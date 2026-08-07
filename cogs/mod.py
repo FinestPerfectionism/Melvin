@@ -30,7 +30,6 @@ def parse_duration(duration: str) -> timedelta | None:
     return timedelta(**{UNIT_MAP[unit]: amount})
 
 
-# UI CLASSES
 class Modcog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

@@ -4,13 +4,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from globals import PRIMARY, MELVIN_EMOJI
-from ui import ErrorUI, ResponseUI, SmallSeparator
-
-# Official Google GenAI SDK imports
+from ui import ErrorUI, ResponseUI
 from google import genai
 from google.genai import types
 
-# globals
 primary = f"{PRIMARY}"
 
 
@@ -77,15 +74,9 @@ class Agentcog(commands.Cog):
     ):
         if isinstance(error, app_commands.CommandOnCooldown):
             if interaction.response.is_done():
-                await interaction.followup.send(
-                    view=ErrorUI("**you're being rate limited.**"),
-                    ephemeral=True,
-                )
+                await interaction.followup.send(view=ErrorUI("**you're being rate limited.**"), ephemeral=True)
             else:
-                await interaction.response.send_message(
-                    view=ErrorUI("**you're being rate limited.**"),
-                    ephemeral=True,
-                )
+                await interaction.response.send_message(view=ErrorUI("**you're being rate limited.**"), ephemeral=True)
         else:
             raise error
 

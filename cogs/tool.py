@@ -1,4 +1,4 @@
-from globals import PRIMARY, MELVIN_EMOJI
+from globals import PRIMARY
 from ui import ResponseUI, ErrorUI
 import discord
 import base64
