@@ -7,17 +7,6 @@ from discord import app_commands
 from discord.ext import commands
 primary = f"#{PRIMARY}"
 
-#custom speak gating
-def server_permission(permission: str):
-    async def predicate(interaction: discord.Interaction):
-        if interaction.guild is None:
-            return True
-
-        return getattr(interaction.user.guild_permissions, permission, False)
-
-    return app_commands.check(predicate)
-
-
 class ToolCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -66,13 +55,12 @@ class ToolCog(commands.Cog):
         await interaction.edit_original_response(view=view)
 
     @tool.command(name="speak", description="speak through melvin")
-    @server_permission("manage_messages")
-
+    @app_commands.checks.has_permissions(manage_messages=True)
     async def speak(
-            self,
-            interaction: discord.Interaction,
-            text: str,
-            attachment: discord.Attachment = None
+        self,
+        interaction: discord.Interaction,
+        text: str,
+        attachment: discord.Attachment = None,
     ):
         view = ResponseUI()
         view.text_display.content = text
@@ -92,10 +80,10 @@ class ToolCog(commands.Cog):
 
     @speak.error
     async def speak_error(
-            self, interaction: discord.Interaction, error: app_commands.AppCommandError
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError,
     ):
-        # Catches the check failure triggered when server_permission returns False
-        if isinstance(error, app_commands.CheckFailure):
+        # Catches if the user doesn't have server permissions
+        if isinstance(error, app_commands.MissingPermissions):
             view = ResponseUI()
             view.text_display.content = (
                 "**This command is gated, read our documentation in our [support server.](https://discord.gg/PfyKM7dyx4)**"
