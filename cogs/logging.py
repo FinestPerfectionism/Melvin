@@ -42,7 +42,6 @@ class LoggingCog(commands.Cog):
             channel: discord.TextChannel
     ):
         action_ui = MiscLoggingClass()
-        action_ui.text_display.content = "<:melvin:1535077942739206214> **thinking...**"
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
         try:
