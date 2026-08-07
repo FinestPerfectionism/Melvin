@@ -1,12 +1,9 @@
-from globals import PRIMARY, MELVIN_EMOJI, SECONDARY, TERTIARY
+from globals import PRIMARY, SECONDARY, TERTIARY
 
-from email import message
-from typing import Optional
 from ui import ErrorUI, ResponseUI, AdUI, NegativeLoggingClass, PositiveLoggingClass, MiscLoggingClass
 import discord
 from discord.ext import commands
 from discord import app_commands
-from discord.ui import text_display, separator, media_gallery, container, button, action_row
 
 #globals (will likely duplicate)
 primary = f"{PRIMARY}"

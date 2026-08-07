@@ -1,10 +1,9 @@
-from globals import PRIMARY, SECONDARY, TERTIARY, MELVIN_EMOJI
+from globals import PRIMARY, SECONDARY, TERTIARY
 from ui import ErrorUI, NegativeLoggingClass, PositiveLoggingClass, MiscLoggingClass
 import discord
 import sqlite3
 from discord.ext import commands
 from discord import app_commands
-from discord.ui import text_display, separator, media_gallery, container, button, action_row
 
 from cogs.agent import ErrorUI
 

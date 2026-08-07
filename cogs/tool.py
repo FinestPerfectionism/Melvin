@@ -3,7 +3,7 @@ from ui import ResponseUI, ErrorUI
 import discord
 import base64
 import binascii
-from discord import app_commands, Interaction, Guild
+from discord import app_commands
 from discord.ext import commands
 primary = f"#{PRIMARY}"
 
