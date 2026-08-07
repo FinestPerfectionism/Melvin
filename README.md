@@ -1,4 +1,4 @@
-https://files.catbox.moe/oj885f.png
+<img width="1640" height="856" alt="melvinbanner" src="https://github.com/user-attachments/assets/a3ec451e-b913-4d32-8c70-b356fbf67e37" />
 
 **Melvin**
 Melvin is an app built around **Discord.py**. it features various **user and server facing commands**, functional as a user & server app.
