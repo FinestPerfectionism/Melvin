@@ -12,14 +12,13 @@ primary = f"{PRIMARY}"
 
 
 class Agentcog(commands.Cog):
-
     def __init__(self, bot):
         self.bot = bot
         # Initialize Google GenAI client using GAPI environment variable
         self.api_key = os.getenv("GAPI")
         self.client = genai.Client(api_key=self.api_key)
 
-    ai = app_commands.Group(name="ai", description="self explanatory, ask a free AI model some stupid shit",)
+    ai = app_commands.Group(name="ai", description="self explanatory, ask a free AI model some stupid shit")
 
     async def query_gemini(self, prompt: str) -> str:
         system_instruction = (
@@ -28,11 +27,11 @@ class Agentcog(commands.Cog):
             "Refrain from using emojis unless told to."
         )
 
-        config = types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.7,)
+        config = types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.7)
 
         try:
             response = await self.client.aio.models.generate_content(
-                model="gemini-3.1-flash-lite", contents=prompt, config=config
+                model="gemini-3.1-flash-lite", contents=prompt, config=config,
             )
 
             if response.text:
@@ -52,14 +51,14 @@ class Agentcog(commands.Cog):
         try:
             ai_response = await self.query_gemini(prompt)
 
-            model_button = discord.ui.Button(label="model", style=discord.ButtonStyle.link, url="https://aistudio.google.com/",)
-            prompt_section = discord.ui.Section(f"# **prompt:** {prompt}", accessory=model_button,)
+            model_button = discord.ui.Button(label="model", style=discord.ButtonStyle.link, url="https://aistudio.google.com/")
+            prompt_section = discord.ui.Section(f"# **prompt:** {prompt}", accessory=model_button)
             response_display = discord.ui.TextDisplay(content=f"{ai_response}\n\n" f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations.**")
 
             #clearing the existing UI, dropping in new^^
             view.container.clear_items()
             view.container.add_item(prompt_section)
-            view.container.add_item(discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small))
+            view.container.add_item(SmallSeparator())
             view.container.add_item(response_display)
 
             await interaction.edit_original_response(view=view)
@@ -69,9 +68,9 @@ class Agentcog(commands.Cog):
 
     @ask.error
     async def ask_error(
-            self,
-            interaction: discord.Interaction,
-            error: app_commands.AppCommandError,
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
     ):
         if isinstance(error, app_commands.CommandOnCooldown):
             if interaction.response.is_done():

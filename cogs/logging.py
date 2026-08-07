@@ -35,12 +35,11 @@ class LoggingCog(commands.Cog):
     @app_commands.describe(channel="the channel to send logs to")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def channel(
-            self,
-            interaction: discord.Interaction,
-            channel: discord.TextChannel
+        self,
+        interaction: discord.Interaction,
+        channel: discord.TextChannel
     ):
         action_ui = MiscLoggingClass()
-        action_ui.text_display.content = "<:melvin:1535077942739206214> **thinking...**"
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
         try:
@@ -171,8 +170,12 @@ class LoggingCog(commands.Cog):
             pass
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState,
-                                    after: discord.VoiceState):
+    async def on_voice_state_update(
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
+    ):
         log_channel = await self.get_log_channel(member.guild.id)
         if log_channel is None:
             return

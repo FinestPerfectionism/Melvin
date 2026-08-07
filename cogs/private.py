@@ -9,14 +9,14 @@ primary = f"#{PRIMARY}"
 class PrivateCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.log_channel = self.bot.get_channel(LOG_CHANNEL)
 
     # app commands will eventually go here
     private = app_commands.Group(name="private", description="some private stuff, gated")
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        log_channel = self.bot.get_channel(LOG_CHANNEL)
-        if log_channel is None:
+        if self.log_channel is None:
             return
 
         view = ResponseUI()
@@ -28,14 +28,13 @@ class PrivateCog(commands.Cog):
             )
 
         try:
-            await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
+            await self.log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        log_channel = self.bot.get_channel(LOG_CHANNEL)
-        if log_channel is None:
+        if self.log_channel is None:
             return
 
         view = ResponseUI()
@@ -47,7 +46,7 @@ class PrivateCog(commands.Cog):
             )
 
         try:
-            await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
+            await self.log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.HTTPException):
             pass
 

@@ -7,6 +7,18 @@ secondary = f"{SECONDARY}"  # green
 tertiary = f"{TERTIARY}"    # red
 message = '**raw ErrorUI class, debug purposes**'
 
+class ThinkingText(discord.ui.TextDisplay):
+    def __init__(self):
+        super().__init__(
+            content=f"{MELVIN_EMOJI} **Thinking...**",
+        )
+
+class SmallSeparator(discord.ui.Separator):
+    def __init__(self):
+        super().__init__(
+            visible=True,
+            spacing=discord.SeparatorSpacing.small,
+        )
 
 #ErrorUI
 class ErrorUI(discord.ui.LayoutView):
@@ -17,14 +29,9 @@ class ErrorUI(discord.ui.LayoutView):
             content=f"# error\n\n{message}"
         )
 
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
-        )
-
         container = discord.ui.Container(
             text_display,
-            separator,
+            SmallSeparator(),
             accent_color=discord.Color.red()
         )
 
@@ -36,16 +43,11 @@ class ErrorUI(discord.ui.LayoutView):
 class ResponseUI(discord.ui.LayoutView):
     def __init__(self):
         super().__init__()
-        self.text_display = discord.ui.TextDisplay(
-            content=f"{MELVIN_EMOJI} **Thinking...**"
-        )
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
-        )
+        self.text_display = ThinkingText()
+        
         container = discord.ui.Container(
             self.text_display,
-            separator,
+            SmallSeparator(),
         )
         self.container = container
         self.add_item(container)
@@ -57,10 +59,6 @@ class AdUI(discord.ui.LayoutView):
         super().__init__()
         self.text_display = discord.ui.TextDisplay(
             content=f"**Melvin**<:melvin:1535077942739206214> <:melvincanary:1535408831578898432> Melvin is an app built around **Discord.py**. it features various **user and server facing commands**, functional as a user & server app.it's currently in an **open beta state**, with core moderation commands, a bunch of **user utilities**, **speaking utilities**, **encoding and decoding** + so much more.Melvin is super new to the app space, and support is **super appreciated**, feel free to check it out. **[add Melvin](<https://discord.com/oauth2/authorize?client_id=1468362201197973756>)**"
-        )
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
         )
         media_gallery = discord.ui.MediaGallery(
             discord.MediaGalleryItem(media='https://files.catbox.moe/oj885f.png')
@@ -78,7 +76,7 @@ class AdUI(discord.ui.LayoutView):
         action_row = discord.ui.ActionRow(adbutton, addbutton)
         container = discord.ui.Container(
             self.text_display,
-            separator,
+            SmallSeparator(),
             media_gallery,
             action_row,
         )
@@ -91,18 +89,11 @@ class ActionUI(discord.ui.LayoutView):
     def __init__(self):
         super().__init__()
 
-        self.text_display = discord.ui.TextDisplay(
-            content=f"{MELVIN_EMOJI} **Thinking...**"
-        )
-
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
-        )
+        self.text_display = ThinkingText()
 
         container = discord.ui.Container(
             self.text_display,
-            separator,
+            SmallSeparator(),
             accent_color=discord.Color.from_str(primary)
         )
 
@@ -118,18 +109,11 @@ class MiscLoggingClass(discord.ui.LayoutView):
     def __init__(self):
         super().__init__()
 
-        self.text_display = discord.ui.TextDisplay(
-            content=f"{MELVIN_EMOJI} **Thinking...**"
-        )
-
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
-        )
+        self.text_display = ThinkingText()
 
         container = discord.ui.Container(
             self.text_display,
-            separator,
+            SmallSeparator(),
             accent_color=discord.Color.from_str(primary)
         )
 
@@ -141,18 +125,11 @@ class NegativeLoggingClass(discord.ui.LayoutView):
     def __init__(self):
         super().__init__()
 
-        self.text_display = discord.ui.TextDisplay(
-            content=f"{MELVIN_EMOJI} **Thinking...**"
-        )
-
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
-        )
+        self.text_display = ThinkingText()
 
         container = discord.ui.Container(
             self.text_display,
-            separator,
+            SmallSeparator(),
             accent_color=discord.Color.from_str(tertiary)
         )
 
@@ -164,18 +141,11 @@ class PositiveLoggingClass(discord.ui.LayoutView):
     def __init__(self):
         super().__init__()
 
-        self.text_display = discord.ui.TextDisplay(
-            content=f"{MELVIN_EMOJI} **Thinking...**"
-        )
-
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
-        )
+        self.text_display = ThinkingText()
 
         container = discord.ui.Container(
             self.text_display,
-            separator,
+            SmallSeparator(),
             accent_color=discord.Color.from_str(secondary)
         )
 

@@ -3,27 +3,22 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-
+from ui import SmallSeparator
 
 primary = f"#{PRIMARY}"
 
 #UI Classes
 class PingUI(discord.ui.LayoutView):
-    def __init__(self):
+    def __init__(self, content: str):
         super().__init__()
 
         self.text_display = discord.ui.TextDisplay(
-            content=f""
-        )
-
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
+            content=content
         )
 
         container = discord.ui.Container(
             self.text_display,
-            separator,
+            SmallSeparator(),
         )
 
         self.add_item(container)
@@ -35,9 +30,6 @@ class AvatarView(discord.ui.LayoutView):
         super().__init__()
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current avatar**"
-        )
-        separator = discord.ui.Separator(
-            visible=True, spacing=discord.SeparatorSpacing.small
         )
         media_gallery = discord.ui.MediaGallery(
             discord.MediaGalleryItem(media=target.display_avatar.url)
@@ -54,7 +46,7 @@ class AvatarView(discord.ui.LayoutView):
         action_row = discord.ui.ActionRow(*buttons)
         container = discord.ui.Container(
             text_display,
-            separator,
+            SmallSeparator(),
             media_gallery,
             action_row,
         )
@@ -67,9 +59,6 @@ class BannerView(discord.ui.LayoutView):
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current banner**"
         )
-        separator = discord.ui.Separator(
-            visible=True, spacing=discord.SeparatorSpacing.small
-        )
         media_gallery = discord.ui.MediaGallery(
             discord.MediaGalleryItem(media=fetched_user.banner.url)
         )
@@ -80,7 +69,7 @@ class BannerView(discord.ui.LayoutView):
         action_row = discord.ui.ActionRow(*buttons)
         container = discord.ui.Container(
             text_display,
-            separator,
+            SmallSeparator(),
             media_gallery,
             action_row,
         )
@@ -97,8 +86,7 @@ class UtilCog(commands.Cog):
     @util.command(name="latency", description="bot latency")
     async def latency(self, interaction: discord.Interaction):
         latency = round(self.bot.latency * 1000)
-        view = PingUI()
-        view.text_display.content = f"bot's latency is **{latency}ms**"
+        view = PingUI(f"bot's latency is **{latency}ms**")
 
         try:
             await interaction.response.send_message(view=view)
