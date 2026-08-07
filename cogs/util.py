@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-
+from ui import SmallSeparator
 
 primary = f"#{PRIMARY}"
 
@@ -16,14 +16,9 @@ class PingUI(discord.ui.LayoutView):
             content=content
         )
 
-        separator = discord.ui.Separator(
-            visible=True,
-            spacing=discord.SeparatorSpacing.small
-        )
-
         container = discord.ui.Container(
             self.text_display,
-            separator,
+            SmallSeparator(),
         )
 
         self.add_item(container)
@@ -35,9 +30,6 @@ class AvatarView(discord.ui.LayoutView):
         super().__init__()
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current avatar**"
-        )
-        separator = discord.ui.Separator(
-            visible=True, spacing=discord.SeparatorSpacing.small
         )
         media_gallery = discord.ui.MediaGallery(
             discord.MediaGalleryItem(media=target.display_avatar.url)
@@ -54,7 +46,7 @@ class AvatarView(discord.ui.LayoutView):
         action_row = discord.ui.ActionRow(*buttons)
         container = discord.ui.Container(
             text_display,
-            separator,
+            SmallSeparator(),
             media_gallery,
             action_row,
         )
@@ -67,9 +59,6 @@ class BannerView(discord.ui.LayoutView):
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current banner**"
         )
-        separator = discord.ui.Separator(
-            visible=True, spacing=discord.SeparatorSpacing.small
-        )
         media_gallery = discord.ui.MediaGallery(
             discord.MediaGalleryItem(media=fetched_user.banner.url)
         )
@@ -80,7 +69,7 @@ class BannerView(discord.ui.LayoutView):
         action_row = discord.ui.ActionRow(*buttons)
         container = discord.ui.Container(
             text_display,
-            separator,
+            SmallSeparator(),
             media_gallery,
             action_row,
         )
