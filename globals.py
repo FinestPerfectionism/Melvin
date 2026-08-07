@@ -1,0 +1,5 @@
+PRIMARY = "#f8b95c"
+SECONDARY = "#c3e1b4"   # green
+TERTIARY = "#f5aaaa"    # red
+MELVIN_EMOJI = "<:melvincanary:1535275578016407562>"
+LOG_CHANNEL = 1535283504105922620
