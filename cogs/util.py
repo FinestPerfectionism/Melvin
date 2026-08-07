@@ -9,11 +9,11 @@ primary = f"#{PRIMARY}"
 
 #UI Classes
 class PingUI(discord.ui.LayoutView):
-    def __init__(self):
+    def __init__(self, content: str):
         super().__init__()
 
         self.text_display = discord.ui.TextDisplay(
-            content=f""
+            content=content
         )
 
         separator = discord.ui.Separator(
@@ -97,8 +97,7 @@ class UtilCog(commands.Cog):
     @util.command(name="latency", description="bot latency")
     async def latency(self, interaction: discord.Interaction):
         latency = round(self.bot.latency * 1000)
-        view = PingUI()
-        view.text_display.content = f"bot's latency is **{latency}ms**"
+        view = PingUI(f"bot's latency is **{latency}ms**")
 
         try:
             await interaction.response.send_message(view=view)
