@@ -5,8 +5,6 @@ import sqlite3
 from discord.ext import commands
 from discord import app_commands
 
-from cogs.agent import ErrorUI
-
 #globals (will likely duplicate)
 primary = f"{PRIMARY}"
 secondary = f"{SECONDARY}" #green

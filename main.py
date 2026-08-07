@@ -1,5 +1,3 @@
-from globals import PRIMARY
-
 import os
 import discord
 import asyncio
@@ -19,10 +17,9 @@ bot = commands.Bot(
         guild=True, user=True
     ),
 )
-#stuff used globally here
+
 load_dotenv()
 token = os.getenv('token')
-primary = f"#{PRIMARY}"
 
 @bot.event
 async def on_ready():
