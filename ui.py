@@ -85,6 +85,12 @@ class ThinkingText(discord.ui.TextDisplay):
             content=f"{MELVIN_EMOJI} **Thinking...**",
         )
 
+class LargeSeparator(discord.ui.Separator):
+    def __init__(self):
+        super().__init__(
+            visible=True,
+            spacing=discord.SeparatorSpacing.large,
+        )
 
 class SmallSeparator(discord.ui.Separator):
     def __init__(self):
