@@ -42,7 +42,7 @@ class PrivateCog(commands.Cog):
 
         if guild.icon:
             view.container.add_item(
-                discord.ui.MediaGallery(discord.MediaGalleryItem(media='https://media.discordapp.net/attachments/1535283696242794627/1535360840809840700/melvinbanner.png?ex=6a777bb6&is=6a762a36&hm=839da661d7fc65b9918e4ee1dd4dbcf1d6a4477e1f1d3da247e06de67028a066&=&format=webp&quality=lossless'))
+                discord.ui.MediaGallery(discord.MediaGalleryItem(media='https://files.catbox.moe/0rgmtr.png'))
             )
 
         try:

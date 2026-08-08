@@ -61,10 +61,10 @@ class AdUI(discord.ui.LayoutView):
     def __init__(self):
         super().__init__()
         self.text_display = discord.ui.TextDisplay(
-            content=f"**Melvin**<:melvin:1535077942739206214> <:melvincanary:1535408831578898432> Melvin is an app built around **Discord.py**. it features various **user and server facing commands**, functional as a user & server app.it's currently in an **open beta state**, with core moderation commands, a bunch of **user utilities**, **speaking utilities**, **encoding and decoding** + so much more.Melvin is super new to the app space, and support is **super appreciated**, feel free to check it out. **[add Melvin](<https://discord.com/oauth2/authorize?client_id=1468362201197973756>)**"
+            content=f"{MELVIN_EMOJI} **Melvin** is an app built around **Discord.py**. it features various **user and server facing commands**, functional as a user & server app.it's currently in an **open beta state**, with core moderation commands, a bunch of **user utilities**, **speaking utilities**, **encoding and decoding** + so much more.Melvin is super new to the app space, and support is **super appreciated**, feel free to check it out. **[add Melvin](<https://discord.com/oauth2/authorize?client_id=1468362201197973756>)**"
         )
         media_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem(media='https://files.catbox.moe/oj885f.png')
+            discord.MediaGalleryItem(media='https://files.catbox.moe/0rgmtr.png')
         )
         adbutton = discord.ui.Button(
             label="support server",
