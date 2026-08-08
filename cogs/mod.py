@@ -161,17 +161,19 @@ class ModCog(
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
         # guild will never be None, and discord already enforces channel as a target
-        if not interaction.guild or not isinstance(channel, GuildChannels):
+        if not interaction.guild:
             return
 
-        channel = channel or interaction.channel
+        target_channel = channel or interaction.channel
 
         # ...however, interaction.channel can be any channel
-        if not isinstance(interaction.channel, GuildChannels):
+        if not isinstance(target_channel, GuildChannels):
             await interaction.edit_original_response(
-                view=ErrorUI(f"**{channel.mention} isn't a valid channel.**"),
+                view=ErrorUI("**this isn't a valid channel.**"),
             )
             return
+
+        channel = target_channel
         everyone_role = interaction.guild.default_role
 
         # toggle: if already locked, unlock instead
@@ -229,18 +231,19 @@ class ModCog(
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
         # guild will never be None, and discord already enforces channel as a target
-        if not interaction.guild or not isinstance(channel, GuildChannels):
+        if not interaction.guild:
             return
 
-        channel = channel or interaction.channel
+        target_channel = channel or interaction.channel
 
         # ...however, interaction.channel can be any channel
-        if not isinstance(interaction.channel, GuildChannels):
+        if not isinstance(target_channel, GuildChannels):
             await interaction.edit_original_response(
-                view=ErrorUI(f"**{channel.mention} isn't a valid channel.**"),
+                view=ErrorUI("**this isn't a valid channel.**"),
             )
             return
 
+        channel = target_channel
         everyone_role = interaction.guild.default_role
 
         if channel.id not in self.locked_channels:
@@ -758,17 +761,19 @@ class ModCog(
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
         # guild will never be None, and discord already enforces channel as a target
-        if not interaction.guild or not isinstance(channel, GuildChannels):
+        if not interaction.guild:
             return
 
-        channel = channel or interaction.channel
+        target_channel = channel or interaction.channel
 
         # ...however, interaction.channel can be any channel
-        if not isinstance(interaction.channel, GuildChannels):
+        if not isinstance(target_channel, GuildChannels):
             await interaction.edit_original_response(
-                view=ErrorUI(f"**{channel.mention} isn't a valid channel.**"),
+                view=ErrorUI("**this isn't a valid channel.**"),
             )
             return
+
+        channel = target_channel
         sniped = self.sniped_messages.get(channel.id)
 
         if sniped is None:
