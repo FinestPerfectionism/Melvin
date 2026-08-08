@@ -32,6 +32,9 @@ def parse_duration(duration: str) -> timedelta | None:
     return timedelta(**{UNIT_MAP[unit]: amount})
 
 
+GuildChannels = discord.TextChannel | discord.VoiceChannel | discord.StageChannel | discord.ForumChannel
+
+
 @app_commands.guild_only
 class ModCog(
     commands.GroupCog,
@@ -44,7 +47,7 @@ class ModCog(
         self.locked_channels: dict[int, discord.PermissionOverwrite] = {}
         self.sniped_messages: dict[int, dict] = {}
 
-    async def _restore_channel(self, channel: discord.TextChannel, everyone_role: discord.Role) -> None:
+    async def _restore_channel(self, channel: GuildChannels, everyone_role: discord.Role) -> None:
         original_overwrite = self.locked_channels.pop(channel.id)
         await channel.set_permissions(
             everyone_role,
@@ -101,8 +104,12 @@ class ModCog(
     async def warnings(
         self,
         interaction: discord.Interaction,
-        member: discord.Member = None,
+        member: discord.Member | None = None,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_UI = ActionUI()
         await interaction.response.send_message(view=action_UI, ephemeral=False)
 
@@ -148,12 +155,25 @@ class ModCog(
     async def lock(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel = None,
+        channel: GuildChannels | None = None,
     ) -> None:
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
-        channel = channel or interaction.channel
+        # guild will never be None, and discord already enforces channel as a target
+        if not interaction.guild:
+            return
+
+        target_channel = channel or interaction.channel
+
+        # ...however, interaction.channel can be any channel
+        if not isinstance(target_channel, GuildChannels):
+            await interaction.edit_original_response(
+                view=ErrorUI("**this isn't a valid channel.**"),
+            )
+            return
+
+        channel = target_channel
         everyone_role = interaction.guild.default_role
 
         # toggle: if already locked, unlock instead
@@ -205,12 +225,25 @@ class ModCog(
     async def unlock(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel = None,
+        channel: GuildChannels | None = None,
     ) -> None:
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
-        channel = channel or interaction.channel
+        # guild will never be None, and discord already enforces channel as a target
+        if not interaction.guild:
+            return
+
+        target_channel = channel or interaction.channel
+
+        # ...however, interaction.channel can be any channel
+        if not isinstance(target_channel, GuildChannels):
+            await interaction.edit_original_response(
+                view=ErrorUI("**this isn't a valid channel.**"),
+            )
+            return
+
+        channel = target_channel
         everyone_role = interaction.guild.default_role
 
         if channel.id not in self.locked_channels:
@@ -244,6 +277,10 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
@@ -283,19 +320,9 @@ class ModCog(
             await interaction.edit_original_response(view=ErrorUI("**there was a problem with the database.\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
             return
 
-        dm_note = ""
-        if dm:
-            try:
-                await member.send(
-                    f"# you were warned in **{interaction.guild.name}**\n**reason:** {reason}",
-                )
-            except discord.Forbidden:
-                dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException:
-                dm_note = "**couldn't send the dm.**"
 
         action_ui.update_text(
-            f"**warned {member.mention}**\n\n**reason:** {reason}{dm_note}",
+            f"**warned {member.mention}**",
         )
         await interaction.edit_original_response(view=action_ui)
 
@@ -310,6 +337,10 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
@@ -325,28 +356,6 @@ class ModCog(
             await interaction.edit_original_response(
                 view=ErrorUI("**this user has a higher or equal role to the bot.**"),
             )
-            return
-
-        dm_note = ""
-        if dm:
-            try:
-                await member.send(
-                    f"# you were kicked from **{interaction.guild.name}**\n**reason:** {reason}",
-                )
-            except discord.Forbidden:
-                dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException:
-                dm_note = "**couldn't send the dm.**"
-
-        try:
-            await member.kick(reason=reason)
-        except discord.Forbidden:
-            await interaction.edit_original_response(
-                view=ErrorUI("**i don't have permission to kick this member.**"),
-            )
-            return
-        except discord.HTTPException:
-            await interaction.edit_original_response(view=ErrorUI("**couldn't kick this member.**"))
             return
 
         db_note = ""
@@ -367,7 +376,7 @@ class ModCog(
             db_note = f"\n\n**couldn't log this action: {e}**"
 
         action_ui.update_text(
-            f"**kicked {member.mention}**\n\n**reason:** {reason}{dm_note}{db_note}",
+            f"**kicked {member.mention}{db_note}**"
         )
         await interaction.edit_original_response(view=action_ui)
 
@@ -382,6 +391,10 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False, allowed_mentions=discord.AllowedMentions.none())
 
@@ -398,17 +411,6 @@ class ModCog(
                 view=ErrorUI("**this user has a higher or equal role to the bot.**"),
             )
             return
-
-        dm_note = ""
-        if dm:
-            try:
-                await member.send(
-                    f"# you were banned from **{interaction.guild.name}**\n**reason:** {reason}",
-                )
-            except discord.Forbidden:
-                dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException:
-                dm_note = "**couldn't send the dm.**"
 
         try:
             await member.ban(reason=reason)
@@ -439,7 +441,7 @@ class ModCog(
             db_note = f"\n\n**couldn't log this action: {e}**"
 
         action_ui.update_text(
-            f"**banned {member.mention}**\n\n**reason:** {reason}{dm_note}{db_note}",
+            f"**banned {member.mention}{db_note}**",
         )
         await interaction.edit_original_response(view=action_ui)
 
@@ -466,6 +468,10 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui)
 
@@ -482,17 +488,6 @@ class ModCog(
                 view=ErrorUI("**this user has a higher or equal role to the bot.**"),
             )
             return
-
-        dm_note = ""
-        if dm:
-            try:
-                await member.send(
-                    f"# you were lynched, burned, stoned, and removed from **{interaction.guild.name}**\n**reason:** {reason}",
-                )
-            except discord.Forbidden:
-                dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException:
-                dm_note = "**couldn't send the dm.**"
 
         try:
             await member.ban(reason=reason)
@@ -523,7 +518,7 @@ class ModCog(
             db_note = f"\n\n**couldn't log this action: {e}**"
 
         action_ui.update_text(
-            f"**lynched {member.mention}**\n\n**reason:** {reason}{dm_note}{db_note}",
+            f"**lynched {member.mention}{db_note}**",
         )
         await interaction.edit_original_response(view=action_ui, allowed_mentions=discord.AllowedMentions.none())
 
@@ -539,6 +534,9 @@ class ModCog(
         duration: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
 
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
@@ -572,17 +570,6 @@ class ModCog(
             )
             return
 
-        dm_note = ""
-        if dm:
-            try:
-                await member.send(
-                    f"# you were muted in **{interaction.guild.name}**\n**reason:** {reason}",
-                )
-            except discord.Forbidden:
-                dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException:
-                dm_note = "**couldn't send the dm.**"
-
         try:
             await member.timeout(until, reason=reason)
         except discord.Forbidden:
@@ -612,7 +599,7 @@ class ModCog(
             db_note = f"\n\n**couldn't log this action: {e}**"
 
         action_ui.update_text(
-            f"**muted {member.mention}**\n\n**reason:** {reason}{dm_note}{db_note}",
+            f"**muted {member.mention}{db_note}**",
         )
         await interaction.edit_original_response(view=action_ui, allowed_mentions=discord.AllowedMentions.none())
 
@@ -627,6 +614,9 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
 
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
@@ -668,7 +658,7 @@ class ModCog(
             return
 
         action_ui.update_text(
-            f"**unmuted {member.mention}**\n\n**reason:** {reason}{dm_note}",
+            f"**unmuted {member.mention}{dm_note}**",
         )
         await interaction.edit_original_response(view=action_ui, allowed_mentions=discord.AllowedMentions.none())
 
@@ -700,12 +690,25 @@ class ModCog(
     async def snipe(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel = None,
+        channel: GuildChannels | None = None,
     ) -> None:
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
-        channel = channel or interaction.channel
+        # guild will never be None, and discord already enforces channel as a target
+        if not interaction.guild:
+            return
+
+        target_channel = channel or interaction.channel
+
+        # ...however, interaction.channel can be any channel
+        if not isinstance(target_channel, GuildChannels):
+            await interaction.edit_original_response(
+                view=ErrorUI("**this isn't a valid channel.**"),
+            )
+            return
+
+        channel = target_channel
         sniped = self.sniped_messages.get(channel.id)
 
         if sniped is None:
