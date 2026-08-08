@@ -1,20 +1,21 @@
-from globals import PRIMARY, MELVIN_EMOJI
+from globals import MELVIN_EMOJI
 from ui import ErrorUI, ResponseUI
 import discord
 import sqlite3
 from discord.ext import commands
 from discord import app_commands
 
-# globals (will likely duplicate)
-primary = f"#{PRIMARY}"
-
-
-class WelcomeCog(commands.Cog):
-    def __init__(self, bot):
+@app_commands.guild_only
+class WelcomeCog(
+    commands.GroupCog,
+    name="welcome",
+    description="some welcome stuff",
+):
+    def __init__(self, bot) -> None:
         self.bot = bot
         self.db_path = "welcome.db"
 
-    def _ensure_db(self):
+    def _ensure_db(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
@@ -36,10 +37,8 @@ class WelcomeCog(commands.Cog):
         conn = self._ensure_db()
         conn.close()
 
-    welcome = app_commands.Group(name="welcome", description="some welcome stuff")
-
     # cogwide error handling
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             msg = "**you don't have permission to do this.**"
         elif isinstance(error, app_commands.NoPrivateMessage):
@@ -53,14 +52,17 @@ class WelcomeCog(commands.Cog):
         else:
             await interaction.response.send_message(view=error_ui, ephemeral=False)
 
-    @welcome.command(name="channel", description="set the channel for member join events.")
+    @app_commands.command(name="channel", description="set the channel for member join events.")
     @app_commands.describe(channel="the channel to send welcome messages to")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def channel(
-            self,
-            interaction: discord.Interaction,
-            channel: discord.TextChannel
-    ):
+        self,
+        interaction: discord.Interaction,
+        channel: discord.TextChannel,
+    ) -> None:
+        if not interaction.guild:
+            return
+
         action_ui = ResponseUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
@@ -101,7 +103,7 @@ class WelcomeCog(commands.Cog):
 
         return self.bot.get_channel(int(row[0]))
 
-    @welcome.command(name="config", description="set the welcome message and optional attachment/buttons")
+    @app_commands.command(name="config", description="set the welcome message and optional attachment/buttons")
     @app_commands.describe(
         text="the welcome message to send (use {member} to mention the new member)",
         attachment_url="optional image url to attach to the welcome message",
@@ -112,15 +114,18 @@ class WelcomeCog(commands.Cog):
     )
     @app_commands.checks.has_permissions(manage_guild=True)
     async def config(
-            self,
-            interaction: discord.Interaction,
-            text: str,
-            attachment_url: str = None,
-            b1_url: str = None,
-            b1_label: str = None,
-            b2_url: str = None,
-            b2_label: str = None
-    ):
+        self,
+        interaction: discord.Interaction,
+        text: str,
+        attachment_url: str | None = None,
+        b1_url: str | None = None,
+        b1_label: str | None = None,
+        b2_url: str | None = None,
+        b2_label: str | None = None,
+    ) -> None:
+        if not interaction.guild:
+            return
+
         action_ui = ResponseUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
@@ -205,7 +210,7 @@ class WelcomeCog(commands.Cog):
         }
 
     @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member):
+    async def on_member_join(self, member: discord.Member) -> None:
         config = await self.get_welcome_config(member.guild.id)
         if config is None or config["channel"] is None:
             return
@@ -238,5 +243,5 @@ class WelcomeCog(commands.Cog):
             pass
 
 
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(WelcomeCog(bot))

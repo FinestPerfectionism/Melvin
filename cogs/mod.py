@@ -4,11 +4,10 @@ from discord import app_commands
 import sqlite3
 import re
 from datetime import timedelta
-from globals import PRIMARY
 from ui import ErrorUI, ActionUI
 
 #globals (will likely duplicate)
-primary = f"{PRIMARY}"
+
 DURATION_PATTERN = re.compile(r"^(\d+)([smhd])$")
 UNIT_MAP = {
     "s": "seconds",
@@ -119,8 +118,8 @@ class Modcog(commands.Cog):
             )
             rows = cursor.fetchall()
             conn.close()
-        except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**there was a problem with the database.\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
+        except Exception:
+            await interaction.edit_original_response(view=ErrorUI("**there was a problem with the database.\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
             return
 
         if not rows:
@@ -164,8 +163,8 @@ class Modcog(commands.Cog):
                     view=ErrorUI("**i don't have permission to edit this channel's permissions.**")
                 )
                 return
-            except discord.HTTPException as e:
-                await interaction.edit_original_response(view=ErrorUI(f"**couldn't unlock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
+            except discord.HTTPException:
+                await interaction.edit_original_response(view=ErrorUI("**couldn't unlock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
                 return
 
             action_ui.update_text(f"**unlocked** {channel.mention}")
@@ -188,8 +187,8 @@ class Modcog(commands.Cog):
                 view=ErrorUI("**i don't have permission to edit this channel's permissions.**")
             )
             return
-        except discord.HTTPException as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**couldn't lock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
+        except discord.HTTPException:
+            await interaction.edit_original_response(view=ErrorUI("**couldn't lock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
             return
 
         self.locked_channels[channel.id] = original_overwrite
@@ -226,8 +225,8 @@ class Modcog(commands.Cog):
                 view=ErrorUI("**i don't have permission to edit this channel's permissions.**")
             )
             return
-        except discord.HTTPException as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**couldn't unlock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
+        except discord.HTTPException:
+            await interaction.edit_original_response(view=ErrorUI("**couldn't unlock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
             return
 
         action_ui.update_text(f"**unlocked** {channel.mention}")
@@ -280,8 +279,8 @@ class Modcog(commands.Cog):
             )
             conn.commit()
             conn.close()
-        except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**there was a problem with the database.\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
+        except Exception:
+            await interaction.edit_original_response(view=ErrorUI("**there was a problem with the database.\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
             return
 
         dm_note = ""
@@ -292,7 +291,7 @@ class Modcog(commands.Cog):
                 )
             except discord.Forbidden:
                 dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException as e:
+            except discord.HTTPException:
                 dm_note = "**couldn't send the dm.**"
 
         action_ui.update_text(
@@ -337,7 +336,7 @@ class Modcog(commands.Cog):
                 )
             except discord.Forbidden:
                 dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException as e:
+            except discord.HTTPException:
                 dm_note = "**couldn't send the dm.**"
 
         try:
@@ -347,7 +346,7 @@ class Modcog(commands.Cog):
                 view=ErrorUI("**i don't have permission to kick this member.**")
             )
             return
-        except discord.HTTPException as e:
+        except discord.HTTPException:
             await interaction.edit_original_response(view=ErrorUI("**couldn't kick this member.**"))
             return
 
@@ -410,7 +409,7 @@ class Modcog(commands.Cog):
                 )
             except discord.Forbidden:
                 dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException as e:
+            except discord.HTTPException:
                 dm_note = "**couldn't send the dm.**"
 
         try:
@@ -420,7 +419,7 @@ class Modcog(commands.Cog):
                 view=ErrorUI("**i don't have permission to ban this member.**")
             )
             return
-        except discord.HTTPException as e:
+        except discord.HTTPException:
             await interaction.edit_original_response(view=ErrorUI("**couldn't ban this member.**"))
             return
 
@@ -499,7 +498,7 @@ class Modcog(commands.Cog):
                 )
             except discord.Forbidden:
                 dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException as e:
+            except discord.HTTPException:
                 dm_note = "**couldn't send the dm.**"
 
         try:
@@ -509,7 +508,7 @@ class Modcog(commands.Cog):
                 view=ErrorUI("**i don't have permission to lynch this member.**")
             )
             return
-        except discord.HTTPException as e:
+        except discord.HTTPException:
             await interaction.edit_original_response(view=ErrorUI("**couldn't lynch this member.**"))
             return
 
@@ -590,7 +589,7 @@ class Modcog(commands.Cog):
                 )
             except discord.Forbidden:
                 dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException as e:
+            except discord.HTTPException:
                 dm_note = "**couldn't send the dm.**"
 
         try:
@@ -600,7 +599,7 @@ class Modcog(commands.Cog):
                 view=ErrorUI("**i don't have permission to mute this member.**")
             )
             return
-        except discord.HTTPException as e:
+        except discord.HTTPException:
             await interaction.edit_original_response(view=ErrorUI("**couldn't mute this member.**"))
             return
 
@@ -665,7 +664,7 @@ class Modcog(commands.Cog):
                 )
             except discord.Forbidden:
                 dm_note = "**couldn't dm this user, their dms may be closed**"
-            except discord.HTTPException as e:
+            except discord.HTTPException:
                 dm_note = "**couldn't send the dm.**"
 
         try:
@@ -675,7 +674,7 @@ class Modcog(commands.Cog):
                 view=ErrorUI("**i don't have permission to unmute this member.**")
             )
             return
-        except discord.HTTPException as e:
+        except discord.HTTPException:
             await interaction.edit_original_response(view=ErrorUI("**couldn't unmute this member.**"))
             return
 

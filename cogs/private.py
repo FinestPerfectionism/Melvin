@@ -1,21 +1,18 @@
-from globals import PRIMARY, LOG_CHANNEL
+from globals import LOG_CHANNEL
 from ui import ResponseUI
 import discord
 from discord.ext import commands
-from discord import app_commands
 
-primary = f"#{PRIMARY}"
-
-
-class PrivateCog(commands.Cog):
-    def __init__(self, bot):
+class PrivateCog(
+    commands.GroupCog,
+    name="private",
+    description="some private stuff, gated",
+):
+    def __init__(self, bot) -> None:
         self.bot = bot
 
-    # app commands will eventually go here
-    private = app_commands.Group(name="private", description="some private stuff, gated")
-
     @commands.Cog.listener()
-    async def on_guild_join(self, guild):
+    async def on_guild_join(self, guild) -> None:
         log_channel = self.bot.get_channel(LOG_CHANNEL)
         if log_channel is None:
             return
@@ -32,7 +29,7 @@ class PrivateCog(commands.Cog):
             pass
 
     @commands.Cog.listener()
-    async def on_guild_remove(self, guild):
+    async def on_guild_remove(self, guild) -> None:
         log_channel = self.bot.get_channel(LOG_CHANNEL)
         if log_channel is None:
             return
@@ -49,5 +46,5 @@ class PrivateCog(commands.Cog):
             pass
 
 
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(PrivateCog(bot))

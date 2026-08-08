@@ -1,12 +1,12 @@
 import os
 import discord
 import asyncio
+from discord.ext import commands
 from dotenv import load_dotenv
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-from discord.ext import commands
 bot = commands.Bot(
     command_prefix="-",
     intents=intents,
@@ -24,7 +24,7 @@ token = os.getenv('token')
 @bot.event
 async def on_ready():
     print(f"{bot.user}")
-    await  bot.tree.sync()
+    await bot.tree.sync()
     print("bot.tree.sync()")
 
 

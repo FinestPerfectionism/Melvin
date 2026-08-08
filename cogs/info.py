@@ -1,15 +1,12 @@
-from globals import PRIMARY
 import discord
 from discord.ext import commands
 from discord import app_commands
 
 from ui import SmallSeparator
 
-primary = f"#{PRIMARY}"
-
 #UI Classes
 class PingUI(discord.ui.LayoutView):
-    def __init__(self, content: str):
+    def __init__(self, content: str) -> None:
         super().__init__()
 
         self.text_display = discord.ui.TextDisplay(
@@ -26,7 +23,7 @@ class PingUI(discord.ui.LayoutView):
 
 
 class AvatarView(discord.ui.LayoutView):
-    def __init__(self, target: discord.User):
+    def __init__(self, target: discord.User) -> None:
         super().__init__()
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current avatar**"
@@ -54,7 +51,7 @@ class AvatarView(discord.ui.LayoutView):
 
 
 class BannerView(discord.ui.LayoutView):
-    def __init__(self, target: discord.Member, fetched_user: discord.User):
+    def __init__(self, target: discord.Member, fetched_user: discord.User) -> None:
         super().__init__()
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current banner**"
@@ -76,15 +73,16 @@ class BannerView(discord.ui.LayoutView):
         self.add_item(container)
 
 
-class InfoCog(commands.Cog):
-    def __init__(self, bot):
+class InfoCog(
+    commands.GroupCog,
+    name="info",
+    description="some info stuff",
+):
+    def __init__(self, bot) -> None:
         self.bot = bot
 
-    # app commands will eventually go here
-    info = app_commands.Group(name="info", description="some info stuff")
-
-    @info.command(name="latency", description="bot latency")
-    async def latency(self, interaction: discord.Interaction):
+    @app_commands.command(name="latency", description="bot latency")
+    async def latency(self, interaction: discord.Interaction) -> None:
         latency = round(self.bot.latency * 1000)
         view = PingUI(f"bot's latency is **{latency}ms**")
 
@@ -93,15 +91,14 @@ class InfoCog(commands.Cog):
         except (discord.Forbidden, discord.HTTPException):
             pass
 
-
-    @info.command(name="avatar", description="view user avatar")
-    async def avatar(self, interaction: discord.Interaction, user: discord.User = None):
+    @app_commands.command(name="avatar", description="view user avatar")
+    async def avatar(self, interaction: discord.Interaction, user: discord.User | None = None) -> None:
         target = user or interaction.user
         view = AvatarView(target)
         await interaction.response.send_message(view=view)
 
-    @info.command(name="banner", description="view user banner")
-    async def banner(self, interaction: discord.Interaction, user: discord.User = None):
+    @app_commands.command(name="banner", description="view user banner")
+    async def banner(self, interaction: discord.Interaction, user: discord.User | None = None) -> None:
         target = user or interaction.user
         fetched_user = await self.bot.fetch_user(target.id)
 
@@ -116,5 +113,5 @@ class InfoCog(commands.Cog):
         await interaction.response.send_message(view=view)
 
 
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(InfoCog(bot))

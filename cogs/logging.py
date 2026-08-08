@@ -1,22 +1,20 @@
-from globals import PRIMARY, SECONDARY, TERTIARY
 from ui import ErrorUI, NegativeLoggingClass, PositiveLoggingClass, MiscLoggingClass
 import discord
 import sqlite3
 from discord.ext import commands
 from discord import app_commands
 
-#globals (will likely duplicate)
-primary = f"{PRIMARY}"
-secondary = f"{SECONDARY}" #green
-tertiary = f"{TERTIARY}" #red
-
-
-class LoggingCog(commands.Cog):
-    def __init__(self, bot):
+@app_commands.guild_only
+class LoggingCog(
+    commands.GroupCog,
+    name="log",
+    description="logging config",
+):
+    def __init__(self, bot) -> None:
         self.bot = bot
         self.db_path = "logging.db"
 
-    async def cog_load(self):
+    async def cog_load(self) -> None:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
@@ -28,17 +26,15 @@ class LoggingCog(commands.Cog):
         conn.commit()
         conn.close()
 
-    log = app_commands.Group(name="log", description="logging config", guild_only=True)
-
     # app commands will eventually go here
-    @log.command(name="channel", description="set the channel for server logs")
+    @app_commands.command(name="channel", description="set the channel for server logs")
     @app_commands.describe(channel="the channel to send logs to")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def channel(
         self,
         interaction: discord.Interaction,
         channel: discord.TextChannel
-    ):
+    ) -> None:
         action_ui = MiscLoggingClass()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
@@ -64,7 +60,7 @@ class LoggingCog(commands.Cog):
         await interaction.edit_original_response(view=action_ui)
 
     @channel.error
-    async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             msg = "**you don't have permission to do this.**"
         elif isinstance(error, app_commands.NoPrivateMessage):
@@ -99,7 +95,7 @@ class LoggingCog(commands.Cog):
     #events will eventually go here
 
     @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member):
+    async def on_member_join(self, member: discord.Member) -> None:
         log_channel = await self.get_log_channel(member.guild.id)
         if log_channel is None:
             return
@@ -114,7 +110,7 @@ class LoggingCog(commands.Cog):
             pass
 
     @commands.Cog.listener()
-    async def on_member_remove(self, member: discord.Member):
+    async def on_member_remove(self, member: discord.Member) -> None:
         log_channel = await self.get_log_channel(member.guild.id)
         if log_channel is None:
             return
@@ -129,7 +125,7 @@ class LoggingCog(commands.Cog):
             pass
 
     @commands.Cog.listener()
-    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+    async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.author.bot or before.content == after.content:
             return
 
@@ -151,7 +147,7 @@ class LoggingCog(commands.Cog):
             pass
 
     @commands.Cog.listener()
-    async def on_message_delete(self, msg: discord.Message):
+    async def on_message_delete(self, msg: discord.Message) -> None:
         if msg.author.bot:
             return
         log_channel = await self.get_log_channel(msg.guild.id)
@@ -175,7 +171,7 @@ class LoggingCog(commands.Cog):
         member: discord.Member,
         before: discord.VoiceState,
         after: discord.VoiceState,
-    ):
+    ) -> None:
         log_channel = await self.get_log_channel(member.guild.id)
         if log_channel is None:
             return
@@ -213,9 +209,7 @@ class LoggingCog(commands.Cog):
                 pass
 
     @commands.Cog.listener()
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        if before.guild is None:
-            return
+    async def on_member_update(self, before: discord.Member, after: discord.Member) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
         if log_channel is None:
             return
@@ -255,7 +249,7 @@ class LoggingCog(commands.Cog):
             pass
 
     @commands.Cog.listener()
-    async def on_user_update(self, before: discord.User, after: discord.User):
+    async def on_user_update(self, before: discord.User, after: discord.User) -> None:
         if before.name == after.name and before.global_name == after.global_name and before.avatar == after.avatar:
             return
 
@@ -287,5 +281,5 @@ class LoggingCog(commands.Cog):
             except (discord.Forbidden, discord.HTTPException):
                 pass
 
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(LoggingCog(bot))

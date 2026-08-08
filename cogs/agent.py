@@ -1,4 +1,3 @@
-import asyncio
 import os
 import time
 import discord
@@ -12,17 +11,19 @@ from google.genai import types
 primary = f"{PRIMARY}"
 
 
-class Agentcog(commands.Cog):
-    def __init__(self, bot):
+class AgentCog(
+    commands.GroupCog,
+    name="ai",
+    description="self explanatory, ask a free AI model some stupid shit",
+):
+    def __init__(self, bot) -> None:
         self.bot = bot
         # Initialize Google GenAI client using GAPI environment variable
         self.api_key = os.getenv("GAPI")
         self.client = genai.Client(api_key=self.api_key)
 
-    ai = app_commands.Group(name="ai", description="self explanatory, ask a free AI model some stupid shit")
-
-#cogwide error logging
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    #cogwide error logging
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         if isinstance(error, app_commands.CommandOnCooldown):
             msg = "**you're being rate limited.**"
         else:
@@ -57,9 +58,9 @@ class Agentcog(commands.Cog):
         except Exception as e:
             raise RuntimeError(f"**Gemini API Error, {str(e)}**")
 
-    @ai.command(name="ask", description="ask a free AI model some stupid shit")
+    @app_commands.command(name="ask", description="ask a free AI model some stupid shit")
     @app_commands.checks.cooldown(2, 60)
-    async def ask(self, interaction: discord.Interaction, prompt: str):
+    async def ask(self, interaction: discord.Interaction, prompt: str) -> None:
         view = ResponseUI()
         await interaction.response.send_message(view=view)
         try:
@@ -83,5 +84,5 @@ class Agentcog(commands.Cog):
             await interaction.edit_original_response(view=ErrorUI(str(e)))
 
 
-async def setup(bot):
-    await bot.add_cog(Agentcog(bot))
+async def setup(bot) -> None:
+    await bot.add_cog(AgentCog(bot))

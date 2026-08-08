@@ -1,19 +1,19 @@
-from globals import PRIMARY
 from ui import ResponseUI, ErrorUI
 import discord
 import base64
 import binascii
 from discord import app_commands
 from discord.ext import commands
-primary = f"#{PRIMARY}"
 
-class ToolCog(commands.Cog):
-    def __init__(self, bot):
+class ToolCog(
+    commands.GroupCog,
+    name="tool",
+    description="some more tool stuff",
+):
+    def __init__(self, bot) -> None:
         self.bot = bot
 
-    tool = app_commands.Group(name="tool", description="some more tool stuff")
-
-    @tool.command(name="base64-decode", description="decode a base64 encoded string")
+    @app_commands.command(name="base64-decode", description="decode a base64 encoded string")
     @app_commands.describe(text="the base64 string to decode")
     async def base64decode(self, interaction: discord.Interaction, text: str):
         view = ResponseUI()
@@ -36,9 +36,9 @@ class ToolCog(commands.Cog):
         view.text_display.content = f"**{decodedstr}** was the attempted decode."
         await interaction.edit_original_response(view=view)
 
-    @tool.command(name="base64-encode", description="encode a string as base64")
+    @app_commands.command(name="base64-encode", description="encode a string as base64")
     @app_commands.describe(text="the string to encode")
-    async def base64encode(self, interaction: discord.Interaction, text: str):
+    async def base64encode(self, interaction: discord.Interaction, text: str) -> None:
         view = ResponseUI()
         await interaction.response.send_message(view=view, ephemeral=False)
 
@@ -54,14 +54,14 @@ class ToolCog(commands.Cog):
         view.text_display.content = f"**{encodedstr}** was the attempted encode."
         await interaction.edit_original_response(view=view)
 
-    @tool.command(name="speak", description="speak through melvin")
+    @app_commands.command(name="speak", description="speak through melvin")
     @app_commands.checks.has_permissions(manage_messages=True)
     async def speak(
         self,
         interaction: discord.Interaction,
         text: str,
-        attachment: discord.Attachment = None,
-    ):
+        attachment: discord.Attachment | None = None,
+    ) -> None:
         view = ResponseUI()
         view.text_display.content = text
 
@@ -81,7 +81,7 @@ class ToolCog(commands.Cog):
     @speak.error
     async def speak_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError,
-    ):
+    ) -> None:
         # Catches if the user doesn't have server permissions
         if isinstance(error, app_commands.MissingPermissions):
             view = ResponseUI()
@@ -94,5 +94,5 @@ class ToolCog(commands.Cog):
             else:
                 await interaction.response.send_message(view=view, ephemeral=True)
 
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(ToolCog(bot))
