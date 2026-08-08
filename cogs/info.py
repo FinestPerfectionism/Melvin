@@ -76,14 +76,14 @@ class BannerView(discord.ui.LayoutView):
         self.add_item(container)
 
 
-class UtilCog(commands.Cog):
+class InfoCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # app commands will eventually go here
-    util = app_commands.Group(name="util", description="some utility stuff")
+    info = app_commands.Group(name="info", description="some info stuff")
 
-    @util.command(name="latency", description="bot latency")
+    @info.command(name="latency", description="bot latency")
     async def latency(self, interaction: discord.Interaction):
         latency = round(self.bot.latency * 1000)
         view = PingUI(f"bot's latency is **{latency}ms**")
@@ -94,13 +94,13 @@ class UtilCog(commands.Cog):
             pass
 
 
-    @util.command(name="avatar", description="view user avatar")
+    @info.command(name="avatar", description="view user avatar")
     async def avatar(self, interaction: discord.Interaction, user: discord.User = None):
         target = user or interaction.user
         view = AvatarView(target)
         await interaction.response.send_message(view=view)
 
-    @util.command(name="banner", description="view user banner")
+    @info.command(name="banner", description="view user banner")
     async def banner(self, interaction: discord.Interaction, user: discord.User = None):
         target = user or interaction.user
         fetched_user = await self.bot.fetch_user(target.id)
@@ -117,4 +117,4 @@ class UtilCog(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(UtilCog(bot))
+    await bot.add_cog(InfoCog(bot))

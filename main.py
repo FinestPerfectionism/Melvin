@@ -30,7 +30,7 @@ async def on_ready():
 
 async def main():
     async with bot:
-        await bot.load_extension("cogs.util")
+        await bot.load_extension("cogs.info")
         await bot.load_extension("cogs.agent")
         await bot.load_extension("cogs.mod")
         await bot.load_extension("cogs.logging")
