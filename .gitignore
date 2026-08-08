@@ -1,3 +1,4 @@
 .env
 *.db
 .replit
+pyproject.toml
