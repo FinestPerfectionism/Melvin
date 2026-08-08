@@ -56,7 +56,7 @@ class LoggingCog(commands.Cog):
             conn.close()
         except Exception as e:
             error_ui = NegativeLoggingClass()
-            error_ui.text_display.content = f"# error\n\ndatabase error: `{e}`"
+            error_ui.text_display.content = f"**database error, {e}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"
             await interaction.edit_original_response(view=error_ui)
             return
 
@@ -66,11 +66,11 @@ class LoggingCog(commands.Cog):
     @channel.error
     async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.MissingPermissions):
-            msg = "you don't have permission to do this."
+            msg = "**you don't have permission to do this.**"
         elif isinstance(error, app_commands.NoPrivateMessage):
-            msg = "this command can only be used in a server."
+            msg = "**this command can only be used in a server.**"
         else:
-            msg = f"something went wrong: `{error}`"
+            msg = f"something went wrong, **{error}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"
 
         error_ui = ErrorUI(msg)
         if interaction.response.is_done():

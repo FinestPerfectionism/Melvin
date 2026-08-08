@@ -21,6 +21,19 @@ class Agentcog(commands.Cog):
 
     ai = app_commands.Group(name="ai", description="self explanatory, ask a free AI model some stupid shit")
 
+#cogwide error logging
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            msg = "**you're being rate limited.**"
+        else:
+            msg = f"**something went wrong: {error}**"
+
+        error_ui = ErrorUI(msg)
+        if interaction.response.is_done():
+            await interaction.followup.send(view=error_ui, ephemeral=True)
+        else:
+            await interaction.response.send_message(view=error_ui, ephemeral=True)
+
 
     async def query_gemini(self, prompt: str) -> str:
         system_instruction = (
@@ -68,20 +81,6 @@ class Agentcog(commands.Cog):
         except Exception as e:
             print(e)
             await interaction.edit_original_response(view=ErrorUI(str(e)))
-
-    @ask.error
-    async def ask_error(
-        self,
-        interaction: discord.Interaction,
-        error: app_commands.AppCommandError,
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            if interaction.response.is_done():
-                await interaction.followup.send(view=ErrorUI("**you're being rate limited.**"), ephemeral=True)
-            else:
-                await interaction.response.send_message(view=ErrorUI("**you're being rate limited.**"), ephemeral=True)
-        else:
-            raise error
 
 
 async def setup(bot):
