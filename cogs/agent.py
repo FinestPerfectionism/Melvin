@@ -1,12 +1,14 @@
 import os
 import time
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-from globals import PRIMARY, MELVIN_EMOJI
-from ui import ErrorUI, ResponseUI, SmallSeparator
 from google import genai
 from google.genai import types
+
+from globals import MELVIN_EMOJI, PRIMARY
+from ui import ErrorUI, ResponseUI, SmallSeparator
 
 primary = f"{PRIMARY}"
 
@@ -16,13 +18,13 @@ class AgentCog(
     name="ai",
     description="self explanatory, ask a free AI model some stupid shit",
 ):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         # Initialize Google GenAI client using GAPI environment variable
         self.api_key = os.getenv("GAPI")
         self.client = genai.Client(api_key=self.api_key)
 
-    #cogwide error logging
+    # cogwide error logging
     async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         if isinstance(error, app_commands.CommandOnCooldown):
             msg = "**you're being rate limited.**"
@@ -34,7 +36,6 @@ class AgentCog(
             await interaction.followup.send(view=error_ui, ephemeral=True)
         else:
             await interaction.response.send_message(view=error_ui, ephemeral=True)
-
 
     async def query_gemini(self, prompt: str) -> str:
         system_instruction = (
@@ -52,11 +53,10 @@ class AgentCog(
 
             if response.text:
                 return response.text
-            else:
-                raise RuntimeError("**Gemini returned an empty response.**")
+            raise RuntimeError("**Gemini returned an empty response.**")
 
         except Exception as e:
-            raise RuntimeError(f"**Gemini API Error, {str(e)}**")
+            raise RuntimeError(f"**Gemini API Error, {e!s}**")
 
     @app_commands.command(name="ask", description="ask a free AI model some stupid shit")
     @app_commands.checks.cooldown(2, 60)
@@ -72,7 +72,7 @@ class AgentCog(
             prompt_section = discord.ui.Section(f"# **prompt:** {prompt}", accessory=model_button)
             response_display = discord.ui.TextDisplay(
                 content=f"{ai_response}\n\n"
-                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. took {elapsed:.1f}s**"
+                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. took {elapsed:.1f}s**",
             )
             view.container.clear_items()
             view.container.add_item(prompt_section)
@@ -84,5 +84,5 @@ class AgentCog(
             await interaction.edit_original_response(view=ErrorUI(str(e)))
 
 
-async def setup(bot) -> None:
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(AgentCog(bot))

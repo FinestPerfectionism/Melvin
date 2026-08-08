@@ -1,16 +1,17 @@
 import discord
-from discord.ext import commands
 from discord import app_commands
+from discord.ext import commands
 
 from ui import SmallSeparator
 
-#UI Classes
+
+# UI Classes
 class PingUI(discord.ui.LayoutView):
     def __init__(self, content: str) -> None:
         super().__init__()
 
         self.text_display = discord.ui.TextDisplay(
-            content=content
+            content=content,
         )
 
         container = discord.ui.Container(
@@ -21,15 +22,14 @@ class PingUI(discord.ui.LayoutView):
         self.add_item(container)
 
 
-
 class AvatarView(discord.ui.LayoutView):
     def __init__(self, target: discord.User) -> None:
         super().__init__()
         text_display = discord.ui.TextDisplay(
-            content=f"**{target.display_name}'s current avatar**"
+            content=f"**{target.display_name}'s current avatar**",
         )
         media_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem(media=target.display_avatar.url)
+            discord.MediaGalleryItem(media=target.display_avatar.url),
         )
 
         if target.avatar is not None:
@@ -54,10 +54,10 @@ class BannerView(discord.ui.LayoutView):
     def __init__(self, target: discord.Member, fetched_user: discord.User) -> None:
         super().__init__()
         text_display = discord.ui.TextDisplay(
-            content=f"**{target.display_name}'s current banner**"
+            content=f"**{target.display_name}'s current banner**",
         )
         media_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem(media=fetched_user.banner.url)
+            discord.MediaGalleryItem(media=fetched_user.banner.url),
         )
         buttons = [
             discord.ui.Button(label=fmt, style=discord.ButtonStyle.link, url=fetched_user.banner.with_format(fmt).url)
@@ -78,7 +78,7 @@ class InfoCog(
     name="info",
     description="some info stuff",
 ):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @app_commands.command(name="latency", description="bot latency")
@@ -103,9 +103,9 @@ class InfoCog(
         fetched_user = await self.bot.fetch_user(target.id)
 
         if fetched_user.banner is None:
-            await  interaction.response.send_message(
+            await interaction.response.send_message(
                 f"{target.display_name}'s profile must not have a banner :/",
-                ephemeral=True
+                ephemeral=True,
             )
             return
 
@@ -113,5 +113,5 @@ class InfoCog(
         await interaction.response.send_message(view=view)
 
 
-async def setup(bot) -> None:
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(InfoCog(bot))

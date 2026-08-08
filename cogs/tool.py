@@ -1,25 +1,28 @@
-from globals import MELVIN_EMOJI
-from ui import ResponseUI, ErrorUI
-import discord
 import base64
 import binascii
 import random
+
+import discord
 from discord import app_commands
 from discord.ext import commands
 
+from globals import MELVIN_EMOJI
+from ui import ErrorUI, ResponseUI
+
 result = random.choice(["heads", "tails"])
+
 
 class ToolCog(
     commands.GroupCog,
     name="tool",
     description="some more tool stuff",
 ):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @app_commands.command(name="base64-decode", description="decode a base64 encoded string")
     @app_commands.describe(text="the base64 string to decode")
-    async def base64decode(self, interaction: discord.Interaction, text: str):
+    async def base64decode(self, interaction: discord.Interaction, text: str) -> None:
         view = ResponseUI()
         await interaction.response.send_message(view=view, ephemeral=False)
 
@@ -28,12 +31,12 @@ class ToolCog(
             decodedstr = decodedbyte.decode("utf-8")
         except binascii.Error as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"not valid b64, **{e}**")
+                view=ErrorUI(f"not valid b64, **{e}**"),
             )
             return
         except UnicodeDecodeError as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"decoded, but the result isn't valid text, **{e}**")
+                view=ErrorUI(f"decoded, but the result isn't valid text, **{e}**"),
             )
             return
 
@@ -51,7 +54,7 @@ class ToolCog(
             encodedstr = encodedbyte.decode("utf-8")
         except Exception as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"something went wrong encoding this: **{e}**")
+                view=ErrorUI(f"something went wrong encoding this: **{e}**"),
             )
             return
 
@@ -74,9 +77,9 @@ class ToolCog(
             view.container.add_item(
                 discord.ui.MediaGallery(
                     discord.MediaGalleryItem(
-                        media=f"attachment://{file.filename}"
-                    )
-                )
+                        media=f"attachment://{file.filename}",
+                    ),
+                ),
             )
             await interaction.response.send_message(view=view, file=file, allowed_mentions=discord.AllowedMentions.none())
         else:
@@ -99,7 +102,7 @@ class ToolCog(
                 await interaction.response.send_message(view=view, ephemeral=True)
 
     @app_commands.command(name="coin", description="flip the coin")
-    async def coinflip(self, interaction: discord.Interaction):
+    async def coinflip(self, interaction: discord.Interaction) -> None:
         view = ResponseUI()
         await interaction.response.send_message(view=view)
 
@@ -107,5 +110,6 @@ class ToolCog(
         view.text_display.content = f"**{MELVIN_EMOJI} the result is... {result}**"
         await interaction.edit_original_response(view=view)
 
-async def setup(bot) -> None:
+
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ToolCog(bot))
