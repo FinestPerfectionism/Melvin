@@ -752,7 +752,7 @@ class ModCog(
     async def snipe(
         self,
         interaction: discord.Interaction,
-        channel: discord.abc.MessageableChannel | None = None,
+        channel: GuildChannels | None = None,
     ) -> None:
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
