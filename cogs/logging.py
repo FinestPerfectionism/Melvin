@@ -158,7 +158,9 @@ class LoggingCog(
             return text if len(text) <= limit else text[:limit] + "…"
 
         view = NegativeLoggingClass()
-        view.text_display.content = f"message sent by **{msg.author}** in {msg.channel.mention} was deleted.**\n{trunc(msg.content)}**"
+        view.text_display.content = (
+            f"# Message Deleted | {discord.utils.format_dt(discord.uitls.utcnow(), style = "F")}"
+        )
 
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
