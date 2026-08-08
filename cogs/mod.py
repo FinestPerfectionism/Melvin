@@ -383,7 +383,7 @@ class ModCog(
         dm: bool = False,
     ) -> None:
         action_ui = ActionUI()
-        await interaction.response.send_message(view=action_ui, ephemeral=False)
+        await interaction.response.send_message(view=action_ui, ephemeral=False, allowed_mentions=discord.AllowedMentions.none())
 
         if member.id == interaction.user.id:
             await interaction.edit_original_response(view=ErrorUI("**you can't ban yourself.**"))
@@ -452,7 +452,7 @@ class ModCog(
         if interaction.response.is_done():
             await interaction.edit_original_response(view=ErrorUI(msg))
         else:
-            await interaction.response.send_message(view=ErrorUI(msg), ephemeral=False)
+            await interaction.response.send_message(view=ErrorUI(msg))
 
     # reskinned ban command, ignore
     @app_commands.command(name="lynch", description="lynch a member")
@@ -467,7 +467,7 @@ class ModCog(
         dm: bool = False,
     ) -> None:
         action_ui = ActionUI()
-        await interaction.response.send_message(view=action_ui, ephemeral=False)
+        await interaction.response.send_message(view=action_ui)
 
         if member.id == interaction.user.id:
             await interaction.edit_original_response(view=ErrorUI("**you can't lynch yourself.**"))
@@ -525,7 +525,7 @@ class ModCog(
         action_ui.update_text(
             f"**lynched {member.mention}**\n\n**reason:** {reason}{dm_note}{db_note}",
         )
-        await interaction.edit_original_response(view=action_ui)
+        await interaction.edit_original_response(view=action_ui, allowed_mentions=discord.AllowedMentions.none())
 
     @app_commands.command(name="mute", description="mute a member")
     @app_commands.guild_only()
@@ -614,7 +614,7 @@ class ModCog(
         action_ui.update_text(
             f"**muted {member.mention}**\n\n**reason:** {reason}{dm_note}{db_note}",
         )
-        await interaction.edit_original_response(view=action_ui)
+        await interaction.edit_original_response(view=action_ui, allowed_mentions=discord.AllowedMentions.none())
 
     @app_commands.command(name="unmute", description="unmute a member")
     @app_commands.guild_only()
@@ -670,7 +670,7 @@ class ModCog(
         action_ui.update_text(
             f"**unmuted {member.mention}**\n\n**reason:** {reason}{dm_note}",
         )
-        await interaction.edit_original_response(view=action_ui)
+        await interaction.edit_original_response(view=action_ui, allowed_mentions=discord.AllowedMentions.none())
 
     @unmute.error
     async def unmute_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
@@ -718,7 +718,7 @@ class ModCog(
             f"{discord.utils.format_dt(sniped['timestamp'], style='R')}\n"
             f"||{sniped['content']}||",
         )
-        await interaction.edit_original_response(view=action_ui)
+        await interaction.edit_original_response(view=action_ui, allowed_mentions=discord.AllowedMentions.none())
 
 
 async def setup(bot: commands.Bot) -> None:
