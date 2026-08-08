@@ -1,3 +1,4 @@
+from globals import MELVIN_EMOJI
 from ui import ErrorUI, ResponseUI, AdUI, NegativeLoggingClass, PositiveLoggingClass, MiscLoggingClass
 import discord
 from discord import app_commands

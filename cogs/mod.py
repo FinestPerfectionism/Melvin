@@ -37,7 +37,6 @@ class Modcog(commands.Cog):
         self.sniped_messages: dict[int, dict] = {}
 
     async def _restore_channel(self, channel: discord.TextChannel, everyone_role: discord.Role):
-        """pops the stored overwrite and re-applies it, removing the lock entry"""
         original_overwrite = self.locked_channels.pop(channel.id)
         await channel.set_permissions(
             everyone_role,

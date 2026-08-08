@@ -3,6 +3,7 @@ import discord
 import asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
+from ui import HelpView
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -21,11 +22,17 @@ bot = commands.Bot(
 load_dotenv()
 token = os.getenv('token')
 
+
+@bot.tree.command(name="help", description="take a peek at melvins commands")
+async def help_command(interaction: discord.Interaction):
+    view = HelpView(bot)
+    await interaction.response.send_message(view=view)
+
+
 @bot.event
 async def on_ready():
     print(f"{bot.user}")
     await bot.tree.sync()
-    print("bot.tree.sync()")
 
 
 async def main():
@@ -39,7 +46,5 @@ async def main():
         await bot.load_extension("cogs.welcome")
         await bot.load_extension("cogs.private")
         await bot.start(token)
-
-
 
 asyncio.run(main())

@@ -1,4 +1,5 @@
-from globals import LOG_CHANNEL
+from discord import app_commands
+from globals import LOG_CHANNEL, MELVIN_EMOJI
 from ui import ResponseUI
 import discord
 from discord.ext import commands
@@ -6,7 +7,7 @@ from discord.ext import commands
 class PrivateCog(
     commands.GroupCog,
     name="private",
-    description="some private stuff, gated",
+    description="some prv stuff",
 ):
     def __init__(self, bot) -> None:
         self.bot = bot
@@ -47,6 +48,26 @@ class PrivateCog(
         except (discord.Forbidden, discord.HTTPException):
             pass
 
+    @app_commands.command(name="sync", description="sync command tree")
+    async def sync(self, interaction: discord.Interaction) -> None:
+        if not await self.bot.is_owner(interaction.user):
+            view = ResponseUI()
+            view.text_display.content = "**This command is gated, read our documentation in our [support server.](https://discord.gg/PfyKM7dyx4)**"
+            await interaction.response.send_message(view=view, ephemeral=True)
+            return
+
+        view = ResponseUI()
+        await interaction.response.send_message(view=view, ephemeral=True)
+
+        try:
+            synced = await self.bot.tree.sync()
+        except discord.HTTPException as e:
+            view.text_display.content = f"**sync failed, {e}**"
+            await interaction.edit_original_response(view=view)
+            return
+
+        view.text_display.content = f"**{MELVIN_EMOJI} synced {len(synced)} command(s)**"
+        await interaction.edit_original_response(view=view)
 
 async def setup(bot) -> None:
     await bot.add_cog(PrivateCog(bot))

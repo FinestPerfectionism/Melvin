@@ -1,4 +1,4 @@
-from ui import ErrorUI, NegativeLoggingClass, PositiveLoggingClass, MiscLoggingClass
+from ui import ErrorUI, NegativeLoggingClass, PositiveLoggingClass, MiscLoggingClass, LargeSeparator, tertiary, primary
 import discord
 import sqlite3
 from discord.ext import commands
@@ -13,6 +13,30 @@ class LoggingCog(
     def __init__(self, bot) -> None:
         self.bot = bot
         self.db_path = "logging.db"
+
+    def clean_and_truncate(self, text : str, length : int = 500) -> str:
+        return discord.utils.escape_markdown(
+            (text)[:length - 3] + "..." if len(text) > length else text
+        )
+
+    def format_attachments(self, attachments : list[discord.Attachment]) -> str:
+        return "\n".join(f"- {discord.utils.escape_markdown(f"{attachment.filename} | {attachment.url}")}" for attachment in attachments)
+
+    def channel_display(self, channel : discord.abc.Messageable | discord.abc.GuildChannel) -> str:
+        if isinstance(channel, discord.Thread):
+            parent = channel.parent
+
+            if isinstance(parent, discord.ForumChannel):
+                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.mention}"
+            if parent is not None:
+                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.mention}"
+
+            return channel.mention
+
+        if isinstance(channel, discord.TextChannel):
+            return f"{channel.mention} | {channel.id}"
+
+        return "Unknown Channel"
 
     async def cog_load(self) -> None:
         conn = sqlite3.connect(self.db_path)
@@ -30,11 +54,15 @@ class LoggingCog(
     @app_commands.command(name="channel", description="set the channel for server logs")
     @app_commands.describe(channel="the channel to send logs to")
     @app_commands.checks.has_permissions(manage_guild=True)
+    @app_commands.guild_only()
     async def channel(
         self,
         interaction: discord.Interaction,
         channel: discord.TextChannel
     ) -> None:
+        if not interaction.guild:
+            return
+
         action_ui = MiscLoggingClass()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
@@ -129,17 +157,51 @@ class LoggingCog(
         if before.author.bot or before.content == after.content:
             return
 
+        if not before.guild:
+            return
+
         log_channel = await self.get_log_channel(before.guild.id)
         if log_channel is None:
             return
-        def trunc(text: str, limit: int = 500) -> str:
-            return text if len(text) <= limit else text[:limit] + "…"
 
-        view = MiscLoggingClass()
-        view.text_display.content = f"**{before.author}** edited a message in {before.channel.mention}\n**before:** {trunc(before.content)}\n**after:** {trunc(after.content)}"
+        container = discord.ui.Container(
+            discord.ui.TextDisplay(f"# Message Edited | {discord.utils.format_dt(after.edited_at or discord.utils.utcnow(), style = "F")}"),
+            discord.ui.Section(
+                f"**Author:** {before.author.mention} | {before.author.id}\n"
+                f"**Channel:** {self.channel_display(after.channel)}",
+                accessory = discord.ui.Button(label = "Jump to Message", style = discord.ButtonStyle.link, url = after.jump_url)
+            ),
+            accent_color = discord.Color.from_str(primary),
+        )
 
-        jump_button = discord.ui.Button(label="jump to", style=discord.ButtonStyle.link, url=after.jump_url)
-        view.container.add_item(discord.ui.ActionRow(jump_button))
+        if after.attachments:
+            container.add_item(
+                LargeSeparator(),
+            )
+            container.add_item(
+                discord.ui.TextDisplay(
+                    "### Attachments\n"
+                    f"{self.format_attachments(after.attachments)}"
+                ),
+            )
+
+        container.add_item(
+            LargeSeparator(),
+        )
+        container.add_item(
+            discord.ui.TextDisplay(
+                "### Before\n"
+                f"{self.clean_and_truncate(before.content) or "[No content, likely an embed or attachment]"}"
+            ),
+        )
+        container.add_item(
+            discord.ui.TextDisplay(
+                "### After\n"
+                f"{self.clean_and_truncate(after.content) or "[No content, likely an embed or attachment]"}"
+            ),
+        )
+        view = discord.ui.LayoutView()
+        view.add_item(container)
 
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
@@ -150,15 +212,43 @@ class LoggingCog(
     async def on_message_delete(self, msg: discord.Message) -> None:
         if msg.author.bot:
             return
+        if not msg.guild:
+            return
         log_channel = await self.get_log_channel(msg.guild.id)
         if log_channel is None:
             return
 
-        def trunc(text: str, limit: int = 500) -> str:
-            return text if len(text) <= limit else text[:limit] + "…"
+        container = discord.ui.Container(
+            discord.ui.TextDisplay(f"# Message Deleted | {discord.utils.format_dt(discord.utils.utcnow(), style = "F")}"),
+            discord.ui.TextDisplay(
+                f"**Author:** {msg.author.mention} | {msg.author.id}\n"
+                f"**Channel:** {self.channel_display(msg.channel)}"
+            ),
+            accent_color = discord.Color.from_str(tertiary),
+        )
 
-        view = NegativeLoggingClass()
-        view.text_display.content = f"message sent by **{msg.author}** in {msg.channel.mention} was deleted.**\n{trunc(msg.content)}**"
+        if msg.attachments:
+            container.add_item(
+                LargeSeparator(),
+            )
+            container.add_item(
+                discord.ui.TextDisplay(
+                    "### Attachments\n"
+                    f"{self.format_attachments(msg.attachments)}"
+                ),
+            )
+
+        container.add_item(
+            LargeSeparator(),
+        )
+        container.add_item(
+            discord.ui.TextDisplay(
+                "### Content\n"
+                f"{self.clean_and_truncate((msg.content) or "[No content, likely an embed or attachment]")}"
+            ),
+        )
+        view = discord.ui.LayoutView()
+        view.add_item(container)
 
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
