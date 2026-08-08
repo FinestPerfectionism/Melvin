@@ -1,4 +1,5 @@
-<img width="1640" height="856" alt="s b" src="https://github.com/user-attachments/assets/599a39e6-63e4-4c0d-8d49-11671e6c5ec2" />
+<img width="1640" height="420" alt="botbanner" src="https://github.com/user-attachments/assets/a29dc670-3648-4f12-909a-669df49a4427" />
+
 
 
 # Melvin
