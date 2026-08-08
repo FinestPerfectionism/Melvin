@@ -34,7 +34,7 @@ def parse_duration(duration: str) -> timedelta | None:
 
 @app_commands.guild_only
 class ModCog(
-    commands.Cog,
+    commands.GroupCog,
     name="mod",
     description="simple moderative actions",
 ):
