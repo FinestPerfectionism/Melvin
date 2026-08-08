@@ -32,6 +32,9 @@ def parse_duration(duration: str) -> timedelta | None:
     return timedelta(**{UNIT_MAP[unit]: amount})
 
 
+GuildChannels = discord.TextChannel | discord.VoiceChannel | discord.StageChannel | discord.ForumChannel
+
+
 @app_commands.guild_only
 class ModCog(
     commands.GroupCog,
@@ -44,7 +47,7 @@ class ModCog(
         self.locked_channels: dict[int, discord.PermissionOverwrite] = {}
         self.sniped_messages: dict[int, dict] = {}
 
-    async def _restore_channel(self, channel: discord.TextChannel, everyone_role: discord.Role) -> None:
+    async def _restore_channel(self, channel: GuildChannels, everyone_role: discord.Role) -> None:
         original_overwrite = self.locked_channels.pop(channel.id)
         await channel.set_permissions(
             everyone_role,
@@ -101,8 +104,12 @@ class ModCog(
     async def warnings(
         self,
         interaction: discord.Interaction,
-        member: discord.Member = None,
+        member: discord.Member | None = None,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_UI = ActionUI()
         await interaction.response.send_message(view=action_UI, ephemeral=False)
 
@@ -148,12 +155,23 @@ class ModCog(
     async def lock(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel = None,
+        channel: GuildChannels | None = None,
     ) -> None:
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
+        # guild will never be None, and discord already enforces channel as a target
+        if not interaction.guild or not isinstance(channel, GuildChannels):
+            return
+
         channel = channel or interaction.channel
+
+        # ...however, interaction.channel can be any channel
+        if not isinstance(interaction.channel, GuildChannels):
+            await interaction.edit_original_response(
+                view=ErrorUI(f"**{channel.mention} isn't a valid channel.**"),
+            )
+            return
         everyone_role = interaction.guild.default_role
 
         # toggle: if already locked, unlock instead
@@ -205,12 +223,24 @@ class ModCog(
     async def unlock(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel = None,
+        channel: GuildChannels | None = None,
     ) -> None:
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
+        # guild will never be None, and discord already enforces channel as a target
+        if not interaction.guild or not isinstance(channel, GuildChannels):
+            return
+
         channel = channel or interaction.channel
+
+        # ...however, interaction.channel can be any channel
+        if not isinstance(interaction.channel, GuildChannels):
+            await interaction.edit_original_response(
+                view=ErrorUI(f"**{channel.mention} isn't a valid channel.**"),
+            )
+            return
+
         everyone_role = interaction.guild.default_role
 
         if channel.id not in self.locked_channels:
@@ -244,6 +274,10 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
@@ -310,6 +344,10 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
@@ -382,6 +420,10 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False, allowed_mentions=discord.AllowedMentions.none())
 
@@ -466,6 +508,10 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui)
 
@@ -539,6 +585,9 @@ class ModCog(
         duration: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
 
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
@@ -627,6 +676,9 @@ class ModCog(
         reason: str,
         dm: bool = False,
     ) -> None:
+        # guild will never be None, thus user will always be a member
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
 
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
@@ -700,12 +752,23 @@ class ModCog(
     async def snipe(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel = None,
+        channel: discord.abc.MessageableChannel | None = None,
     ) -> None:
         action_ui = ActionUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
+        # guild will never be None, and discord already enforces channel as a target
+        if not interaction.guild or not isinstance(channel, GuildChannels):
+            return
+
         channel = channel or interaction.channel
+
+        # ...however, interaction.channel can be any channel
+        if not isinstance(interaction.channel, GuildChannels):
+            await interaction.edit_original_response(
+                view=ErrorUI(f"**{channel.mention} isn't a valid channel.**"),
+            )
+            return
         sniped = self.sniped_messages.get(channel.id)
 
         if sniped is None:

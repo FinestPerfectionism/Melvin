@@ -4,6 +4,7 @@ from discord.ext import commands
 
 from ui import SmallSeparator
 
+
 # UI Classes
 class PingUI(discord.ui.LayoutView):
     def __init__(self, content: str) -> None:

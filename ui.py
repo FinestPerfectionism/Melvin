@@ -179,6 +179,7 @@ class AdUI(discord.ui.LayoutView):
         self.add_item(banner_container)
         self.add_item(content_container)
 
+
 # ActionUI
 class ActionUI(discord.ui.LayoutView):
     def __init__(self) -> None:
