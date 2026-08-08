@@ -139,7 +139,7 @@ class ModCog(
         action_UI.update_text(
             f"**warns for {member.mention}** ({len(rows)})\n\n" + "\n\n".join(entries),
         )
-        await interaction.edit_original_response(view=action_UI)
+        await interaction.edit_original_response(view=action_UI, allowed_mentions=discord.AllowedMentions.none())
 
     @app_commands.command(name="lock", description="lock a channel, or unlock it if already locked")
     @app_commands.guild_only()
