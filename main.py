@@ -32,7 +32,6 @@ async def help_command(interaction: discord.Interaction):
 @bot.event
 async def on_ready():
     print(f"{bot.user}")
-    await bot.tree.sync()
 
 
 async def main():

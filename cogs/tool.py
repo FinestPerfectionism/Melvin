@@ -1,9 +1,13 @@
+from globals import MELVIN_EMOJI
 from ui import ResponseUI, ErrorUI
 import discord
 import base64
 import binascii
+import random
 from discord import app_commands
 from discord.ext import commands
+
+result = random.choice(["heads", "tails"])
 
 class ToolCog(
     commands.GroupCog,
@@ -93,6 +97,15 @@ class ToolCog(
                 await interaction.followup.send(view=view, ephemeral=True)
             else:
                 await interaction.response.send_message(view=view, ephemeral=True)
+
+    @app_commands.command(name="coin", description="flip the coin")
+    async def coinflip(self, interaction: discord.Interaction):
+        view = ResponseUI()
+        await interaction.response.send_message(view=view)
+
+        result = random.choice(["heads", "tails"])
+        view.text_display.content = f"**{MELVIN_EMOJI} the result is... {result}**"
+        await interaction.edit_original_response(view=view)
 
 async def setup(bot) -> None:
     await bot.add_cog(ToolCog(bot))
