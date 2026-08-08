@@ -16,13 +16,14 @@ class PrivateCog(
         log_channel = self.bot.get_channel(LOG_CHANNEL)
         if log_channel is None:
             return
-
         view = ResponseUI()
-        view.text_display.content = f"**Melvin was just added to {guild.name}**"
+        view.text_display.content = (
+            f"**Melvin was just added to {guild.name}**\n"
+            f"Now in **{len(self.bot.guilds)}** guild(s)"
+        )
         view.container.add_item(
             discord.ui.MediaGallery(discord.MediaGalleryItem(media='https://files.catbox.moe/0rgmtr.png'))
         )
-
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.HTTPException):
@@ -33,13 +34,14 @@ class PrivateCog(
         log_channel = self.bot.get_channel(LOG_CHANNEL)
         if log_channel is None:
             return
-
         view = ResponseUI()
-        view.text_display.content = f"**Melvin was just removed from {guild.name}**"
+        view.text_display.content = (
+            f"**Melvin was just removed from {guild.name}**\n"
+            f"Now in **{len(self.bot.guilds)}** guild(s)"
+        )
         view.container.add_item(
             discord.ui.MediaGallery(discord.MediaGalleryItem(media='https://files.catbox.moe/0rgmtr.png'))
         )
-
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.HTTPException):

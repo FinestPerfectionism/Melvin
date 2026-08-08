@@ -61,7 +61,7 @@ class AdUI(discord.ui.LayoutView):
     def __init__(self):
         super().__init__()
         self.text_display = discord.ui.TextDisplay(
-            content=f"{MELVIN_EMOJI} **Melvin** is an app built around **Discord.py**. it features various **user and server facing commands**, functional as a user & server app.it's currently in an **open beta state**, with core moderation commands, a bunch of **user utilities**, **speaking utilities**, **encoding and decoding** + so much more.Melvin is super new to the app space, and support is **super appreciated**, feel free to check it out. **[add Melvin](<https://discord.com/oauth2/authorize?client_id=1468362201197973756>)**"
+            content=f"{MELVIN_EMOJI} Melvin is an app written using the **discord.py** framework. It features various **user and guild commands**, making it greatly useful as both a personal and server app. It's currently in an **open beta state**, with core moderation commands, and cogs complete with **user utilities**, **speaking utilities**, **encoding and decoding**, and so much more! Melvin is new to the discord bots realm, and support is **greatly appreciated**! Please feel free to check it out and/or **[contribute](https://github.com/saltgranule/Melvin)!**"
         )
         media_gallery = discord.ui.MediaGallery(
             discord.MediaGalleryItem(media='https://files.catbox.moe/0rgmtr.png')
@@ -76,7 +76,12 @@ class AdUI(discord.ui.LayoutView):
             style=discord.ButtonStyle.link,
             url="https://discord.com/oauth2/authorize?client_id=1468362201197973756"
         )
-        action_row = discord.ui.ActionRow(adbutton, addbutton)
+        gitbutton = discord.ui.Button(
+            label="github",
+            style=discord.ButtonStyle.link,
+            url="https://github.com/saltgranule/Melvin"
+        )
+        action_row = discord.ui.ActionRow(adbutton, addbutton, gitbutton)
         container = discord.ui.Container(
             self.text_display,
             SmallSeparator(),
