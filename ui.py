@@ -47,7 +47,7 @@ class HelpView(discord.ui.LayoutView):
         self.page = 0
 
         banner_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem(media="https://files.catbox.moe/cw9fau.png"),
+            discord.MediaGalleryItem(media="https://files.catbox.moe/3dwyry.png"),
         )
         banner_container = discord.ui.Container(banner_gallery)
 
@@ -144,11 +144,14 @@ class AdUI(discord.ui.LayoutView):
     def __init__(self) -> None:
         super().__init__()
         self.text_display = discord.ui.TextDisplay(
-            content=f"{MELVIN_EMOJI} Melvin is an app written using the **discord.py** framework. It features various **user and guild commands**, making it greatly useful as both a personal and server app. It's currently in an **open beta state**, with core moderation commands, and cogs complete with **user utilities**, **speaking utilities**, **encoding and decoding**, and so much more! Melvin is new to the discord bots realm, and support is **greatly appreciated**! Please feel free to check it out and/or **[contribute](https://github.com/saltgranule/Melvin)!**",
+            content=f"# {MELVIN_EMOJI} Melvin\nmelvin is an app written using the **discord.py** framework. It features various **user and guild commands**, making it greatly useful as both a personal and server app. It's currently in an **open beta state**, with core moderation commands, and cogs complete with **user utilities**, **speaking utilities**, **encoding and decoding**, and so much more!\n\nMelvin is new to the discord bots realm, and support is **greatly appreciated**! Please feel free to check it out and/or **[contribute](https://github.com/saltgranule/Melvin)!**",
         )
+
         media_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem(media="https://files.catbox.moe/0rgmtr.png"),
+            discord.MediaGalleryItem(media="https://files.catbox.moe/7e6nw8.png"),
         )
+        banner_container = discord.ui.Container(media_gallery)
+
         adbutton = discord.ui.Button(
             label="support server",
             style=discord.ButtonStyle.link,
@@ -165,15 +168,16 @@ class AdUI(discord.ui.LayoutView):
             url="https://github.com/saltgranule/Melvin",
         )
         action_row = discord.ui.ActionRow(adbutton, addbutton, gitbutton)
-        container = discord.ui.Container(
+
+        content_container = discord.ui.Container(
             self.text_display,
             SmallSeparator(),
-            media_gallery,
             action_row,
         )
-        self.container = container
-        self.add_item(container)
+        self.container = content_container
 
+        self.add_item(banner_container)
+        self.add_item(content_container)
 
 # ActionUI
 class ActionUI(discord.ui.LayoutView):

@@ -25,7 +25,7 @@ class PrivateCog(
             f"Now in **{len(self.bot.guilds)}** guild(s)"
         )
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media="https://files.catbox.moe/0rgmtr.png")),
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media="https://files.catbox.moe/7e6nw8.png")),
         )
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
@@ -43,7 +43,7 @@ class PrivateCog(
             f"Now in **{len(self.bot.guilds)}** guild(s)"
         )
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media="https://files.catbox.moe/0rgmtr.png")),
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media="https://files.catbox.moe/7e6nw8.png")),
         )
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
