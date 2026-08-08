@@ -309,7 +309,7 @@ class LoggingCog(
         if before.nick != after.nick:
             old_nick = before.nick or before.name
             new_nick = after.nick or after.name
-            changes.append(f"**nickname:** {old_nick} to {new_nick}")
+            changes.append(f"**Nickname:** {old_nick} | {new_nick}")
 
         if before.roles != after.roles:
             before_roles = set(before.roles)
@@ -317,22 +317,41 @@ class LoggingCog(
             added = after_roles - before_roles
             removed = before_roles - after_roles
             if added:
-                changes.append(f"**roles added:** {', '.join(r.mention for r in added)}")
+                changes.append(f"**Roles added:** {', '.join(r.mention for r in added)}")
             if removed:
-                changes.append(f"**roles removed:** {', '.join(r.mention for r in removed)}")
+                changes.append(f"**Roles removed:** {', '.join(r.mention for r in removed)}")
 
         if before.timed_out_until != after.timed_out_until:
             if after.timed_out_until is not None:
-                changes.append(f"**timed out until:** {discord.utils.format_dt(after.timed_out_until, style='f')}")
+                changes.append(f"**Timed out until:** {discord.utils.format_dt(after.timed_out_until, style='f')}")
             else:
-                changes.append("**timeout removed**")
+                changes.append("**Timeout removed**")
 
         if not changes:
             return
 
-        view = MiscLoggingClass()
-        view.text_display.content = f"**{after}** was updated\n" + "\n".join(changes)
-        view.container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=after.display_avatar.url)))
+        container = discord.ui.Container(
+            discord.ui.TextDisplay(f"# Member Updated | {discord.utils.format_dt(discord.utils.utcnow(), style="F")}"),
+            discord.ui.Section(
+                f"**Member:** {after.mention} | {after.id}",
+                accessory=discord.ui.Thumbnail(media=after.display_avatar.url),
+            ),
+            accent_color=discord.Color.from_str(primary),
+        )
+
+        changes_text = "\n".join(changes)
+        container.add_item(
+            LargeSeparator(),
+        )
+        container.add_item(
+            discord.ui.TextDisplay(
+                "### Changes\n"
+                f"{changes_text}"
+            ),
+        )
+        view = discord.ui.LayoutView()
+        view.add_item(container)
+
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.HTTPException):
@@ -353,19 +372,39 @@ class LoggingCog(
 
             changes = []
             if before.name != after.name:
-                changes.append(f"**username:** {before.name} to {after.name}")
+                changes.append(f"**Username:** {before.name} | {after.name}")
             if before.global_name != after.global_name:
                 changes.append(
-                    f"**display name:** {before.global_name or before.name} to {after.global_name or after.name}")
+                    f"**Display name:** {before.global_name or before.name} | {after.global_name or after.name}")
             if before.avatar != after.avatar:
-                changes.append("**avatar changed**")
+                changes.append("**Avatar changed**")
 
             if not changes:
                 continue
 
-            view = MiscLoggingClass()
-            view.text_display.content = f"**{after}** updated their profile\n" + "\n".join(changes)
-            view.container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=after.display_avatar.url)))
+            container = discord.ui.Container(
+                discord.ui.TextDisplay(
+                    f"# Profile Updated | {discord.utils.format_dt(discord.utils.utcnow(), style="F")}"),
+                discord.ui.Section(
+                    f"**User:** {after.mention} | {after.id}",
+                    accessory=discord.ui.Thumbnail(media=after.display_avatar.url),
+                ),
+                accent_color=discord.Color.from_str(primary),
+            )
+
+            changes_text = "\n".join(changes)
+            container.add_item(
+                LargeSeparator(),
+            )
+            container.add_item(
+                discord.ui.TextDisplay(
+                    "### Changes\n"
+                    f"{changes_text}"
+                ),
+            )
+            view = discord.ui.LayoutView()
+            view.add_item(container)
+
             try:
                 await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
             except (discord.Forbidden, discord.HTTPException):
