@@ -1,10 +1,11 @@
 import asyncio
 import os
+import time
 import discord
 from discord import app_commands
 from discord.ext import commands
 from globals import PRIMARY, MELVIN_EMOJI
-from ui import ErrorUI, ResponseUI
+from ui import ErrorUI, ResponseUI, SmallSeparator
 from google import genai
 from google.genai import types
 
@@ -12,14 +13,14 @@ primary = f"{PRIMARY}"
 
 
 class Agentcog(commands.Cog):
-
     def __init__(self, bot):
         self.bot = bot
         # Initialize Google GenAI client using GAPI environment variable
         self.api_key = os.getenv("GAPI")
         self.client = genai.Client(api_key=self.api_key)
 
-    ai = app_commands.Group(name="ai", description="self explanatory, ask a free AI model some stupid shit",)
+    ai = app_commands.Group(name="ai", description="self explanatory, ask a free AI model some stupid shit")
+
 
     async def query_gemini(self, prompt: str) -> str:
         system_instruction = (
@@ -28,11 +29,11 @@ class Agentcog(commands.Cog):
             "Refrain from using emojis unless told to."
         )
 
-        config = types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.7,)
+        config = types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.7)
 
         try:
             response = await self.client.aio.models.generate_content(
-                model="gemini-3.1-flash-lite", contents=prompt, config=config
+                model="gemini-3.1-flash-lite", contents=prompt, config=config,
             )
 
             if response.text:
@@ -48,20 +49,21 @@ class Agentcog(commands.Cog):
     async def ask(self, interaction: discord.Interaction, prompt: str):
         view = ResponseUI()
         await interaction.response.send_message(view=view)
-
         try:
+            start = time.time()
             ai_response = await self.query_gemini(prompt)
+            elapsed = time.time() - start
 
-            model_button = discord.ui.Button(label="model", style=discord.ButtonStyle.link, url="https://aistudio.google.com/",)
-            prompt_section = discord.ui.Section(f"# **prompt:** {prompt}", accessory=model_button,)
-            response_display = discord.ui.TextDisplay(content=f"{ai_response}\n\n" f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations.**")
-
-            #clearing the existing UI, dropping in new^^
+            model_button = discord.ui.Button(label="model", style=discord.ButtonStyle.link, url="https://aistudio.google.com/")
+            prompt_section = discord.ui.Section(f"# **prompt:** {prompt}", accessory=model_button)
+            response_display = discord.ui.TextDisplay(
+                content=f"{ai_response}\n\n"
+                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. took {elapsed:.1f}s**"
+            )
             view.container.clear_items()
             view.container.add_item(prompt_section)
-            view.container.add_item(discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small))
+            view.container.add_item(SmallSeparator())
             view.container.add_item(response_display)
-
             await interaction.edit_original_response(view=view)
         except Exception as e:
             print(e)
@@ -69,9 +71,9 @@ class Agentcog(commands.Cog):
 
     @ask.error
     async def ask_error(
-            self,
-            interaction: discord.Interaction,
-            error: app_commands.AppCommandError,
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
     ):
         if isinstance(error, app_commands.CommandOnCooldown):
             if interaction.response.is_done():

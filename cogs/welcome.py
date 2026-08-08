@@ -38,7 +38,7 @@ class WelcomeCog(commands.Cog):
 
     welcome = app_commands.Group(name="welcome", description="some welcome stuff")
 
-    # one shared error handler for every command in this cog
+    # cogwide error handling
     async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.MissingPermissions):
             msg = "**you don't have permission to do this.**"
