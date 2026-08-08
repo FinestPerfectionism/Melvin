@@ -1,9 +1,12 @@
+import sqlite3
+
+import discord
+from discord import app_commands
+from discord.ext import commands
+
 from globals import MELVIN_EMOJI
 from ui import ErrorUI, ResponseUI
-import discord
-import sqlite3
-from discord.ext import commands
-from discord import app_commands
+
 
 @app_commands.guild_only
 class WelcomeCog(
@@ -11,7 +14,7 @@ class WelcomeCog(
     name="welcome",
     description="some welcome stuff",
 ):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.db_path = "welcome.db"
 
@@ -33,7 +36,7 @@ class WelcomeCog(
         conn.commit()
         return conn
 
-    async def cog_load(self):
+    async def cog_load(self) -> None:
         conn = self._ensure_db()
         conn.close()
 
@@ -74,7 +77,7 @@ class WelcomeCog(
                 INSERT OR REPLACE INTO welcome_channels (guild_id, channel_id)
                 VALUES (?, ?)
                 """,
-                (str(interaction.guild.id), str(channel.id))
+                (str(interaction.guild.id), str(channel.id)),
             )
             conn.commit()
             conn.close()
@@ -91,7 +94,7 @@ class WelcomeCog(
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
-                (str(guild_id),)
+                (str(guild_id),),
             )
             row = cursor.fetchone()
             conn.close()
@@ -110,7 +113,7 @@ class WelcomeCog(
         b1_url="optional first button url",
         b1_label="label for the first button (defaults to 'link')",
         b2_url="optional second button url",
-        b2_label="label for the second button (defaults to 'link')"
+        b2_label="label for the second button (defaults to 'link')",
     )
     @app_commands.checks.has_permissions(manage_guild=True)
     async def config(
@@ -132,7 +135,7 @@ class WelcomeCog(
         for url in (attachment_url, b1_url, b2_url):
             if url and not url.startswith(("http://", "https://")):
                 await interaction.edit_original_response(
-                    view=ErrorUI("all URLs must be valid http(s) links.")
+                    view=ErrorUI("all URLs must be valid http(s) links."),
                 )
                 return
 
@@ -142,7 +145,7 @@ class WelcomeCog(
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
-                (str(interaction.guild.id),)
+                (str(interaction.guild.id),),
             )
             row = cursor.fetchone()
             existing_channel_id = row[0] if row else None
@@ -154,7 +157,7 @@ class WelcomeCog(
         # Config requires a channel, but the database may legitimately have no row yet.
         if existing_channel_id is None:
             await interaction.edit_original_response(
-                view=ErrorUI("**set a welcome channel first, using /welcome channel.**")
+                view=ErrorUI("**set a welcome channel first, using /welcome channel.**"),
             )
             return
 
@@ -169,8 +172,8 @@ class WelcomeCog(
                 """,
                 (
                     str(interaction.guild.id), existing_channel_id, text, attachment_url,
-                    b1_url, b1_label or "link", b2_url, b2_label or "link 2"
-                )
+                    b1_url, b1_label or "link", b2_url, b2_label or "link 2",
+                ),
             )
             conn.commit()
             conn.close()
@@ -188,7 +191,7 @@ class WelcomeCog(
             cursor.execute(
                 "SELECT channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label "
                 "FROM welcome_channels WHERE guild_id = ?",
-                (str(guild_id),)
+                (str(guild_id),),
             )
             row = cursor.fetchone()
             conn.close()
@@ -223,7 +226,7 @@ class WelcomeCog(
 
         if config["attachment_url"]:
             view.container.add_item(
-                discord.ui.MediaGallery(discord.MediaGalleryItem(media=config["attachment_url"]))
+                discord.ui.MediaGallery(discord.MediaGalleryItem(media=config["attachment_url"])),
             )
 
         buttons = []
@@ -243,5 +246,5 @@ class WelcomeCog(
             pass
 
 
-async def setup(bot) -> None:
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(WelcomeCog(bot))

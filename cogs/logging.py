@@ -1,8 +1,19 @@
-from ui import ErrorUI, NegativeLoggingClass, PositiveLoggingClass, MiscLoggingClass, LargeSeparator, tertiary, primary
-import discord
 import sqlite3
-from discord.ext import commands
+
+import discord
 from discord import app_commands
+from discord.ext import commands
+
+from ui import (
+    ErrorUI,
+    LargeSeparator,
+    MiscLoggingClass,
+    NegativeLoggingClass,
+    PositiveLoggingClass,
+    primary,
+    tertiary,
+)
+
 
 @app_commands.guild_only
 class LoggingCog(
@@ -10,19 +21,19 @@ class LoggingCog(
     name="log",
     description="logging config",
 ):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.db_path = "logging.db"
 
-    def clean_and_truncate(self, text : str, length : int = 500) -> str:
+    def clean_and_truncate(self, text: str, length: int = 500) -> str:
         return discord.utils.escape_markdown(
-            (text)[:length - 3] + "..." if len(text) > length else text
+            (text)[:length - 3] + "..." if len(text) > length else text,
         )
 
-    def format_attachments(self, attachments : list[discord.Attachment]) -> str:
+    def format_attachments(self, attachments: list[discord.Attachment]) -> str:
         return "\n".join(f"- {discord.utils.escape_markdown(f"{attachment.filename} | {attachment.url}")}" for attachment in attachments)
 
-    def channel_display(self, channel : discord.abc.Messageable | discord.abc.GuildChannel) -> str:
+    def channel_display(self, channel: discord.abc.Messageable | discord.abc.GuildChannel) -> str:
         if isinstance(channel, discord.Thread):
             parent = channel.parent
 
@@ -58,7 +69,7 @@ class LoggingCog(
     async def channel(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel
+        channel: discord.TextChannel,
     ) -> None:
         if not interaction.guild:
             return
@@ -74,7 +85,7 @@ class LoggingCog(
                 INSERT OR REPLACE INTO log_channels (guild_id, channel_id)
                 VALUES (?, ?)
                 """,
-                (str(interaction.guild.id), str(channel.id))
+                (str(interaction.guild.id), str(channel.id)),
             )
             conn.commit()
             conn.close()
@@ -108,7 +119,7 @@ class LoggingCog(
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT channel_id FROM log_channels WHERE guild_id = ?",
-                (str(guild_id),)
+                (str(guild_id),),
             )
             row = cursor.fetchone()
             conn.close()
@@ -120,7 +131,7 @@ class LoggingCog(
 
         return self.bot.get_channel(int(row[0]))
 
-    #events will eventually go here
+    # events will eventually go here
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
@@ -169,9 +180,9 @@ class LoggingCog(
             discord.ui.Section(
                 f"**Author:** {before.author.mention} | {before.author.id}\n"
                 f"**Channel:** {self.channel_display(after.channel)}",
-                accessory = discord.ui.Button(label = "Jump to Message", style = discord.ButtonStyle.link, url = after.jump_url)
+                accessory=discord.ui.Button(label="Jump to Message", style=discord.ButtonStyle.link, url=after.jump_url),
             ),
-            accent_color = discord.Color.from_str(primary),
+            accent_color=discord.Color.from_str(primary),
         )
 
         if after.attachments:
@@ -181,7 +192,7 @@ class LoggingCog(
             container.add_item(
                 discord.ui.TextDisplay(
                     "### Attachments\n"
-                    f"{self.format_attachments(after.attachments)}"
+                    f"{self.format_attachments(after.attachments)}",
                 ),
             )
 
@@ -191,13 +202,13 @@ class LoggingCog(
         container.add_item(
             discord.ui.TextDisplay(
                 "### Before\n"
-                f"{self.clean_and_truncate(before.content) or "[No content, likely an embed or attachment]"}"
+                f"{self.clean_and_truncate(before.content) or "[No content, likely an embed or attachment]"}",
             ),
         )
         container.add_item(
             discord.ui.TextDisplay(
                 "### After\n"
-                f"{self.clean_and_truncate(after.content) or "[No content, likely an embed or attachment]"}"
+                f"{self.clean_and_truncate(after.content) or "[No content, likely an embed or attachment]"}",
             ),
         )
         view = discord.ui.LayoutView()
@@ -222,9 +233,9 @@ class LoggingCog(
             discord.ui.TextDisplay(f"# Message Deleted | {discord.utils.format_dt(discord.utils.utcnow(), style = "F")}"),
             discord.ui.TextDisplay(
                 f"**Author:** {msg.author.mention} | {msg.author.id}\n"
-                f"**Channel:** {self.channel_display(msg.channel)}"
+                f"**Channel:** {self.channel_display(msg.channel)}",
             ),
-            accent_color = discord.Color.from_str(tertiary),
+            accent_color=discord.Color.from_str(tertiary),
         )
 
         if msg.attachments:
@@ -234,7 +245,7 @@ class LoggingCog(
             container.add_item(
                 discord.ui.TextDisplay(
                     "### Attachments\n"
-                    f"{self.format_attachments(msg.attachments)}"
+                    f"{self.format_attachments(msg.attachments)}",
                 ),
             )
 
@@ -244,7 +255,7 @@ class LoggingCog(
         container.add_item(
             discord.ui.TextDisplay(
                 "### Content\n"
-                f"{self.clean_and_truncate((msg.content) or "[No content, likely an embed or attachment]")}"
+                f"{self.clean_and_truncate((msg.content) or "[No content, likely an embed or attachment]")}",
             ),
         )
         view = discord.ui.LayoutView()
@@ -346,7 +357,7 @@ class LoggingCog(
         container.add_item(
             discord.ui.TextDisplay(
                 "### Changes\n"
-                f"{changes_text}"
+                f"{changes_text}",
             ),
         )
         view = discord.ui.LayoutView()
@@ -399,7 +410,7 @@ class LoggingCog(
             container.add_item(
                 discord.ui.TextDisplay(
                     "### Changes\n"
-                    f"{changes_text}"
+                    f"{changes_text}",
                 ),
             )
             view = discord.ui.LayoutView()
@@ -410,5 +421,6 @@ class LoggingCog(
             except (discord.Forbidden, discord.HTTPException):
                 pass
 
-async def setup(bot) -> None:
+
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(LoggingCog(bot))

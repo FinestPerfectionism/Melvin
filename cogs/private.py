@@ -1,19 +1,21 @@
+import discord
 from discord import app_commands
+from discord.ext import commands
+
 from globals import LOG_CHANNEL, MELVIN_EMOJI
 from ui import ResponseUI
-import discord
-from discord.ext import commands
+
 
 class PrivateCog(
     commands.GroupCog,
     name="private",
     description="some prv stuff",
 ):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild) -> None:
+    async def on_guild_join(self, guild: discord.Guild) -> None:
         log_channel = self.bot.get_channel(LOG_CHANNEL)
         if log_channel is None:
             return
@@ -23,7 +25,7 @@ class PrivateCog(
             f"Now in **{len(self.bot.guilds)}** guild(s)"
         )
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media='https://files.catbox.moe/0rgmtr.png'))
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media="https://files.catbox.moe/0rgmtr.png")),
         )
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
@@ -31,7 +33,7 @@ class PrivateCog(
             pass
 
     @commands.Cog.listener()
-    async def on_guild_remove(self, guild) -> None:
+    async def on_guild_remove(self, guild: discord.Guild) -> None:
         log_channel = self.bot.get_channel(LOG_CHANNEL)
         if log_channel is None:
             return
@@ -41,7 +43,7 @@ class PrivateCog(
             f"Now in **{len(self.bot.guilds)}** guild(s)"
         )
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media='https://files.catbox.moe/0rgmtr.png'))
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media="https://files.catbox.moe/0rgmtr.png")),
         )
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
@@ -69,5 +71,6 @@ class PrivateCog(
         view.text_display.content = f"**{MELVIN_EMOJI} synced {len(synced)} command(s)**"
         await interaction.edit_original_response(view=view)
 
-async def setup(bot) -> None:
+
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(PrivateCog(bot))
