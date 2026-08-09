@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from globals import MELVIN_EMOJI, PRIMARY, SECONDARY, TERTIARY
+from globals import MELVIN_EMOJI, PRIMARY, SECONDARY, TERTIARY, INVITE_URL
 
 primary = f"{PRIMARY}"
 secondary = f"{SECONDARY}"  # green
@@ -155,7 +155,7 @@ class AdUI(discord.ui.LayoutView):
         adbutton = discord.ui.Button(
             label="support server",
             style=discord.ButtonStyle.link,
-            url="https://discord.gg/XejfDTA6QK",
+            url=f"{INVITE_URL}",
         )
         addbutton = discord.ui.Button(
             label="add melvin",

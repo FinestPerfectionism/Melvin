@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import MELVIN_EMOJI
+from globals import MELVIN_EMOJI, INVITE_URL
 from ui import ErrorUI, ResponseUI
 
 
@@ -47,7 +47,7 @@ class WelcomeCog(
         elif isinstance(error, app_commands.NoPrivateMessage):
             msg = "**this command can only be used in a server.**"
         else:
-            msg = f"something went wrong, **{error}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"
+            msg = f"something went wrong, **{error}. please [join the support server]({INVITE_URL}) to report this issue.**"
 
         error_ui = ErrorUI(msg)
         if interaction.response.is_done():
@@ -82,7 +82,7 @@ class WelcomeCog(
             conn.commit()
             conn.close()
         except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
+            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
 
         action_ui.text_display.content = f"{MELVIN_EMOJI} **welcome channel set to {channel.mention}**"
@@ -151,7 +151,7 @@ class WelcomeCog(
             existing_channel_id = row[0] if row else None
             conn.close()
         except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
+            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
 
         # Config requires a channel, but the database may legitimately have no row yet.
@@ -178,7 +178,7 @@ class WelcomeCog(
             conn.commit()
             conn.close()
         except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
+            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
 
         action_ui.text_display.content = f"**{MELVIN_EMOJI} welcome message updated**"

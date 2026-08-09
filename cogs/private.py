@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import LOG_CHANNEL, MELVIN_EMOJI
+from globals import LOG_CHANNEL, MELVIN_EMOJI, INVITE_URL
 from ui import ResponseUI
 
 
@@ -54,7 +54,7 @@ class PrivateCog(
     async def sync(self, interaction: discord.Interaction) -> None:
         if not await self.bot.is_owner(interaction.user):
             view = ResponseUI()
-            view.text_display.content = "**This command is gated, read our documentation in our [support server.](https://discord.gg/PfyKM7dyx4)**"
+            view.text_display.content = f"**This command is gated, read our documentation in our [support server.]({INVITE_URL})**"
             await interaction.response.send_message(view=view, ephemeral=True)
             return
 

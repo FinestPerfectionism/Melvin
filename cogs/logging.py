@@ -4,6 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from globals import INVITE_URL
 from ui import (
     ErrorUI,
     LargeSeparator,
@@ -38,9 +39,9 @@ class LoggingCog(
             parent = channel.parent
 
             if isinstance(parent, discord.ForumChannel):
-                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.mention}"
+                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.id}"
             if parent is not None:
-                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.mention}"
+                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.id}"
 
             return channel.mention
 
@@ -91,7 +92,7 @@ class LoggingCog(
             conn.close()
         except Exception as e:
             error_ui = NegativeLoggingClass()
-            error_ui.text_display.content = f"**database error, {e}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"
+            error_ui.text_display.content = f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"
             await interaction.edit_original_response(view=error_ui)
             return
 
@@ -105,7 +106,7 @@ class LoggingCog(
         elif isinstance(error, app_commands.NoPrivateMessage):
             msg = "**this command can only be used in a server.**"
         else:
-            msg = f"something went wrong, **{error}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"
+            msg = f"something went wrong, **{error}. please [join the support server]({INVITE_URL}) to report this issue.**"
 
         error_ui = ErrorUI(msg)
         if interaction.response.is_done():

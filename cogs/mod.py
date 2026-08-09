@@ -6,6 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from globals import INVITE_URL
 from ui import ActionUI, ErrorUI
 
 # globals (will likely duplicate)
@@ -78,7 +79,7 @@ class ModCog(
         elif isinstance(error, app_commands.NoPrivateMessage):
             msg = "**this command can only be used in a server.**"
         else:
-            msg = "**something went wrong.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."
+            msg = f"**something went wrong.**\nplease [join the support server]({INVITE_URL}) to report this issue."
 
         error_ui = ErrorUI(msg)
         if interaction.response.is_done():
@@ -129,7 +130,7 @@ class ModCog(
             rows = cursor.fetchall()
             conn.close()
         except Exception:
-            await interaction.edit_original_response(view=ErrorUI("**there was a problem with the database.\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
+            await interaction.edit_original_response(view=ErrorUI(f"**there was a problem with the database.\nplease [join the support server]({INVITE_URL}) to report this issue.**"))
             return
 
         if not rows:
@@ -186,7 +187,7 @@ class ModCog(
                 )
                 return
             except discord.HTTPException:
-                await interaction.edit_original_response(view=ErrorUI("**couldn't unlock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
+                await interaction.edit_original_response(view=ErrorUI(f"**couldn't unlock that channel.**\nplease [join the support server]({INVITE_URL}) to report this issue."))
                 return
 
             action_ui.update_text(f"**unlocked** {channel.mention}")
@@ -210,7 +211,7 @@ class ModCog(
             )
             return
         except discord.HTTPException:
-            await interaction.edit_original_response(view=ErrorUI("**couldn't lock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
+            await interaction.edit_original_response(view=ErrorUI(f"**couldn't lock that channel.**\nplease [join the support server]({INVITE_URL}) to report this issue."))
             return
 
         self.locked_channels[channel.id] = original_overwrite
@@ -260,7 +261,7 @@ class ModCog(
             )
             return
         except discord.HTTPException:
-            await interaction.edit_original_response(view=ErrorUI("**couldn't unlock that channel.**\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue."))
+            await interaction.edit_original_response(view=ErrorUI(f"**couldn't unlock that channel.**\nplease [join the support server]({INVITE_URL}) to report this issue."))
             return
 
         action_ui.update_text(f"**unlocked** {channel.mention}")
@@ -317,9 +318,8 @@ class ModCog(
             conn.commit()
             conn.close()
         except Exception:
-            await interaction.edit_original_response(view=ErrorUI("**there was a problem with the database.\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
+            await interaction.edit_original_response(view=ErrorUI(f"**there was an error, please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
-
 
         action_ui.update_text(
             f"**warned {member.mention}**",
@@ -376,7 +376,7 @@ class ModCog(
             db_note = f"\n\n**couldn't log this action: {e}**"
 
         action_ui.update_text(
-            f"**kicked {member.mention}{db_note}**"
+            f"**kicked {member.mention}{db_note}**",
         )
         await interaction.edit_original_response(view=action_ui)
 
@@ -667,22 +667,11 @@ class ModCog(
         if isinstance(error, app_commands.MissingPermissions):
             msg = "**you don't have permission to unmute members**"
         else:
-            msg = f"**error, {error}. please [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"
+            msg = f"**error, {error}. please [join the support server]({INVITE_URL}) to report this issue.**"
         if interaction.response.is_done():
             await interaction.edit_original_response(view=ErrorUI(msg))
         else:
             await interaction.response.send_message(view=ErrorUI(msg), ephemeral=False)
-
-    @commands.Cog.listener()
-    async def on_message_delete(self, message: discord.Message) -> None:
-        if message.author.bot:
-            return
-
-        self.sniped_messages[message.channel.id] = {
-            "author": message.author,
-            "content": message.content or "[No content, likely an embed or attachment]",
-            "timestamp": message.created_at,
-        }
 
     @app_commands.command(name="snipe", description="see the last deleted message in this channel")
     @app_commands.describe(channel="the channel to snipe (defaults to this channel)")
