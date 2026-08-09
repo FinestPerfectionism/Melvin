@@ -23,7 +23,7 @@ class PingUI(discord.ui.LayoutView):
 
 
 class AvatarView(discord.ui.LayoutView):
-    def __init__(self, target: discord.User) -> None:
+    def __init__(self, target: discord.User | discord.Member) -> None:
         super().__init__()
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current avatar**",
@@ -33,9 +33,10 @@ class AvatarView(discord.ui.LayoutView):
         )
 
         if target.avatar is not None:
+            formats = ("png", "jpg", "webp", "gif") if target.avatar.is_animated() else ("png", "jpg", "webp")
             buttons = [
                 discord.ui.Button(label=fmt, style=discord.ButtonStyle.link, url=target.avatar.with_format(fmt).url)
-                for fmt in ("png", "jpg", "webp")
+                for fmt in formats
             ]
         else:
             buttons = [discord.ui.Button(label="web", style=discord.ButtonStyle.link, url=target.display_avatar.url)]
@@ -51,18 +52,27 @@ class AvatarView(discord.ui.LayoutView):
 
 
 class BannerView(discord.ui.LayoutView):
-    def __init__(self, target: discord.Member, fetched_user: discord.User) -> None:
+    def __init__(self, target: discord.User | discord.Member, fetched_user: discord.User) -> None:
         super().__init__()
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current banner**",
         )
+
+        banner_url = fetched_user.banner.url if fetched_user.banner else ""
+
         media_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem(media=fetched_user.banner.url),
+            discord.MediaGalleryItem(media=banner_url),
         )
-        buttons = [
-            discord.ui.Button(label=fmt, style=discord.ButtonStyle.link, url=fetched_user.banner.with_format(fmt).url)
-            for fmt in ("png", "jpg", "webp")
-        ]
+
+        if fetched_user.banner:
+            formats = ("png", "jpg", "webp", "gif") if fetched_user.banner.is_animated() else ("png", "jpg", "webp")
+            buttons = [
+                discord.ui.Button(label=fmt, style=discord.ButtonStyle.link, url=fetched_user.banner.with_format(fmt).url)
+                for fmt in formats
+            ]
+        else:
+            buttons = [discord.ui.Button(label="No Banner", style=discord.ButtonStyle.link, disabled=True, url="https://discord.com")]
+
         action_row = discord.ui.ActionRow(*buttons)
         container = discord.ui.Container(
             text_display,

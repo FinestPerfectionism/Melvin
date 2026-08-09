@@ -320,7 +320,6 @@ class ModCog(
             await interaction.edit_original_response(view=ErrorUI("**there was a problem with the database.\nplease [join the support server](https://discord.gg/PfyKM7dyx4) to report this issue.**"))
             return
 
-
         action_ui.update_text(
             f"**warned {member.mention}**",
         )
@@ -376,7 +375,7 @@ class ModCog(
             db_note = f"\n\n**couldn't log this action: {e}**"
 
         action_ui.update_text(
-            f"**kicked {member.mention}{db_note}**"
+            f"**kicked {member.mention}{db_note}**",
         )
         await interaction.edit_original_response(view=action_ui)
 
@@ -672,17 +671,6 @@ class ModCog(
             await interaction.edit_original_response(view=ErrorUI(msg))
         else:
             await interaction.response.send_message(view=ErrorUI(msg), ephemeral=False)
-
-    @commands.Cog.listener()
-    async def on_message_delete(self, message: discord.Message) -> None:
-        if message.author.bot:
-            return
-
-        self.sniped_messages[message.channel.id] = {
-            "author": message.author,
-            "content": message.content or "[No content, likely an embed or attachment]",
-            "timestamp": message.created_at,
-        }
 
     @app_commands.command(name="snipe", description="see the last deleted message in this channel")
     @app_commands.describe(channel="the channel to snipe (defaults to this channel)")

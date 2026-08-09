@@ -38,9 +38,9 @@ class LoggingCog(
             parent = channel.parent
 
             if isinstance(parent, discord.ForumChannel):
-                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.mention}"
+                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.id}"
             if parent is not None:
-                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.mention}"
+                return f"{parent.mention} -> {channel.mention} | {parent.id} -> {channel.id}"
 
             return channel.mention
 
