@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import LOG_CHANNEL, MELVIN_EMOJI, INVITE_URL
+from globals import INVITE_URL, LOG_CHANNEL, MELVIN_EMOJI
 from ui import ResponseUI
 
 

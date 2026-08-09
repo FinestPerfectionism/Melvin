@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from globals import MELVIN_EMOJI, PRIMARY, SECONDARY, TERTIARY, INVITE_URL
+from globals import INVITE_URL, MELVIN_EMOJI, PRIMARY, SECONDARY, TERTIARY
 
 primary = f"{PRIMARY}"
 secondary = f"{SECONDARY}"  # green

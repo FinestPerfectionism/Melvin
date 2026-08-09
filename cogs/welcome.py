@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import MELVIN_EMOJI, INVITE_URL
+from globals import INVITE_URL, MELVIN_EMOJI
 from ui import ErrorUI, ResponseUI
 
 
