@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import INVITE_URL, LOG_CHANNEL, MELVIN_EMOJI
+from globals import INVITE_URL, LOG_CHANNEL, MELVIN_CHECK_EMOJI, MELVIN_WARN_EMOJI
 from ui import ResponseUI
 
 
@@ -54,7 +54,7 @@ class PrivateCog(
     async def sync(self, interaction: discord.Interaction) -> None:
         if not await self.bot.is_owner(interaction.user):
             view = ResponseUI()
-            view.text_display.content = f"**This command is gated, read our documentation in our [support server.]({INVITE_URL})**"
+            view.text_display.content = f"{MELVIN_WARN_EMOJI} **This command is gated, read our documentation in our [support server.]({INVITE_URL})**"
             await interaction.response.send_message(view=view, ephemeral=True)
             return
 
@@ -68,7 +68,7 @@ class PrivateCog(
             await interaction.edit_original_response(view=view)
             return
 
-        view.text_display.content = f"**{MELVIN_EMOJI} synced {len(synced)} command(s)**"
+        view.text_display.content = f"**{MELVIN_CHECK_EMOJI} synced {len(synced)} command(s)**"
         await interaction.edit_original_response(view=view)
 
 

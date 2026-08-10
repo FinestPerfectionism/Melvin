@@ -1,7 +1,14 @@
 import discord
 from discord.ext import commands
 
-from globals import INVITE_URL, MELVIN_EMOJI, PRIMARY, SECONDARY, TERTIARY
+from globals import (
+    INVITE_URL,
+    MELVIN_CROSS_EMOJI,
+    MELVIN_EMOJI,
+    PRIMARY,
+    SECONDARY,
+    TERTIARY,
+)
 
 primary = f"{PRIMARY}"
 secondary = f"{SECONDARY}"  # green
@@ -112,7 +119,7 @@ class ErrorUI(discord.ui.LayoutView):
         super().__init__()
 
         text_display = discord.ui.TextDisplay(
-            content=f"# error\n\n{message}",
+            content=f"# {MELVIN_CROSS_EMOJI} error\n\n{message}",
         )
 
         container = discord.ui.Container(

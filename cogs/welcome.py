@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import INVITE_URL, MELVIN_EMOJI
+from globals import INVITE_URL, MELVIN_CHECK_EMOJI
 from ui import ErrorUI, ResponseUI
 
 
@@ -85,7 +85,7 @@ class WelcomeCog(
             await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
 
-        action_ui.text_display.content = f"{MELVIN_EMOJI} **welcome channel set to {channel.mention}**"
+        action_ui.text_display.content = f"{MELVIN_CHECK_EMOJI} **welcome channel set to {channel.mention}**"
         await interaction.edit_original_response(view=action_ui)
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
@@ -181,7 +181,7 @@ class WelcomeCog(
             await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
 
-        action_ui.text_display.content = f"**{MELVIN_EMOJI} welcome message updated**"
+        action_ui.text_display.content = f"**{MELVIN_CHECK_EMOJI} welcome message updated**"
         await interaction.edit_original_response(view=action_ui)
 
     async def get_welcome_config(self, guild_id: int) -> dict | None:
