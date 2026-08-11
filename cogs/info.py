@@ -1,6 +1,8 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
+
+from globals import PRIMARY, MELVIN_MISC_EMOJI
 from ui import SmallSeparator, ResponseUI
 
 
@@ -79,7 +81,8 @@ class InfoCog(
         await interaction.response.defer()
         latency = round(self.bot.latency * 1000)
         view = ResponseUI()
-        view.text_display.content = f"**bot's latency is {latency}ms**"
+        view.text_display.content = f"# {MELVIN_MISC_EMOJI} latency\n**bot's latency is {latency}ms**"
+        view.container.accent_color = discord.Color.from_str(PRIMARY)
         await interaction.followup.send(view=view)
 
     @app_commands.command(name="avatar", description="view user avatar")

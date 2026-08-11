@@ -5,6 +5,9 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 from ui import HelpView
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -19,6 +22,22 @@ bot = commands.Bot(
         guild=True, user=True,
     ),
 )
+
+
+async def custom_setup_hook():
+    loop = asyncio.get_running_loop()
+    loop.set_debug(True)
+
+    try:
+        import aiodns
+        resolver = aiodns.DNSResolver(nameservers=['1.1.1.1', '8.8.8.8'])
+        bot.http._HTTPClient__session._connector._resolver._resolver = resolver
+        logging.info("successful resolve")
+    except Exception as e:
+        logging.info(f"could not resolve {e}")
+    logging.info("logging started")
+
+bot.setup_hook = custom_setup_hook
 
 @bot.tree.command(name="help", description="take a peek at melvins commands")
 async def help_command(interaction: discord.Interaction) -> None:

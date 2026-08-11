@@ -1,8 +1,8 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from globals import INVITE_URL, LOG_CHANNEL, MELVIN_CHECK_EMOJI, MELVIN_WARN_EMOJI
-from ui import ResponseUI
+from globals import INVITE_URL, LOG_CHANNEL, MELVIN_CHECK_EMOJI, MELVIN_WARN_EMOJI, PRIMARY, SECONDARY
+from ui import ResponseUI, ErrorUI
 
 
 class PrivateCog(
@@ -57,13 +57,14 @@ class PrivateCog(
         try:
             synced = await self.bot.tree.sync()
         except discord.HTTPException as e:
-            view = ResponseUI()
-            view.text_display.content = f"**sync failed, {e}**"
+            view = ErrorUI(message=f"**{e}**")
             await interaction.followup.send(view=view, ephemeral=True)
             return
 
         view = ResponseUI()
         view.text_display.content = f"**{MELVIN_CHECK_EMOJI} synced {len(synced)} command(s)**"
+        view.container.accent_color = discord.Color.from_str(SECONDARY)
+        await interaction.followup.send(view=view)
         await interaction.followup.send(view=view, ephemeral=True)
 
 
