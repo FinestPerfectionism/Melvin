@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import INVITE_URL
+from globals import INVITE_URL, SECONDARY, TERTIARY
 from ui import (
     ErrorUI,
     LargeSeparator,
@@ -140,9 +140,15 @@ class LoggingCog(
         if log_channel is None:
             return
 
-        view = PositiveLoggingClass()
-        view.text_display.content = f"**{member}** joined,\nmember #{member.guild.member_count}"
-        view.container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=member.display_avatar.url)))
+        container = discord.ui.Container(
+            discord.ui.Section(
+                f"**{member} joined,**\n**member #{member.guild.member_count}**",
+                accessory=discord.ui.Thumbnail(media=member.display_avatar.url),
+            ),
+            accent_color=discord.Color.from_str(SECONDARY),
+        )
+        view = discord.ui.LayoutView()
+        view.add_item(container)
 
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
@@ -155,9 +161,15 @@ class LoggingCog(
         if log_channel is None:
             return
 
-        view = NegativeLoggingClass()
-        view.text_display.content = f"**{member}** left the server."
-        view.container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=member.display_avatar.url)))
+        container = discord.ui.Container(
+            discord.ui.Section(
+                f"**{member} left,**\n**member #{member.guild.member_count}**",
+                accessory=discord.ui.Thumbnail(media=member.display_avatar.url),
+            ),
+            accent_color=discord.Color.from_str(TERTIARY),
+        )
+        view = discord.ui.LayoutView()
+        view.add_item(container)
 
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
