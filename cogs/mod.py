@@ -1,3 +1,4 @@
+import datetime
 import discord
 import aiosqlite
 from discord import app_commands
@@ -15,6 +16,20 @@ class ModCog(
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.db_path = "data/mod.db"
+
+    #duration parsing
+    def parseduration(self, durationstr: str):
+        unit = durationstr[-1].lower()
+        if unit not in ("s", "m", "h", "d"):
+            return None
+        try:
+            value = int(durationstr[:-1])
+            if value <= 0:
+                return None
+        except ValueError:
+                return None
+        multipliers = {"s": 1, "m": 60, "h": 3600, "d": 86400}
+        return value * multipliers[unit]
 
     async def _ensure_db(self) -> None:
         async with aiosqlite.connect(self.db_path) as conn:
@@ -222,6 +237,68 @@ class ModCog(
             view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} banned\n **{member.mention} has been banned, case {case_id}**")
             view.container.accent_color=discord.Color.from_str(SECONDARY)
         await interaction.response.send_message(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+
+    @app_commands.command(name="mute", description="mute a member")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(moderate_members=True)
+    async def mute(self, interaction: discord.Interaction, member: discord.Member, reason: str, duration: str) -> None:
+
+        #guard clauses
+        seconds = self.parseduration(duration)
+        if not seconds:
+            await interaction.response.send_message(view = ErrorUI("**not a valid duration format.**"))
+            return
+        if seconds > 28 * 86400:
+            await interaction.response.send_message(view = ErrorUI("**duration cannot surpass 28 days.**"))
+            return
+        if member.bot:
+            await interaction.response.send_message(view = ErrorUI("**you tried to mute an app.**"))
+            return
+        if member.id == interaction.user.id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to mute yourself.**"))
+            return
+        if member.id == interaction.guild.owner_id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to mute the guild owner.**"))
+            return
+        if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to mute someone equal to / above you.**"))
+            return
+        if member.top_role >= interaction.guild.me.top_role:
+            await interaction.response.send_message(view = ErrorUI("**i tried to mute someone equal to / above me.**"))
+            return
+
+        #mute db call
+        async with aiosqlite.connect(self.db_path) as conn:
+            cursor = await conn.execute(
+                """
+                INSERT INTO mod_cases (guild_id, user_id, mod_id, action_type, reason)
+                VALUES (?, ?, ?, 'mute', ?)
+                """,
+                (interaction.guild_id, member.id, interaction.user.id, reason),
+            )
+            case_id = cursor.lastrowid
+            await conn.commit()
+
+        #try dm
+        await self.dmhandling(
+            user=member,
+            action_type="mute",
+            case_id=case_id,
+            guild_name=interaction.guild.name,
+            reason=reason,
+        )
+
+        #the actual mute part
+        until = discord.utils.utcnow() + datetime.timedelta(seconds=seconds)
+        await member.timeout(until, reason=f"muted by melvin using {interaction.user} with the reason {reason}")
+
+        #mute msg
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} muted\n **{member.mention} has been muted, case {case_id}**")
+            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ModCog(bot))
