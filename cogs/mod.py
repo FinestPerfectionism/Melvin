@@ -20,6 +20,7 @@ class ModCog(
                     warn_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     kick_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     ban_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    mute_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     guild_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
                     mod_id INTEGER NOT NULL,
