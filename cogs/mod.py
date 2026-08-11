@@ -1,7 +1,8 @@
 import discord
+import aiosqlite
 from discord.ext import commands
 from globals import INVITE_URL
-from ui import ActionUI, ErrorUI
+from ui import ResponseUI, ErrorUI
 
 class ModCog(
     commands.GroupCog,
@@ -10,6 +11,25 @@ class ModCog(
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.db_path = "data/mod.db"
+
+    async def cog_load(self) -> None:
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS warnings (
+                    warn_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    kick_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ban_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    guild_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL,
+                    mod_id INTEGER NOT NULL,
+                    reason TEXT NOT NULL,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+                """
+            )
+            await db.commit()
 
 
 async def setup(bot: commands.Bot) -> None:
