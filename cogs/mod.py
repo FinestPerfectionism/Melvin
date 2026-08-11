@@ -1,8 +1,10 @@
 import discord
 import aiosqlite
+from discord import app_commands
 from discord.ext import commands
 from globals import INVITE_URL
-from ui import ResponseUI, ErrorUI
+from ui import ResponseUI, ErrorUI, message
+
 
 class ModCog(
     commands.GroupCog,
@@ -30,6 +32,17 @@ class ModCog(
             )
             await conn.commit()
 
+    #newer cogwide EH
+    async def errorhandler(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
+        if isinstance(error, app_commands.MissingPermissions):
+            message = "you lack permission(s) required to run this command."
+        elif isinstance(error, app_commands.BotMissingPermissions):
+            message = "i lack permission(s) required to run this command."
+            view = ErrorUI(message)
+            if interaction.response.is_done():
+                await interaction.followup.send(view=view, ephemeral=True)
+            else:
+                await interaction.response.send_message(view=view, ephemeral=True)
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ModCog(bot))
