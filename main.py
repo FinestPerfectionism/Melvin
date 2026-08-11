@@ -1,10 +1,10 @@
 import asyncio
 import os
-
 import discord
+from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
-
+from errorhandling import report_error
 from ui import HelpView
 
 intents = discord.Intents.default()
@@ -21,6 +21,18 @@ bot = commands.Bot(
     ),
 )
 
+@bot.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    await report_error(
+        bot, "app command error", error,
+        context=f"**command, {interaction.command.qualified_name if interaction.command else 'unknown'}** | **user, {interaction.user}**"
+    )
+
+@bot.event
+async def on_error(event_method, *args, **kwargs):
+    import sys
+    exc_type, exc_value, exc_tb = sys.exc_info()
+    await report_error(bot, f"**listener error in {event_method}**", exc_value)
 
 @bot.tree.command(name="help", description="take a peek at melvins commands")
 async def help_command(interaction: discord.Interaction) -> None:
