@@ -13,10 +13,9 @@ class ModCog(
         self.bot = bot
         self.db_path = "data/mod.db"
 
-    async def cog_load(self) -> None:
-        async with aiosqlite.connect(self.db_path) as db:
-            await db.execute(
-                """
+    async def _ensure_db(self) -> None:
+        async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute("""
                 CREATE TABLE IF NOT EXISTS warnings (
                     warn_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     kick_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,7 +28,7 @@ class ModCog(
                 );
                 """
             )
-            await db.commit()
+            await conn.commit()
 
 
 async def setup(bot: commands.Bot) -> None:
