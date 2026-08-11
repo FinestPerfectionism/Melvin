@@ -43,6 +43,7 @@ async def help_command(interaction: discord.Interaction) -> None:
 @bot.event
 async def on_ready() -> None:
     print(f"{bot.user}")
+    await bot.tree.sync()
 
 
 async def main() -> None:

@@ -1,5 +1,4 @@
-import sqlite3
-
+import aiosqlite
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -51,16 +50,14 @@ class LoggingCog(
         return "Unknown Channel"
 
     async def cog_load(self) -> None:
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS log_channels (
-                guild_id TEXT PRIMARY KEY,
-                channel_id TEXT NOT NULL
-            )
-        """)
-        conn.commit()
-        conn.close()
+        async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS log_channels (
+                    guild_id TEXT PRIMARY KEY,
+                    channel_id TEXT NOT NULL
+                )
+            """)
+            await conn.commit()
 
     # app commands will eventually go here
     @app_commands.command(name="channel", description="set the channel for server logs")
@@ -79,17 +76,15 @@ class LoggingCog(
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT OR REPLACE INTO log_channels (guild_id, channel_id)
-                VALUES (?, ?)
-                """,
-                (str(interaction.guild.id), str(channel.id)),
-            )
-            conn.commit()
-            conn.close()
+            async with aiosqlite.connect(self.db_path) as conn:
+                await conn.execute(
+                    """
+                    INSERT OR REPLACE INTO log_channels (guild_id, channel_id)
+                    VALUES (?, ?)
+                    """,
+                    (str(interaction.guild.id), str(channel.id)),
+                )
+                await conn.commit()
         except Exception as e:
             error_ui = NegativeLoggingClass()
             error_ui.text_display.content = f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"
@@ -116,14 +111,12 @@ class LoggingCog(
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT channel_id FROM log_channels WHERE guild_id = ?",
-                (str(guild_id),),
-            )
-            row = cursor.fetchone()
-            conn.close()
+            async with aiosqlite.connect(self.db_path) as conn:
+                async with conn.execute(
+                    "SELECT channel_id FROM log_channels WHERE guild_id = ?",
+                    (str(guild_id),),
+                ) as cursor:
+                    row = await cursor.fetchone()
         except Exception:
             return None
 

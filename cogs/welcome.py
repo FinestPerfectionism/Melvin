@@ -1,5 +1,4 @@
-import sqlite3
-
+import aiosqlite
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -18,27 +17,24 @@ class WelcomeCog(
         self.bot = bot
         self.db_path = "welcome.db"
 
-    def _ensure_db(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS welcome_channels (
-                guild_id TEXT PRIMARY KEY,
-                channel_id TEXT NOT NULL,
-                message TEXT,
-                attachment_url TEXT,
-                b1_url TEXT,
-                b1_label TEXT,
-                b2_url TEXT,
-                b2_label TEXT
-            )
-        """)
-        conn.commit()
-        return conn
+    async def _ensure_db(self) -> None:
+        async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS welcome_channels (
+                    guild_id TEXT PRIMARY KEY,
+                    channel_id TEXT NOT NULL,
+                    message TEXT,
+                    attachment_url TEXT,
+                    b1_url TEXT,
+                    b1_label TEXT,
+                    b2_url TEXT,
+                    b2_label TEXT
+                )
+            """)
+            await conn.commit()
 
     async def cog_load(self) -> None:
-        conn = self._ensure_db()
-        conn.close()
+        await self._ensure_db()
 
     # cogwide error handling
     async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
@@ -70,17 +66,15 @@ class WelcomeCog(
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT OR REPLACE INTO welcome_channels (guild_id, channel_id)
-                VALUES (?, ?)
-                """,
-                (str(interaction.guild.id), str(channel.id)),
-            )
-            conn.commit()
-            conn.close()
+            async with aiosqlite.connect(self.db_path) as conn:
+                await conn.execute(
+                    """
+                    INSERT OR REPLACE INTO welcome_channels (guild_id, channel_id)
+                    VALUES (?, ?)
+                    """,
+                    (str(interaction.guild.id), str(channel.id)),
+                )
+                await conn.commit()
         except Exception as e:
             await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
@@ -90,14 +84,12 @@ class WelcomeCog(
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
-                (str(guild_id),),
-            )
-            row = cursor.fetchone()
-            conn.close()
+            async with aiosqlite.connect(self.db_path) as conn:
+                async with conn.execute(
+                    "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
+                    (str(guild_id),),
+                ) as cursor:
+                    row = await cursor.fetchone()
         except Exception:
             return None
 
@@ -141,15 +133,14 @@ class WelcomeCog(
 
         try:
             # Make sure the table exists even if cog_load did not run.
-            conn = self._ensure_db()
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
-                (str(interaction.guild.id),),
-            )
-            row = cursor.fetchone()
+            await self._ensure_db()
+            async with aiosqlite.connect(self.db_path) as conn:
+                async with conn.execute(
+                    "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
+                    (str(interaction.guild.id),),
+                ) as cursor:
+                    row = await cursor.fetchone()
             existing_channel_id = row[0] if row else None
-            conn.close()
         except Exception as e:
             await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
@@ -162,21 +153,19 @@ class WelcomeCog(
             return
 
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT OR REPLACE INTO welcome_channels
-                (guild_id, channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    str(interaction.guild.id), existing_channel_id, text, attachment_url,
-                    b1_url, b1_label or "link", b2_url, b2_label or "link 2",
-                ),
-            )
-            conn.commit()
-            conn.close()
+            async with aiosqlite.connect(self.db_path) as conn:
+                await conn.execute(
+                    """
+                    INSERT OR REPLACE INTO welcome_channels
+                    (guild_id, channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        str(interaction.guild.id), existing_channel_id, text, attachment_url,
+                        b1_url, b1_label or "link", b2_url, b2_label or "link 2",
+                    ),
+                )
+                await conn.commit()
         except Exception as e:
             await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
@@ -186,15 +175,13 @@ class WelcomeCog(
 
     async def get_welcome_config(self, guild_id: int) -> dict | None:
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label "
-                "FROM welcome_channels WHERE guild_id = ?",
-                (str(guild_id),),
-            )
-            row = cursor.fetchone()
-            conn.close()
+            async with aiosqlite.connect(self.db_path) as conn:
+                async with conn.execute(
+                    "SELECT channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label "
+                    "FROM welcome_channels WHERE guild_id = ?",
+                    (str(guild_id),),
+                ) as cursor:
+                    row = await cursor.fetchone()
         except Exception:
             return None
 
