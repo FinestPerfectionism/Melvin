@@ -15,15 +15,14 @@ class ModCog(
 
     async def _ensure_db(self) -> None:
         async with aiosqlite.connect(self.db_path) as conn:
-            await conn.execute("""
-                CREATE TABLE IF NOT EXISTS warnings (
-                    warn_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    kick_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    ban_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    mute_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            await conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS mod_cases (
+                    case_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     guild_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
                     mod_id INTEGER NOT NULL,
+                    action_type TEXT NOT NULL,
                     reason TEXT NOT NULL,
                     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
                 );
