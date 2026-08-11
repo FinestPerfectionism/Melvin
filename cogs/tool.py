@@ -1,11 +1,9 @@
 import base64
 import binascii
 import random
-
 import discord
 from discord import app_commands
 from discord.ext import commands
-
 from globals import INVITE_URL, MELVIN_EMOJI, MELVIN_WARN_EMOJI
 from ui import ErrorUI, ResponseUI
 
@@ -100,15 +98,6 @@ class ToolCog(
                 await interaction.followup.send(view=view, ephemeral=True)
             else:
                 await interaction.response.send_message(view=view, ephemeral=True)
-
-    @app_commands.command(name="coin", description="flip the coin")
-    async def coinflip(self, interaction: discord.Interaction) -> None:
-        view = ResponseUI()
-        await interaction.response.send_message(view=view)
-
-        result = random.choice(["heads", "tails"])
-        view.text_display.content = f"**{MELVIN_EMOJI} the result is... {result}**"
-        await interaction.edit_original_response(view=view)
 
 
 async def setup(bot: commands.Bot) -> None:
