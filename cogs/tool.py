@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import MELVIN_EMOJI, INVITE_URL
+from globals import INVITE_URL, MELVIN_EMOJI, MELVIN_WARN_EMOJI
 from ui import ErrorUI, ResponseUI
 
 result = random.choice(["heads", "tails"])
@@ -93,7 +93,7 @@ class ToolCog(
         if isinstance(error, app_commands.MissingPermissions):
             view = ResponseUI()
             view.text_display.content = (
-                f"**This command is gated, read our documentation in our [support server.]({INVITE_URL})**"
+                f"**{MELVIN_WARN_EMOJI} This command is gated, read our documentation in our [support server.]({INVITE_URL})**"
             )
 
             if interaction.response.is_done():
