@@ -15,7 +15,7 @@ class WelcomeCog(
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db_path = "welcome.db"
+        self.db_path = "data/welcome.db"
 
     async def _ensure_db(self) -> None:
         async with aiosqlite.connect(self.db_path) as conn:

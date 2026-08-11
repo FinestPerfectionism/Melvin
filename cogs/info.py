@@ -76,31 +76,32 @@ class InfoCog(
 
     @app_commands.command(name="latency", description="bot latency")
     async def latency(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
         latency = round(self.bot.latency * 1000)
         view = ResponseUI()
         view.text_display.content = f"**bot's latency is {latency}ms**"
-        await interaction.response.send_message(view=view)
+        await interaction.followup.send(view=view)
 
     @app_commands.command(name="avatar", description="view user avatar")
     async def avatar(self, interaction: discord.Interaction, user: discord.User | None = None) -> None:
+        await interaction.response.defer()
         target = user or interaction.user
         view = AvatarView(target)
-        await interaction.response.send_message(view=view)
+        await interaction.followup.send(view=view)
 
     @app_commands.command(name="banner", description="view user banner")
     async def banner(self, interaction: discord.Interaction, user: discord.User | None = None) -> None:
+        await interaction.response.defer()
         target = user or interaction.user
         fetched_user = await self.bot.fetch_user(target.id)
-
         if fetched_user.banner is None:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 f"{target.display_name}'s profile must not have a banner :/",
                 ephemeral=True,
             )
             return
-
         view = BannerView(target, fetched_user)
-        await interaction.response.send_message(view=view)
+        await interaction.followup.send(view=view)
 
 
 async def setup(bot: commands.Bot) -> None:

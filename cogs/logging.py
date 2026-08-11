@@ -23,7 +23,7 @@ class LoggingCog(
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db_path = "logging.db"
+        self.db_path = "data/logging.db"
 
     def clean_and_truncate(self, text: str, length: int = 500) -> str:
         return discord.utils.escape_markdown(

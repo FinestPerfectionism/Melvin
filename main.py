@@ -22,8 +22,9 @@ bot = commands.Bot(
 
 @bot.tree.command(name="help", description="take a peek at melvins commands")
 async def help_command(interaction: discord.Interaction) -> None:
+    await interaction.response.defer()
     view = HelpView(bot)
-    await interaction.response.send_message(view=view)
+    await interaction.followup.send(view=view)
 
 
 @bot.event

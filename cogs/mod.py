@@ -64,15 +64,17 @@ class ModCog(
         await self._ensure_db()
 
     #newer cogwide EH
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
+    async def cog_app_command_error(self, interaction: discord.Interaction,
+                                    error: app_commands.AppCommandError) -> None:
         if isinstance(error, app_commands.MissingPermissions):
-            message = f"**you lack permission(s) required to run this command.**"
+            message = "**you lack permission(s) required to run this command.**"
         elif isinstance(error, app_commands.BotMissingPermissions):
-            message = f"**i lack permission(s) required to run this command.**"
+            message = "**i lack permission(s) required to run this command.**"
         else:
-            message = f"**an unexpected error occurred.**"
+            message = "**an unexpected error occurred.**"
 
         view = ErrorUI(message)
+
         if interaction.response.is_done():
             await interaction.followup.send(view=view, ephemeral=True)
         else:
@@ -83,15 +85,16 @@ class ModCog(
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def warn(self, interaction: discord.Interaction, member: discord.Member, reason: str) -> None:
+        await interaction.response.defer()
         #guard clause
         if member.bot:
-            await interaction.response.send_message(view = ErrorUI("**you tried to warn an app.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to warn an app.**"))
             return
         if member.id == interaction.user.id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to warn yourself.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to warn yourself.**"))
             return
         if member.id == interaction.guild.owner_id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to warn the guild owner.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to warn the guild owner.**"))
             return
 
         #warn db call
@@ -130,28 +133,29 @@ class ModCog(
         if hasattr(view.text_display, "content"):
             view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} warning\n **{member.mention}, you have been warned, case {case_id}**")
             view.container.accent_color=discord.Color.from_str(SECONDARY)
-        await interaction.response.send_message(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
     #kick cmd
     @app_commands.command(name="kick", description="kick a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(kick_members=True)
     async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str) -> None:
+        await interaction.response.defer()
         #guard clause
         if member.bot:
-            await interaction.response.send_message(view = ErrorUI("**you tried to kick an app.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to kick an app.**"))
             return
         if member.id == interaction.user.id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to kick yourself.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to kick yourself.**"))
             return
         if member.id == interaction.guild.owner_id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to kick the guild owner.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to kick the guild owner.**"))
             return
         if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to kick someone equal to / above you.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to kick someone equal to / above you.**"))
             return
         if member.top_role >= interaction.guild.me.top_role:
-            await interaction.response.send_message(view = ErrorUI("**i tried to kick someone equal to / above me.**"))
+            await interaction.followup.send(view = ErrorUI("**i tried to kick someone equal to / above me.**"))
             return
 
         #kick db call
@@ -183,28 +187,29 @@ class ModCog(
         if hasattr(view.text_display, "content"):
             view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} kicked\n **{member.mention} has been kicked, case {case_id}**")
             view.container.accent_color=discord.Color.from_str(SECONDARY)
-        await interaction.response.send_message(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
     #ban cmd
     @app_commands.command(name="ban", description="ban a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(ban_members=True)
     async def ban(self, interaction: discord.Interaction, member: discord.Member, reason: str) -> None:
+        await interaction.response.defer()
         #guard clause
         if member.bot:
-            await interaction.response.send_message(view = ErrorUI("**you tried to ban an app.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to ban an app.**"))
             return
         if member.id == interaction.user.id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to ban yourself.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to ban yourself.**"))
             return
         if member.id == interaction.guild.owner_id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to ban the guild owner.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to ban the guild owner.**"))
             return
         if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to ban someone equal to / above you.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to ban someone equal to / above you.**"))
             return
         if member.top_role >= interaction.guild.me.top_role:
-            await interaction.response.send_message(view = ErrorUI("**i tried to ban someone equal to / above me.**"))
+            await interaction.followup.send(view = ErrorUI("**i tried to ban someone equal to / above me.**"))
             return
 
         #ban db call
@@ -236,36 +241,37 @@ class ModCog(
         if hasattr(view.text_display, "content"):
             view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} banned\n **{member.mention} has been banned, case {case_id}**")
             view.container.accent_color=discord.Color.from_str(SECONDARY)
-        await interaction.response.send_message(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
     #mute cmd
     @app_commands.command(name="mute", description="mute a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def mute(self, interaction: discord.Interaction, member: discord.Member, reason: str, duration: str) -> None:
+        await interaction.response.defer()
 
         #guard clause
         seconds = self.parseduration(duration)
         if not seconds:
-            await interaction.response.send_message(view = ErrorUI("**not a valid duration format.**"))
+            await interaction.followup.send(view = ErrorUI("**not a valid duration format.**"))
             return
         if seconds > 28 * 86400:
-            await interaction.response.send_message(view = ErrorUI("**duration cannot surpass 28 days.**"))
+            await interaction.followup.send(view = ErrorUI("**duration cannot surpass 28 days.**"))
             return
         if member.bot:
-            await interaction.response.send_message(view = ErrorUI("**you tried to mute an app.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to mute an app.**"))
             return
         if member.id == interaction.user.id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to mute yourself.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to mute yourself.**"))
             return
         if member.id == interaction.guild.owner_id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to mute the guild owner.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to mute the guild owner.**"))
             return
         if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to mute someone equal to / above you.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to mute someone equal to / above you.**"))
             return
         if member.top_role >= interaction.guild.me.top_role:
-            await interaction.response.send_message(view = ErrorUI("**i tried to mute someone equal to / above me.**"))
+            await interaction.followup.send(view = ErrorUI("**i tried to mute someone equal to / above me.**"))
             return
 
         #mute db call
@@ -298,7 +304,7 @@ class ModCog(
         if hasattr(view.text_display, "content"):
             view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} muted\n **{member.mention} has been muted, case {case_id}**")
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
 
     #unmute cmd
@@ -306,13 +312,14 @@ class ModCog(
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def unmute(self, interaction: discord.Interaction, member: discord.Member, reason: str = "no reason given") -> None:
+        await interaction.response.defer()
 
         #guard clause
         if not member.is_timed_out():
-            await interaction.response.send_message(view = ErrorUI("**member is not timed out**"))
+            await interaction.followup.send(view = ErrorUI("**member is not timed out**"))
             return
         if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
-            await interaction.response.send_message(view = ErrorUI("**you tried to unmute someone equal to / above you.**"))
+            await interaction.followup.send(view = ErrorUI("**you tried to unmute someone equal to / above you.**"))
             return
 
         #unmute db call
@@ -344,7 +351,7 @@ class ModCog(
         if hasattr(view.text_display, "content"):
             view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unmuted\n **{member.mention} has been unmuted, case {case_id}**")
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ModCog(bot))
