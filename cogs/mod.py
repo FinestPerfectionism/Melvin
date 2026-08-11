@@ -238,12 +238,13 @@ class ModCog(
             view.container.accent_color=discord.Color.from_str(SECONDARY)
         await interaction.response.send_message(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
+    #mute cmd
     @app_commands.command(name="mute", description="mute a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def mute(self, interaction: discord.Interaction, member: discord.Member, reason: str, duration: str) -> None:
 
-        #guard clauses
+        #guard clause
         seconds = self.parseduration(duration)
         if not seconds:
             await interaction.response.send_message(view = ErrorUI("**not a valid duration format.**"))
@@ -299,6 +300,51 @@ class ModCog(
             view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
+
+    #unmute cmd
+    @app_commands.command(name="unmute", description="unmute a member")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(moderate_members=True)
+    async def unmute(self, interaction: discord.Interaction, member: discord.Member, reason: str = "no reason given") -> None:
+
+        #guard clause
+        if not member.is_timed_out():
+            await interaction.response.send_message(view = ErrorUI("**member is not timed out**"))
+            return
+        if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to unmute someone equal to / above you.**"))
+            return
+
+        #unmute db call
+        async with aiosqlite.connect(self.db_path) as conn:
+            cursor = await conn.execute(
+                """
+                INSERT INTO mod_cases (guild_id, user_id, mod_id, action_type, reason)
+                VALUES (?, ?, ?, 'unmute', ?)
+                """,
+                (interaction.guild_id, member.id, interaction.user.id, reason),
+            )
+            case_id = cursor.lastrowid
+            await conn.commit()
+
+        #try dm
+        await self.dmhandling(
+            user=member,
+            action_type="unmute",
+            case_id=case_id,
+            guild_name=interaction.guild.name,
+            reason=reason,
+        )
+
+        #the actual unmute part
+        await member.timeout(None, reason=f"unmuted by melvin using {interaction.user} with the reason {reason}")
+
+        #unmute msg
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unmuted\n **{member.mention} has been unmuted, case {case_id}**")
+            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ModCog(bot))
