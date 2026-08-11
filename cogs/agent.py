@@ -72,7 +72,7 @@ class AgentCog(
             prompt_section = discord.ui.Section(f"# **prompt:** {prompt}", accessory=model_button)
             response_display = discord.ui.TextDisplay(
                 content=f"{ai_response}\n\n"
-                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. took {elapsed:.1f}s**",
+                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. took {elapsed:.1f}s**\n-# **context may be screwed, no grounding search available**",
             )
             view.container.clear_items()
             view.container.add_item(prompt_section)
