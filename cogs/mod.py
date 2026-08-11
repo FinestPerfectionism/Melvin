@@ -2,7 +2,8 @@ import discord
 import aiosqlite
 from discord import app_commands
 from discord.ext import commands
-from globals import INVITE_URL, MELVIN_CROSS_EMOJI, MELVIN_CHECK_EMOJI, SECONDARY
+from globals import INVITE_URL, MELVIN_CROSS_EMOJI, MELVIN_CHECK_EMOJI, SECONDARY, MELVIN_WARN_EMOJI, PRIMARY, \
+    MELVIN_MISC_EMOJI
 from ui import ResponseUI, ErrorUI, message
 
 
@@ -31,6 +32,18 @@ class ModCog(
                 """
             )
             await conn.commit()
+
+    async def dmhandling(self, user: discord.User | discord.Member, action_type: str, case_id: int, guild_name: str,
+                         reason: str) -> None:
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = f"**{MELVIN_MISC_EMOJI} you received a {action_type} in {guild_name} for {reason}. case {case_id}**"
+            view.container.accent_color = discord.Color.from_str(PRIMARY)
+        try:
+            await user.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        except (discord.Forbidden, discord.HTTPException):
+            pass
+            #only failing silently here because idk where to put the EH for it
 
     async def cog_load(self) -> None:
         await self._ensure_db()
@@ -88,6 +101,15 @@ class ModCog(
 
             await conn.commit()
 
+        #try dm
+        await self.dmhandling(
+            user=member,
+            action_type="warning",
+            case_id=case_id,
+            guild_name=interaction.guild.name,
+            reason=reason,
+        )
+
         #warn msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
@@ -128,6 +150,15 @@ class ModCog(
             )
             case_id = cursor.lastrowid
             await conn.commit()
+
+        #try dm
+        await self.dmhandling(
+            user=member,
+            action_type="kick",
+            case_id=case_id,
+            guild_name=interaction.guild.name,
+            reason=reason,
+        )
 
         #the actual kick part
         await member.kick(reason=f"kicked by melvin using {interaction.user} with the reason {reason}")
@@ -172,6 +203,15 @@ class ModCog(
             )
             case_id = cursor.lastrowid
             await conn.commit()
+
+        #try dm
+        await self.dmhandling(
+            user=member,
+            action_type="ban",
+            case_id=case_id,
+            guild_name=interaction.guild.name,
+            reason=reason,
+        )
 
         #the actual ban part
         await member.ban(reason=f"banned by melvin using {interaction.user} with the reason {reason}", delete_message_days=30)
