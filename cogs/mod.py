@@ -62,6 +62,9 @@ class ModCog(
         if member.id == interaction.user.id:
             await interaction.response.send_message(view = ErrorUI("**you tried to warn yourself.**"))
             return
+        if member.id == interaction.guild.owner_id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to warn the guild owner.**"))
+            return
 
         #warn db call
         async with aiosqlite.connect(self.db_path) as conn:
@@ -82,7 +85,6 @@ class ModCog(
                     (interaction.guild_id, member.id),
             ) as count_cursor:
                 row = await count_cursor.fetchone()
-                total_warns = row[0] if row else 1
 
             await conn.commit()
 
@@ -93,6 +95,93 @@ class ModCog(
             view.container.accent_color=discord.Color.from_str(SECONDARY)
         await interaction.response.send_message(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
+    #kick cmd
+    @app_commands.command(name="kick", description="kick a member")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(kick_members=True)
+    async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str) -> None:
+        #guard clause
+        if member.bot:
+            await interaction.response.send_message(view = ErrorUI("**you tried to kick an app.**"))
+            return
+        if member.id == interaction.user.id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to kick yourself.**"))
+            return
+        if member.id == interaction.guild.owner_id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to kick the guild owner.**"))
+            return
+        if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to kick someone equal to / above you.**"))
+            return
+        if member.top_role >= interaction.guild.me.top_role:
+            await interaction.response.send_message(view = ErrorUI("**i tried to kick someone equal to / above me.**"))
+            return
+
+        #kick db call
+        async with aiosqlite.connect(self.db_path) as conn:
+            cursor = await conn.execute(
+                """
+                INSERT INTO mod_cases (guild_id, user_id, mod_id, action_type, reason)
+                VALUES (?, ?, ?, 'kick', ?)
+                """,
+                (interaction.guild_id, member.id, interaction.user.id, reason),
+            )
+            case_id = cursor.lastrowid
+            await conn.commit()
+
+        #the actual kick part
+        await member.kick(reason=f"kicked by melvin using {interaction.user} with the reason {reason}")
+
+        #kick msg
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} kicked\n **{member.mention} has been kicked, case {case_id}**")
+            view.container.accent_color=discord.Color.from_str(SECONDARY)
+        await interaction.response.send_message(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+
+    #ban cmd
+    @app_commands.command(name="ban", description="ban a member")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(ban_members=True)
+    async def ban(self, interaction: discord.Interaction, member: discord.Member, reason: str) -> None:
+        #guard clause
+        if member.bot:
+            await interaction.response.send_message(view = ErrorUI("**you tried to ban an app.**"))
+            return
+        if member.id == interaction.user.id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to ban yourself.**"))
+            return
+        if member.id == interaction.guild.owner_id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to ban the guild owner.**"))
+            return
+        if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
+            await interaction.response.send_message(view = ErrorUI("**you tried to ban someone equal to / above you.**"))
+            return
+        if member.top_role >= interaction.guild.me.top_role:
+            await interaction.response.send_message(view = ErrorUI("**i tried to ban someone equal to / above me.**"))
+            return
+
+        #ban db call
+        async with aiosqlite.connect(self.db_path) as conn:
+            cursor = await conn.execute(
+                """
+                INSERT INTO mod_cases (guild_id, user_id, mod_id, action_type, reason)
+                VALUES (?, ?, ?, 'ban', ?)
+                """,
+                (interaction.guild_id, member.id, interaction.user.id, reason),
+            )
+            case_id = cursor.lastrowid
+            await conn.commit()
+
+        #the actual ban part
+        await member.ban(reason=f"banned by melvin using {interaction.user} with the reason {reason}", delete_message_days=30)
+
+        #ban msg
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} banned\n **{member.mention} has been banned, case {case_id}**")
+            view.container.accent_color=discord.Color.from_str(SECONDARY)
+        await interaction.response.send_message(view = view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ModCog(bot))

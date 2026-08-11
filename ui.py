@@ -125,7 +125,7 @@ class ErrorUI(discord.ui.LayoutView):
         container = discord.ui.Container(
             text_display,
             SmallSeparator(),
-            accent_color=discord.Color.red(),
+            accent_color=discord.Color.from_str(tertiary),
         )
 
         self.container = container

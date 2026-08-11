@@ -7,7 +7,7 @@ from discord.ext import commands
 from google import genai
 from google.genai import types
 
-from globals import MELVIN_EMOJI, PRIMARY
+from globals import MELVIN_EMOJI, PRIMARY, MELVIN_MISC_EMOJI
 from ui import ErrorUI, ResponseUI, SmallSeparator
 
 primary = f"{PRIMARY}"
@@ -72,7 +72,7 @@ class AgentCog(
             prompt_section = discord.ui.Section(f"# **prompt:** {prompt}", accessory=model_button)
             response_display = discord.ui.TextDisplay(
                 content=f"{ai_response}\n\n"
-                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. took {elapsed:.1f}s**\n-# **context may be screwed, no grounding search available**",
+                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. {MELVIN_MISC_EMOJI} took {elapsed:.1f}s**\n-# **context may be screwed, no grounding search available**",
             )
             view.container.clear_items()
             view.container.add_item(prompt_section)
