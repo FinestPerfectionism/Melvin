@@ -3,6 +3,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs import logging
 from globals import INVITE_URL, MELVIN_CHECK_EMOJI
 from ui import ErrorUI, ResponseUI
 
@@ -62,8 +63,8 @@ class WelcomeCog(
         if not interaction.guild:
             return
 
-        action_ui = ResponseUI()
-        await interaction.response.send_message(view=action_ui, ephemeral=False)
+        view = ResponseUI()
+        await interaction.response.send_message(view=view, ephemeral=False)
 
         try:
             async with aiosqlite.connect(self.db_path) as conn:
@@ -74,13 +75,16 @@ class WelcomeCog(
                     """,
                     (str(interaction.guild.id), str(channel.id)),
                 )
-                await conn.commit()
         except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
+            logging.exception("failed to set welcome channel", interaction.guild.id)
+            await interaction.edit_original_response(
+                view=ErrorUI(
+                    f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**")
+            )
             return
 
-        action_ui.text_display.content = f"{MELVIN_CHECK_EMOJI} **welcome channel set to {channel.mention}**"
-        await interaction.edit_original_response(view=action_ui)
+        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} welcome set \n**welcome channel set to {channel.mention}**"
+        await interaction.edit_original_response(view=view)
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
         try:

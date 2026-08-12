@@ -13,7 +13,7 @@ from globals import (
 primary = f"{PRIMARY}"
 secondary = f"{SECONDARY}"  # green
 tertiary = f"{TERTIARY}"  # red
-message = "**raw ErrorUI class, debug purposes**"
+message = f"**something went wrong with that. please [join the support server]({INVITE_URL}) to report this issue.**"
 
 
 # HelpView Funcs to grasp command group details

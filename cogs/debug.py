@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from globals import INVITE_URL
 from ui import (
     AdUI,
     ErrorUI,
@@ -22,39 +23,18 @@ class DebugCog(
 
     @app_commands.command(name="think", description="send raw ResponseUI class")
     async def think(self, interaction: discord.Interaction) -> None:
-        await interaction.response.defer
         view = ResponseUI()
-        await interaction.followup.send(view=view)
+        await interaction.response.send_message(view=view)
 
     @app_commands.command(name="error", description="send raw ErrorUI class")
     async def error(self, interaction: discord.Interaction) -> None:
-        await interaction.response.defer
-        view = ErrorUI(message="**raw ErrorUI class debug purposes**")
-        await interaction.followup.send(view=view)
-
-    @app_commands.command(name="blue", description="send raw MiscLoggingClass class")
-    async def blue(self, interaction: discord.Interaction) -> None:
-        await interaction.response.defer
-        view = MiscLoggingClass()
-        await interaction.followup.send(view=view)
-
-    @app_commands.command(name="red", description="send raw NegativeLoggingClass class")
-    async def red(self, interaction: discord.Interaction) -> None:
-        await interaction.response.defer
-        view = NegativeLoggingClass()
-        await interaction.followup.send(view=view)
-
-    @app_commands.command(name="green", description="send raw PositiveLoggingClass class")
-    async def green(self, interaction: discord.Interaction) -> None:
-        await interaction.response.defer
-        view = PositiveLoggingClass()
-        await interaction.followup.send(view=view)
+        view = ErrorUI(message=f"**something went wrong with that. please [join the support server]({INVITE_URL}) to report this issue.**")
+        await interaction.response.send_message(view=view)
 
     @app_commands.command(name="ad", description="send advertisement")
     async def ad(self, interaction: discord.Interaction) -> None:
-        await interaction.response.defer
         view = AdUI()
-        await interaction.followup.send(view=view)
+        await interaction.response.send_message(view=view)
 
 
 async def setup(bot: commands.Bot) -> None:

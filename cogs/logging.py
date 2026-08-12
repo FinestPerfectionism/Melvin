@@ -2,8 +2,9 @@ import aiosqlite
 import discord
 from discord import app_commands
 from discord.ext import commands
+import logging
 
-from globals import INVITE_URL, SECONDARY, TERTIARY
+from globals import INVITE_URL, SECONDARY, TERTIARY, PRIMARY, MELVIN_MISC_EMOJI
 from ui import (
     ErrorUI,
     LargeSeparator,
@@ -11,7 +12,7 @@ from ui import (
     NegativeLoggingClass,
     PositiveLoggingClass,
     primary,
-    tertiary,
+    tertiary, ResponseUI,
 )
 
 
@@ -72,8 +73,8 @@ class LoggingCog(
         if not interaction.guild:
             return
 
-        action_ui = MiscLoggingClass()
-        await interaction.response.send_message(view=action_ui, ephemeral=False)
+        view = ResponseUI()
+        await interaction.response.send_message(view=view, ephemeral=False)
 
         try:
             async with aiosqlite.connect(self.db_path) as conn:
@@ -86,13 +87,14 @@ class LoggingCog(
                 )
                 await conn.commit()
         except Exception as e:
-            error_ui = NegativeLoggingClass()
-            error_ui.text_display.content = f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"
-            await interaction.edit_original_response(view=error_ui)
+            logging.exception("failed to set log channel for guild %s", interaction.guild.id)
+            view = ErrorUI(message="**something went wrong saving that**")
+            await interaction.edit_original_response(view=view)
             return
 
-        action_ui.text_display.content = f"logging channel set to {channel.mention}"
-        await interaction.edit_original_response(view=action_ui)
+        view.text_display.content = f"# {MELVIN_MISC_EMOJI} logging \n**logging channel set to {channel.mention}**"
+        view.container.accent_color = discord.Color.from_str(PRIMARY)
+        await interaction.edit_original_response(view=view)
 
     @channel.error
     async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
