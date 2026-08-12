@@ -1,15 +1,12 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from globals import INVITE_URL, MELVIN_EMOJI, MELVIN_BANNER
-from ui import (
-    ErrorUI,
-    ResponseUI,
-    SmallSeparator
-)
+
+from globals import INVITE_URL, MELVIN_BANNER, MELVIN_EMOJI
+from ui import ErrorUI, ResponseUI, SmallSeparator
 
 
-#AdUI
+# AdUI
 class AdUI(discord.ui.LayoutView):
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__()

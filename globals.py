@@ -8,5 +8,5 @@ MELVIN_WARN_EMOJI = "<:AlertMelvin:1536787474641190952>"
 MELVIN_MISC_EMOJI = "<:AlertMelvinAlt:1536787713942888609>"
 MELVIN_CHECK_EMOJI = "<:PositiveMelvin:1536787382534283350>"
 ERROR_CHANNEL = 1536683441616064532
-INVITE_URL = 'https://discord.gg/PfyKM7dyx4'
-MELVIN_BANNER = 'https://github.com/user-attachments/assets/a29dc670-3648-4f12-909a-669df49a4427'
+INVITE_URL = "https://discord.gg/PfyKM7dyx4"
+MELVIN_BANNER = "https://github.com/user-attachments/assets/a29dc670-3648-4f12-909a-669df49a4427"

@@ -1,11 +1,13 @@
 import os
 import time
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 from google import genai
 from google.genai import types
-from globals import MELVIN_EMOJI, PRIMARY, MELVIN_MISC_EMOJI
+
+from globals import MELVIN_EMOJI, MELVIN_MISC_EMOJI, PRIMARY
 from ui import ErrorUI, ResponseUI, SmallSeparator
 
 primary = f"{PRIMARY}"

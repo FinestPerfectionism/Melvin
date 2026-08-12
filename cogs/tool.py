@@ -1,8 +1,10 @@
 import base64
 import binascii
+
 import discord
 from discord import app_commands
 from discord.ext import commands
+
 from globals import INVITE_URL, MELVIN_WARN_EMOJI
 from ui import ErrorUI, ResponseUI
 
@@ -52,7 +54,7 @@ class ToolCog(
 
     @app_commands.command(name="speak", description="speak through melvin")
     @app_commands.checks.has_permissions(manage_messages=True)
-    async def speak(self, interaction: discord.Interaction, text: str, attachment: discord.Attachment | None = None,) -> None:
+    async def speak(self, interaction: discord.Interaction, text: str, attachment: discord.Attachment | None = None) -> None:
         await interaction.response.defer(ephemeral=False)
         view = ResponseUI()
         view.text_display.content = text
@@ -72,7 +74,7 @@ class ToolCog(
 
     @speak.error
     async def speak_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError,) -> None:
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             view = ResponseUI()
             view.text_display.content = (f"**{MELVIN_WARN_EMOJI} This command is gated, read our documentation in our [support server.]({INVITE_URL})**")

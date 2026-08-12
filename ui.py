@@ -7,7 +7,7 @@ from globals import (
     MELVIN_EMOJI,
     PRIMARY,
     SECONDARY,
-    TERTIARY, MELVIN_BANNER,
+    TERTIARY,
 )
 
 primary = f"{PRIMARY}"
@@ -24,7 +24,7 @@ def get_cog_commands(cog: commands.Cog) -> list:
     return cog.get_app_commands()
 
 
-def flatten_commands(cmd) -> list:
+def flatten_commands(cmd: object) -> list:
     if isinstance(cmd, discord.app_commands.Group):
         result = []
         for sub in cmd.commands:
@@ -38,9 +38,11 @@ def help_page(cog: commands.Cog) -> str:
     if cog.__cog_group_description__ and cog.__cog_group_description__ != "…":
         lines.append(f"-# **{cog.__cog_group_description__}**")
 
-    for top_level_cmd in get_cog_commands(cog):
-        for cmd in flatten_commands(top_level_cmd):
-            lines.append(f"**\n/{cmd.qualified_name}**\n-# **{cmd.description}**")
+    lines.extend(
+        f"**\n/{cmd.qualified_name}**\n-# **{cmd.description}**"
+        for top_cmd in get_cog_commands(cog)
+        for cmd in flatten_commands(top_cmd)
+    )
 
     return "\n".join(lines)
 
@@ -144,6 +146,7 @@ class ResponseUI(discord.ui.LayoutView):
         )
         self.container = container
         self.add_item(container)
+
 
 # ActionUI
 class ActionUI(discord.ui.LayoutView):

@@ -1,55 +1,61 @@
 import asyncio
+import logging
 import os
+
+import aiodns
 import discord
-from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
+
 from ui import HelpView
-import logging
 
 logging.basicConfig(level=logging.INFO)
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-bot = commands.Bot(
-    command_prefix="-",
-    intents=intents,
-    allowed_contexts=discord.app_commands.AppCommandContext(
-        guild=True, dm_channel=True, private_channel=True,
-    ),
-    allowed_installs=discord.app_commands.AppInstallationType(
-        guild=True, user=True,
-    ),
-)
+
+log = logging.getLogger(__name__)
 
 
-async def custom_setup_hook():
-    loop = asyncio.get_running_loop()
-    loop.set_debug(True)
+class Melvin(commands.Bot):
+    def __init__(self) -> None:
+        super().__init__(
+            command_prefix="-",
+            intents=intents,
+            allowed_contexts=discord.app_commands.AppCommandContext(
+                guild=True, dm_channel=True, private_channel=True,
+            ),
+            allowed_installs=discord.app_commands.AppInstallationType(
+                guild=True, user=True,
+            ),
+        )
 
-    try:
-        import aiodns
-        resolver = aiodns.DNSResolver(nameservers=['1.1.1.1', '8.8.8.8'])
-        bot.http._HTTPClient__session._connector._resolver._resolver = resolver
-        logging.info("successful resolve")
-    except Exception as e:
-        logging.info(f"could not resolve {e}")
-    logging.info("logging started")
+    async def setup_hook(self) -> None:
+        loop = asyncio.get_running_loop()
+        loop.set_debug(True)
+        try:
 
-bot.setup_hook = custom_setup_hook
+            resolver = aiodns.DNSResolver(nameservers=["1.1.1.1", "8.8.8.8"])
+            bot.http._HTTPClient__session._connector._resolver._resolver = resolver
+            log.info("successful resolve")
+        except Exception as e:
+            log.info(f"could not resolve {e}")
+        log.info("logging started")
+
+    async def on_ready(self) -> None:
+        print(f"{bot.user}")
+        await bot.tree.sync()
+
+
+bot = Melvin()
+
 
 @bot.tree.command(name="help", description="take a peek at melvins commands")
 async def help_command(interaction: discord.Interaction) -> None:
     await interaction.response.defer()
     view = HelpView(bot)
     await interaction.followup.send(view=view)
-
-
-@bot.event
-async def on_ready() -> None:
-    print(f"{bot.user}")
-    await bot.tree.sync()
 
 
 async def main() -> None:
