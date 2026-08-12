@@ -1,12 +1,18 @@
 import os
 import time
+import asyncio
+import warnings
+from datetime import datetime
 import discord
 from discord import app_commands
 from discord.ext import commands
+from ddgs import DDGS
 from google import genai
 from google.genai import types
 from globals import MELVIN_EMOJI, PRIMARY, MELVIN_MISC_EMOJI
 from ui import ErrorUI, ResponseUI, SmallSeparator
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 primary = f"{PRIMARY}"
 
@@ -18,12 +24,28 @@ class AgentCog(
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        # Initialize Google GenAI client using GAPI environment variable
         self.api_key = os.getenv("GAPI")
         self.client = genai.Client(api_key=self.api_key)
 
+    def _get_web_context(self, query: str, max_results: int = 5) -> str:
+        try:
+            ddgs = DDGS()
+            results = list(ddgs.text(query, max_results=max_results))
+            if not results:
+                return "no search context available."
+
+            formatted_results = []
+            for i, r in enumerate(results, 1):
+                formatted_results.append(
+                    f"Source {i}:\nTitle: {r.get('title')}\nURL: {r.get('href')}\nSnippet: {r.get('body')}\n"
+                )
+            return "\n---\n".join(formatted_results)
+        except Exception:
+            return "couldnt to fetch search context."
+
     # cogwide error logging
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
+    async def cog_app_command_error(self, interaction: discord.Interaction,
+                                    error: app_commands.AppCommandError) -> None:
         if isinstance(error, app_commands.CommandOnCooldown):
             msg = "**you're being rate limited.**"
         else:
@@ -35,15 +57,30 @@ class AgentCog(
             await interaction.response.send_message(view=error_ui, ephemeral=True)
 
     async def query_gemini(self, prompt: str) -> str:
+        current_date_str = datetime.now().strftime("%B %d, %Y")
+        search_context = await asyncio.to_thread(self._get_web_context, prompt)
+
         system_instruction = (
+            f"Today's date is {current_date_str}. "
             "Try to keep responses tidy, brief, and minimal to stay within Discord's 4000 character limit. "
             "Contain responses in short, yet informative paragraphs, rather than graphs or tables. "
-            "Refrain from using emojis unless told to."
+            "Refrain from using emojis unless told to. "
+            "Use the provided search context to ground your answer relative to today's date. "
         )
+
+        #helpful
+        full_prompt = (
+            f"--- CURRENT DATE: {current_date_str} ---\n"
+            f"--- SEARCH CONTEXT ---\n"
+            f"{search_context}\n"
+            f"--- END CONTEXT ---\n\n"
+            f"User Question: {prompt}"
+        )
+
         config = types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.7)
         try:
             response = await self.client.aio.models.generate_content(
-                model="gemini-3.1-flash-lite", contents=prompt, config=config,
+                model="gemini-3.1-flash-lite", contents=full_prompt, config=config,
             )
             if response.text:
                 return response.text
@@ -59,11 +96,12 @@ class AgentCog(
             start = time.time()
             ai_response = await self.query_gemini(prompt)
             elapsed = time.time() - start
-            model_button = discord.ui.Button(label="model", style=discord.ButtonStyle.link, url="https://aistudio.google.com/")
+            model_button = discord.ui.Button(label="model", style=discord.ButtonStyle.link,
+                                             url="https://aistudio.google.com/")
             prompt_section = discord.ui.Section(f"# **prompt:** {prompt}", accessory=model_button)
             response_display = discord.ui.TextDisplay(
                 content=f"{ai_response}\n\n"
-                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. {MELVIN_MISC_EMOJI} took {elapsed:.1f}s**\n-# **context may be screwed, no grounding search available**",
+                        f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. {MELVIN_MISC_EMOJI} took {elapsed:.1f}s**\n-# **grounded using ddgs web search context**",
             )
             view = ResponseUI()
             view.container.clear_items()
