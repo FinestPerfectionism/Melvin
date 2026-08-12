@@ -18,7 +18,17 @@ from ui import (
 )
 
 log = logging.getLogger(__name__)
+HOLOGRAPHIC_VALUES = (11127295, 16759788, 16761760)
 
+#gradient role func
+def _describe_style(role: discord.Role) -> str:
+    if (role.colour.value,
+        role.secondary_colour.value if role.secondary_colour else None,
+        role.tertiary_colour.value if role.tertiary_colour else None) == HOLOGRAPHIC_VALUES:
+        return "Holographic"
+    if role.secondary_colour is not None:
+        return "Gradient"
+    return "Solid"
 
 @app_commands.guild_only
 class LoggingCog(
@@ -29,6 +39,8 @@ class LoggingCog(
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.db_path = "data/logging.db"
+
+
 
     def clean_and_truncate(self, text: str, length: int = 500) -> str:
         return discord.utils.escape_markdown((text)[:length - 3] + "..." if len(text) > length else text)
@@ -552,8 +564,25 @@ class LoggingCog(
         changes = []
         if before.name != after.name:
             changes.append(f"**Name:** **{before.name}** | **{after.name}**")
-        if before.color != after.color:
-            changes.append(f"**Color:** **{before.color}** | **{after.color}**")
+
+        colour_changed = (
+            before.colour != after.colour
+            or before.secondary_colour != after.secondary_colour
+            or before.tertiary_colour != after.tertiary_colour
+        )
+        if colour_changed:
+            def fmt(role: discord.Role) -> str:
+                parts = [str(role.colour)]
+                if role.secondary_colour:
+                    parts.append(str(role.secondary_colour))
+                if role.tertiary_colour:
+                    parts.append(str(role.tertiary_colour))
+                return " / ".join(parts)
+
+            b_style = _describe_style(before)
+            a_style = _describe_style(after)
+            changes.append(f"**Colours:** **{fmt(before)}** ({b_style}) | **{fmt(after)}** ({a_style})")
+
         if before.permissions != after.permissions:
             changes.append("**Permissions updated**")
 
@@ -562,21 +591,15 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(f"# Role Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"),
-            discord.ui.TextDisplay(f"**Role:** {after.mention} | {after.id}"),
-            accent_color=discord.Color.from_str(primary),
+            discord.ui.TextDisplay(f"**Role:** {after.mention} | `{after.id}`"),
+            accent_color=discord.Color.from_str(PRIMARY)
         )
-
         changes_text = "\n".join(changes)
         container.add_item(LargeSeparator())
-        container.add_item(
-            discord.ui.TextDisplay(
-                "### Changes\n"
-                f"{changes_text}",
-            ),
-        )
+        container.add_item(discord.ui.TextDisplay(f"### Changes\n{changes_text}"))
+
         view = discord.ui.LayoutView()
         view.add_item(container)
-
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.HTTPException):
