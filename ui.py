@@ -49,10 +49,8 @@ def help_page(cog: commands.Cog) -> str:
 
 class HelpView(discord.ui.LayoutView):
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
+        super().__init__(timeout=None)
         self.bot = bot
-        self.cogs = [c for c in bot.cogs.values() if get_cog_commands(c)]
-        print(f"help view found {len(self.cogs)} cogs: {[c.__cog_group_name__ for c in self.cogs]}")
         self.page = 0
 
         banner_gallery = discord.ui.MediaGallery(
@@ -60,13 +58,22 @@ class HelpView(discord.ui.LayoutView):
         )
         banner_container = discord.ui.Container(banner_gallery)
 
-        self.text_display = discord.ui.TextDisplay(content=help_page(self.cogs[0]))
-        separator = discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small)
-
-        self.prev_button = discord.ui.Button(label="prev", style=discord.ButtonStyle.secondary)
-        self.next_button = discord.ui.Button(label="next", style=discord.ButtonStyle.secondary)
+        # 2. Add fixed custom_id parameters to both buttons
+        self.prev_button = discord.ui.Button(
+            label="prev", style=discord.ButtonStyle.secondary, custom_id="help_view:prev"
+        )
+        self.next_button = discord.ui.Button(
+            label="next", style=discord.ButtonStyle.secondary, custom_id="help_view:next"
+        )
         self.prev_button.callback = self.on_prev
         self.next_button.callback = self.on_next
+
+        # Initial text display setup
+        cogs = self.get_cogs()
+        initial_content = help_page(cogs[0]) if cogs else "No commands available."
+        self.text_display = discord.ui.TextDisplay(content=initial_content)
+        separator = discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small)
+
         self._update_button_states()
 
         nav_row = discord.ui.ActionRow(self.prev_button, self.next_button)
@@ -75,20 +82,39 @@ class HelpView(discord.ui.LayoutView):
         self.add_item(banner_container)
         self.add_item(content_container)
 
+    def get_cogs(self) -> list:
+        return [c for c in self.bot.cogs.values() if get_cog_commands(c)]
+
     def _update_button_states(self) -> None:
-        self.prev_button.disabled = self.page == 0
-        self.next_button.disabled = self.page == len(self.cogs) - 1
+        cogs = self.get_cogs()
+        total_pages = len(cogs)
+        if total_pages <= 1:
+            self.prev_button.disabled = True
+            self.next_button.disabled = True
+        else:
+            self.prev_button.disabled = self.page == 0
+            self.next_button.disabled = self.page >= total_pages - 1
 
     async def on_prev(self, interaction: discord.Interaction) -> None:
-        self.page -= 1
+        cogs = self.get_cogs()
+        if not cogs:
+            await interaction.response.defer()
+            return
+
+        self.page = max(0, self.page - 1)
         self._update_button_states()
-        self.text_display.content = help_page(self.cogs[self.page])
+        self.text_display.content = help_page(cogs[self.page])
         await interaction.response.edit_message(view=self)
 
     async def on_next(self, interaction: discord.Interaction) -> None:
-        self.page += 1
+        cogs = self.get_cogs()
+        if not cogs:
+            await interaction.response.defer()
+            return
+
+        self.page = min(len(cogs) - 1, self.page + 1)
         self._update_button_states()
-        self.text_display.content = help_page(self.cogs[self.page])
+        self.text_display.content = help_page(cogs[self.page])
         await interaction.response.edit_message(view=self)
 
 
