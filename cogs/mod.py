@@ -371,36 +371,38 @@ class ModCog(
     @app_commands.command(name="lock", description="lock a channel")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_channels=True)
-    async def lock(self, interaction: discord.Interaction, reason: str = "no reason given") -> None:
+    async def lock(self, interaction: discord.Interaction, channel: discord.TextChannel | discord.VoiceChannel | discord.Thread | None = None, reason: str = "no reason given") -> None:
         await interaction.response.defer()
-        channel = interaction.channel
+        target_channel = channel or interaction.channel
 
         # guard clause
-        if not isinstance(channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)):
-            await interaction.followup.send(view=ErrorUI("**this can only be used in a text channel, voice channel, or thread.**"))
+        if not isinstance(target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)):
+            await interaction.followup.send(
+                view=ErrorUI("**this can only be used in a text channel, voice channel, or thread.**"))
             return
 
-        if isinstance(channel, discord.Thread):
-            if channel.locked:
+        if isinstance(target_channel, discord.Thread):
+            if target_channel.locked:
                 await interaction.followup.send(view=ErrorUI("**this thread is already locked.**"))
                 return
 
             # the actual thread locking
-            await channel.edit(locked=True, reason=f"locked using melvin by {interaction.user} for the reason {reason}")
+            await target_channel.edit(locked=True, reason=f"locked using melvin by {interaction.user} for the reason {reason}")
         else:
-            current_overwrite = channel.overwrites_for(interaction.guild.default_role)
+            current_overwrite = target_channel.overwrites_for(interaction.guild.default_role)
             if current_overwrite.send_messages is False:
                 await interaction.followup.send(view=ErrorUI("**this channel is already locked.**"))
                 return
 
             # the actual channel locking
             current_overwrite.send_messages = False
-            await channel.set_permissions(interaction.guild.default_role, overwrite=current_overwrite, reason=f"locked using melvin by {interaction.user} for the reason {reason}")
+            await target_channel.set_permissions(interaction.guild.default_role, overwrite=current_overwrite, reason=f"locked using melvin by {interaction.user} for the reason {reason}")
 
         # lock msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} locked\n **{channel.mention} has been locked**")
+            view.text_display.content = (
+                f"# {MELVIN_CHECK_EMOJI} locked\n **{target_channel.mention} has been locked**")
             view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
@@ -408,38 +410,36 @@ class ModCog(
     @app_commands.command(name="unlock", description="unlock a channel")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_channels=True)
-    async def unlock(self, interaction: discord.Interaction, reason: str = "no reason given") -> None:
+    async def unlock(self, interaction: discord.Interaction, channel: discord.TextChannel | discord.VoiceChannel | discord.Thread | None = None, reason: str = "no reason given") -> None:
         await interaction.response.defer()
-        channel = interaction.channel
+        target_channel = channel or interaction.channel
 
         # guard clause
-        if not isinstance(channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)):
-            await interaction.followup.send(view=ErrorUI(
-                "**this can only be used in either a text channel, voice channel, or thread.**"))
+        if not isinstance(target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)):
+            await interaction.followup.send(view=ErrorUI("**this can only be used in either a text channel, voice channel, or thread.**"))
             return
 
-        if isinstance(channel, discord.Thread):
-            if not channel.locked:
-                await interaction.followup.send(
-                    view=ErrorUI("**this thread is not locked.**"))
+        if isinstance(target_channel, discord.Thread):
+            if not target_channel.locked:
+                await interaction.followup.send(view=ErrorUI("**this thread is not locked.**"))
                 return
 
             # the actual thread unlocking
-            await channel.edit(locked=False, reason=f"unlocked using melvin by {interaction.user} with the reason {reason}")
+            await target_channel.edit(locked=False, reason=f"unlocked using melvin by {interaction.user} with the reason {reason}")
         else:
-            current_overwrite = channel.overwrites_for(interaction.guild.default_role)
+            current_overwrite = target_channel.overwrites_for(interaction.guild.default_role)
             if current_overwrite.send_messages is None or current_overwrite.send_messages is True:
                 await interaction.followup.send(view=ErrorUI("**this channel is not locked.**"))
                 return
 
             # the actual channel unlocking (sets overwrite back to neutral/inherit)
             current_overwrite.send_messages = None
-            await channel.set_permissions(interaction.guild.default_role, overwrite=current_overwrite, reason=f"unlocked using melvin by {interaction.user} with the reason {reason}")
+            await target_channel.set_permissions(interaction.guild.default_role, overwrite=current_overwrite, reason=f"unlocked using melvin by {interaction.user} with the reason {reason}")
 
         # unlock msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unlocked\n **unlocked {channel.mention}**")
+            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unlocked\n **unlocked {target_channel.mention}**")
             view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
