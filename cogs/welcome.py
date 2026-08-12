@@ -75,6 +75,7 @@ class WelcomeCog(
                     """,
                     (str(interaction.guild.id), str(channel.id)),
                 )
+                await conn.commit()
         except Exception as e:
             logging.exception("failed to set welcome channel", interaction.guild.id)
             await interaction.edit_original_response(
