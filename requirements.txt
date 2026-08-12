@@ -4,3 +4,4 @@ dotenv
 aiosqlite
 aiodns
 faust-cchardet
+ddgs
