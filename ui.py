@@ -7,7 +7,7 @@ from globals import (
     MELVIN_EMOJI,
     PRIMARY,
     SECONDARY,
-    TERTIARY,
+    TERTIARY, MELVIN_BANNER,
 )
 
 primary = f"{PRIMARY}"
@@ -144,48 +144,6 @@ class ResponseUI(discord.ui.LayoutView):
         )
         self.container = container
         self.add_item(container)
-
-
-# AdUI
-class AdUI(discord.ui.LayoutView):
-    def __init__(self) -> None:
-        super().__init__()
-        self.text_display = discord.ui.TextDisplay(
-            content=f"# {MELVIN_EMOJI} Melvin\nYAGPDB written in python under the discord.py framework, by someone still learning python. features user and guild install commands, welcoming configuration, cv2 messages over legacy embeds, and much more. Melvin is open source, and open to contributions, so if you want to contribute, feel free. **[github](https://github.com/saltgranule/Melvin)**",
-        )
-
-        media_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem(media="https://github.com/user-attachments/assets/a29dc670-3648-4f12-909a-669df49a4427"),
-        )
-        banner_container = discord.ui.Container(media_gallery)
-
-        adbutton = discord.ui.Button(
-            label="support server",
-            style=discord.ButtonStyle.link,
-            url=f"{INVITE_URL}",
-        )
-        addbutton = discord.ui.Button(
-            label="add melvin",
-            style=discord.ButtonStyle.link,
-            url="https://discord.com/oauth2/authorize?client_id=1468362201197973756",
-        )
-        gitbutton = discord.ui.Button(
-            label="github",
-            style=discord.ButtonStyle.link,
-            url="https://github.com/saltgranule/Melvin",
-        )
-        action_row = discord.ui.ActionRow(adbutton, addbutton, gitbutton)
-
-        content_container = discord.ui.Container(
-            self.text_display,
-            SmallSeparator(),
-            action_row,
-        )
-        self.container = content_container
-
-        self.add_item(banner_container)
-        self.add_item(content_container)
-
 
 # ActionUI
 class ActionUI(discord.ui.LayoutView):

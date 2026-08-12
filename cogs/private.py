@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from globals import INVITE_URL, LOG_CHANNEL, MELVIN_CHECK_EMOJI, MELVIN_WARN_EMOJI, PRIMARY, SECONDARY
+from globals import INVITE_URL, LOG_CHANNEL, MELVIN_CHECK_EMOJI, MELVIN_WARN_EMOJI, PRIMARY, SECONDARY, MELVIN_BANNER
 from ui import ResponseUI, ErrorUI
 
 
@@ -24,7 +24,7 @@ class PrivateCog(
             f"Now in **{len(self.bot.guilds)}** guild(s)"
         )
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media="https://files.catbox.moe/7e6nw8.png")))
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")))
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.HTTPException):
@@ -38,7 +38,7 @@ class PrivateCog(
         view = ResponseUI()
         view.text_display.content = (f"**Melvin was just removed from {guild.name}**\n. Now in **{len(self.bot.guilds)}** guild(s)")
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media="https://files.catbox.moe/7e6nw8.png")))
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")))
         try:
             await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.HTTPException):
