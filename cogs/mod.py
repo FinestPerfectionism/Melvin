@@ -1,5 +1,5 @@
 import datetime
-
+import asyncio
 import aiosqlite
 import discord
 from discord import app_commands
@@ -99,7 +99,7 @@ class ModCog(
     @app_commands.command(name="warn", description="warn someone")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
-    async def warn(self, interaction: discord.Interaction, member: discord.Member, reason: str) -> None:
+    async def warn(self, interaction: discord.Interaction, member: discord.Member, reason: str = "No reason provided") -> None:
         await interaction.response.defer()
         # guard clause
         if member.bot:
@@ -154,7 +154,7 @@ class ModCog(
     @app_commands.command(name="kick", description="kick a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(kick_members=True)
-    async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str) -> None:
+    async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str = "No reason provided") -> None:
         await interaction.response.defer()
         # guard clause
         if member.bot:
@@ -208,7 +208,7 @@ class ModCog(
     @app_commands.command(name="ban", description="ban a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(ban_members=True)
-    async def ban(self, interaction: discord.Interaction, member: discord.Member, reason: str) -> None:
+    async def ban(self, interaction: discord.Interaction, member: discord.Member, reason: str = "No reason provided") -> None:
         await interaction.response.defer()
         # guard clause
         if member.bot:
@@ -261,7 +261,7 @@ class ModCog(
     @app_commands.command(name="unban", description="unban a user")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(ban_members=True)
-    async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str) -> None:
+    async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str = "No reason provided") -> None:
         await interaction.response.defer()
 
         # guard clause
@@ -303,7 +303,7 @@ class ModCog(
     @app_commands.command(name="mute", description="mute a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
-    async def mute(self, interaction: discord.Interaction, member: discord.Member, reason: str, duration: str) -> None:
+    async def mute(self, interaction: discord.Interaction, member: discord.Member, duration: str, reason: str = "No reason provided") -> None:
         await interaction.response.defer()
 
         # guard clause
@@ -481,6 +481,96 @@ class ModCog(
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
             view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unlocked\n **unlocked {target_channel.mention}**")
+            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+
+    #role add cmd
+    @app_commands.command(name="role-add", description="add a role to a member")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(manage_roles=True)
+    async def role_add(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role, reason: str = "No reason provided") -> None:
+        await interaction.response.defer()
+
+        # guard clause
+        if member.bot:
+            await interaction.followup.send(view=ErrorUI("**you tried to add a role to an app.**"))
+            return
+        if role in member.roles:
+            await interaction.followup.send(view=ErrorUI("**that member already has this role.**"))
+            return
+        if role.position >= interaction.user.top_role.position and interaction.user.id != interaction.guild.owner_id:
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to manage a role equal to / above your top role.**"))
+            return
+        if role.position >= interaction.guild.me.top_role.position:
+            await interaction.followup.send(view=ErrorUI("**i tried to manage a role equal to / above my top role.**"))
+            return
+
+        # role db call
+        async with aiosqlite.connect(self.db_path) as conn:
+            cursor = await conn.execute(
+                """
+                INSERT INTO mod_cases (guild_id, user_id, mod_id, action_type, reason)
+                VALUES (?, ?, ?, 'role_add', ?)
+                """,
+                (interaction.guild_id, member.id, interaction.user.id, reason),
+            )
+            case_id = cursor.lastrowid
+            await conn.commit()
+
+        # the actual role part
+        await member.add_roles(role, reason=f"role added by melvin using {interaction.user} with the reason {reason}")
+
+        # role add msg
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = (
+                f"# {MELVIN_CHECK_EMOJI} role added\n **{role.mention} added to {member.mention}, case {case_id}**")
+            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+
+
+    #role remove cmd
+    @app_commands.command(name="role-remove", description="remove a role from a member")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(manage_roles=True)
+    async def role_remove(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role, reason: str = "No reason provided") -> None:
+        await interaction.response.defer()
+
+        # guard clause
+        if member.bot:
+            await interaction.followup.send(view=ErrorUI("**you tried to remove a role from an app.**"))
+            return
+        if role not in member.roles:
+            await interaction.followup.send(view=ErrorUI("**that member does not have this role.**"))
+            return
+        if role.position >= interaction.user.top_role.position and interaction.user.id != interaction.guild.owner_id:
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to manage a role equal to / above your top role.**"))
+            return
+        if role.position >= interaction.guild.me.top_role.position:
+            await interaction.followup.send(view=ErrorUI("**i tried to manage a role equal to / above my top role.**"))
+            return
+
+        # role db call
+        async with aiosqlite.connect(self.db_path) as conn:
+            cursor = await conn.execute(
+                """
+                INSERT INTO mod_cases (guild_id, user_id, mod_id, action_type, reason)
+                VALUES (?, ?, ?, 'role_remove', ?)
+                """,
+                (interaction.guild_id, member.id, interaction.user.id, reason),
+            )
+            case_id = cursor.lastrowid
+            await conn.commit()
+
+        # the actual role part
+        await member.remove_roles(role, reason=f"role removed by melvin using {interaction.user} with the reason {reason}")
+
+        # role remove msg
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} role removed\n **{role.mention} removed from {member.mention}, case {case_id}**")
             view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
