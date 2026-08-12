@@ -258,6 +258,47 @@ class ModCog(
             view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
 
+    @app_commands.command(name="unban", description="unban a user")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(ban_members=True)
+    async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str) -> None:
+        await interaction.response.defer()
+
+        # guard clause
+        try:
+            await interaction.guild.fetch_ban(user)
+        except discord.NotFound:
+            await interaction.followup.send(view=ErrorUI("**that user is not banned.**"))
+            return
+        except discord.HTTPException as e:
+            await interaction.followup.send(view=ErrorUI(f"**failed to check ban status: {e!s}**"))
+            return
+
+        # unban db call
+        async with aiosqlite.connect(self.db_path) as conn:
+            cursor = await conn.execute(
+                """
+                INSERT INTO mod_cases (guild_id, user_id, mod_id, action_type, reason)
+                VALUES (?, ?, ?, 'unban', ?)
+                """,
+                (interaction.guild_id, user.id, interaction.user.id, reason),
+            )
+            case_id = cursor.lastrowid
+            await conn.commit()
+
+        # the actual unban part
+        await interaction.guild.unban(
+            user,
+            reason=f"unbanned using melvin by {interaction.user} with the reason {reason}"
+        )
+
+        # unban msg
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unbanned\n **{user.mention} has been unbanned, case {case_id}**")
+            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+
     # mute cmd
     @app_commands.command(name="mute", description="mute a member")
     @app_commands.guild_only()
