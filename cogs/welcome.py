@@ -58,14 +58,9 @@ class WelcomeCog(
     @app_commands.command(name="channel", description="set the channel for member join events.")
     @app_commands.describe(channel="the channel to send welcome messages to")
     @app_commands.checks.has_permissions(manage_guild=True)
-    async def channel(
-        self,
-        interaction: discord.Interaction,
-        channel: discord.TextChannel,
-    ) -> None:
+    async def channel(self, interaction: discord.Interaction, channel: discord.TextChannel) -> None:
         if not interaction.guild:
             return
-
         view = ResponseUI()
         await interaction.response.send_message(view=view, ephemeral=False)
 
@@ -81,12 +76,8 @@ class WelcomeCog(
                 await conn.commit()
         except Exception:
             log.exception("failed to set welcome channel", interaction.guild.id)
-            await interaction.edit_original_response(
-                view=ErrorUI(
-                    f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**"),
-            )
+            await interaction.edit_original_response(view=ErrorUI(f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**"))
             return
-
         view.text_display.content = f"# {MELVIN_CHECK_EMOJI} welcome set \n**welcome channel set to {channel.mention}**"
         await interaction.edit_original_response(view=view)
 
