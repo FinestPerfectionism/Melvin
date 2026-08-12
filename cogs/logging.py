@@ -22,9 +22,7 @@ HOLOGRAPHIC_VALUES = (11127295, 16759788, 16761760)
 
 #gradient role func
 def _describe_style(role: discord.Role) -> str:
-    if (role.colour.value,
-        role.secondary_colour.value if role.secondary_colour else None,
-        role.tertiary_colour.value if role.tertiary_colour else None) == HOLOGRAPHIC_VALUES:
+    if (role.colour.value, role.secondary_colour.value if role.secondary_colour else None, role.tertiary_colour.value if role.tertiary_colour else None) == HOLOGRAPHIC_VALUES:
         return "Holographic"
     if role.secondary_colour is not None:
         return "Gradient"
