@@ -234,7 +234,7 @@ class ModCog(
         )
 
         #the actual ban part
-        await member.ban(reason=f"banned by melvin using {interaction.user} with the reason {reason}", delete_message_days=30)
+        await member.ban(reason=f"banned by melvin using {interaction.user} with the reason {reason}", delete_message_days=7)
 
         #ban msg
         view = ResponseUI()
