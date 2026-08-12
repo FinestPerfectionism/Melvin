@@ -1,8 +1,16 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from globals import INVITE_URL, LOG_CHANNEL, MELVIN_CHECK_EMOJI, MELVIN_WARN_EMOJI, PRIMARY, SECONDARY, MELVIN_BANNER
-from ui import ResponseUI, ErrorUI
+
+from globals import (
+    INVITE_URL,
+    LOG_CHANNEL,
+    MELVIN_BANNER,
+    MELVIN_CHECK_EMOJI,
+    MELVIN_WARN_EMOJI,
+    SECONDARY,
+)
+from ui import ErrorUI, ResponseUI
 
 
 class PrivateCog(

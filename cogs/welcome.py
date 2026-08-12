@@ -1,11 +1,14 @@
+import logging
+
 import aiosqlite
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from cogs import logging
 from globals import INVITE_URL, MELVIN_CHECK_EMOJI
 from ui import ErrorUI, ResponseUI
+
+log = logging.getLogger(__name__)
 
 
 @app_commands.guild_only
@@ -76,11 +79,11 @@ class WelcomeCog(
                     (str(interaction.guild.id), str(channel.id)),
                 )
                 await conn.commit()
-        except Exception as e:
-            logging.exception("failed to set welcome channel", interaction.guild.id)
+        except Exception:
+            log.exception("failed to set welcome channel", interaction.guild.id)
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**")
+                    f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**"),
             )
             return
 
@@ -89,12 +92,11 @@ class WelcomeCog(
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
         try:
-            async with aiosqlite.connect(self.db_path) as conn:
-                async with conn.execute(
-                    "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
-                    (str(guild_id),),
-                ) as cursor:
-                    row = await cursor.fetchone()
+            async with aiosqlite.connect(self.db_path) as conn, conn.execute(
+                "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
+                (str(guild_id),),
+            ) as cursor:
+                row = await cursor.fetchone()
         except Exception:
             return None
 
@@ -139,12 +141,11 @@ class WelcomeCog(
         try:
             # Make sure the table exists even if cog_load did not run.
             await self._ensure_db()
-            async with aiosqlite.connect(self.db_path) as conn:
-                async with conn.execute(
-                    "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
-                    (str(interaction.guild.id),),
-                ) as cursor:
-                    row = await cursor.fetchone()
+            async with aiosqlite.connect(self.db_path) as conn, conn.execute(
+                "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
+                (str(interaction.guild.id),),
+            ) as cursor:
+                row = await cursor.fetchone()
             existing_channel_id = row[0] if row else None
         except Exception as e:
             await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
@@ -180,13 +181,12 @@ class WelcomeCog(
 
     async def get_welcome_config(self, guild_id: int) -> dict | None:
         try:
-            async with aiosqlite.connect(self.db_path) as conn:
-                async with conn.execute(
-                    "SELECT channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label "
-                    "FROM welcome_channels WHERE guild_id = ?",
-                    (str(guild_id),),
-                ) as cursor:
-                    row = await cursor.fetchone()
+            async with aiosqlite.connect(self.db_path) as conn, conn.execute(
+                "SELECT channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label "
+                "FROM welcome_channels WHERE guild_id = ?",
+                (str(guild_id),),
+            ) as cursor:
+                row = await cursor.fetchone()
         except Exception:
             return None
 

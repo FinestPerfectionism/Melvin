@@ -2,8 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import PRIMARY, MELVIN_MISC_EMOJI
-from ui import SmallSeparator, ResponseUI
+from globals import MELVIN_MISC_EMOJI, PRIMARY
+from ui import ResponseUI, SmallSeparator
 
 
 # UI Classes

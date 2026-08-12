@@ -1,19 +1,23 @@
+import logging
+
 import aiosqlite
 import discord
 from discord import app_commands
 from discord.ext import commands
-import logging
 
-from globals import INVITE_URL, SECONDARY, TERTIARY, PRIMARY, MELVIN_MISC_EMOJI
+from globals import INVITE_URL, MELVIN_MISC_EMOJI, PRIMARY, SECONDARY, TERTIARY
 from ui import (
     ErrorUI,
     LargeSeparator,
     MiscLoggingClass,
     NegativeLoggingClass,
     PositiveLoggingClass,
+    ResponseUI,
     primary,
-    tertiary, ResponseUI,
+    tertiary,
 )
+
+log = logging.getLogger(__name__)
 
 
 @app_commands.guild_only
@@ -86,8 +90,8 @@ class LoggingCog(
                     (str(interaction.guild.id), str(channel.id)),
                 )
                 await conn.commit()
-        except Exception as e:
-            logging.exception("failed to set log channel for guild %s", interaction.guild.id)
+        except Exception:
+            log.exception("failed to set log channel for guild %s", interaction.guild.id)
             view = ErrorUI(message="**something went wrong saving that**")
             await interaction.edit_original_response(view=view)
             return
@@ -113,12 +117,11 @@ class LoggingCog(
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
         try:
-            async with aiosqlite.connect(self.db_path) as conn:
-                async with conn.execute(
-                    "SELECT channel_id FROM log_channels WHERE guild_id = ?",
-                    (str(guild_id),),
-                ) as cursor:
-                    row = await cursor.fetchone()
+            async with aiosqlite.connect(self.db_path) as conn, conn.execute(
+                "SELECT channel_id FROM log_channels WHERE guild_id = ?",
+                (str(guild_id),),
+            ) as cursor:
+                row = await cursor.fetchone()
         except Exception:
             return None
 
