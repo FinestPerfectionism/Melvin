@@ -151,7 +151,7 @@ class AdUI(discord.ui.LayoutView):
     def __init__(self) -> None:
         super().__init__()
         self.text_display = discord.ui.TextDisplay(
-            content=f"# {MELVIN_EMOJI} Melvin\nmelvin is an app written using the discord.py framework. It features various user and guild install commands, making it greatly useful as both a personal and server app. it uses CV2 component messages within all of it's responses and it features some of the main features of a discord app, with core moderation commands, and cogs complete with info, and user commands, with much more to come. Melvin is open source, and open to contributions, so if you want to contribute, feel free. **[github](https://github.com/saltgranule/Melvin)**",
+            content=f"# {MELVIN_EMOJI} Melvin\nYAGPDB written in python under the discord.py framework, by someone still learning python. features user and guild install commands, welcoming configuration, cv2 messages over legacy embeds, and much more. Melvin is open source, and open to contributions, so if you want to contribute, feel free. **[github](https://github.com/saltgranule/Melvin)**",
         )
 
         media_gallery = discord.ui.MediaGallery(
