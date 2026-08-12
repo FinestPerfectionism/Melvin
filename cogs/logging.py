@@ -589,7 +589,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(f"# Role Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"),
-            discord.ui.TextDisplay(f"**Role:** {after.mention} | `{after.id}`"),
+            discord.ui.TextDisplay(f"**Role:** {after.mention} | {after.id}"),
             accent_color=discord.Color.from_str(PRIMARY)
         )
         changes_text = "\n".join(changes)
