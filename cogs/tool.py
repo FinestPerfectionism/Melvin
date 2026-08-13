@@ -18,7 +18,8 @@ class ToolCog(
         self.bot = bot
 
     @app_commands.command(
-        name="base64-decode", description="decode a base64 encoded string"
+        name="base64-decode",
+        description="decode a base64 encoded string",
     )
     @app_commands.describe(text="the base64 string to decode")
     async def base64decode(self, interaction: discord.Interaction, text: str) -> None:
@@ -29,12 +30,12 @@ class ToolCog(
             decodedstr = decodedbyte.decode("utf-8")
         except binascii.Error as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"not valid b64, **{e}**")
+                view=ErrorUI(f"not valid b64, **{e}**"),
             )
             return
         except UnicodeDecodeError as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"decoded, but the result isn't valid text, **{e}**")
+                view=ErrorUI(f"decoded, but the result isn't valid text, **{e}**"),
             )
             return
 
@@ -52,7 +53,7 @@ class ToolCog(
             encodedstr = encodedbyte.decode("utf-8")
         except Exception as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"something went wrong encoding this: **{e}**")
+                view=ErrorUI(f"something went wrong encoding this: **{e}**"),
             )
             return
 
@@ -82,16 +83,16 @@ class ToolCog(
                 ),
             )
             await interaction.followup.send(
-                view=view, file=file, allowed_mentions=discord.AllowedMentions.none()
+                view=view, file=file, allowed_mentions=discord.AllowedMentions.none(),
             )
         else:
             await interaction.followup.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
 
     @speak.error
     async def speak_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             view = ResponseUI()

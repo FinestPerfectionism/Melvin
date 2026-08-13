@@ -42,7 +42,9 @@ class WelcomeCog(
 
     # cogwide error handling
     async def cog_app_command_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             msg = "**you don't have permission to do this.**"
@@ -58,12 +60,12 @@ class WelcomeCog(
             await interaction.response.send_message(view=error_ui, ephemeral=False)
 
     @app_commands.command(
-        name="channel", description="set the channel for member join events."
+        name="channel", description="set the channel for member join events.",
     )
     @app_commands.describe(channel="the channel to send welcome messages to")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def channel(
-        self, interaction: discord.Interaction, channel: discord.TextChannel
+        self, interaction: discord.Interaction, channel: discord.TextChannel,
     ) -> None:
         if not interaction.guild:
             return
@@ -84,8 +86,8 @@ class WelcomeCog(
             log.exception("failed to set welcome channel", interaction.guild.id)
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**"
-                )
+                    f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**",
+                ),
             )
             return
         view.text_display.content = f"# {MELVIN_CHECK_EMOJI} welcome set \n**welcome channel set to {channel.mention}**"
@@ -160,8 +162,8 @@ class WelcomeCog(
         except Exception as e:
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"
-                )
+                    f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**",
+                ),
             )
             return
 
@@ -169,7 +171,7 @@ class WelcomeCog(
         if existing_channel_id is None:
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    "**set a welcome channel first, using /welcome channel.**"
+                    "**set a welcome channel first, using /welcome channel.**",
                 ),
             )
             return
@@ -197,8 +199,8 @@ class WelcomeCog(
         except Exception as e:
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"
-                )
+                    f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**",
+                ),
             )
             return
 
@@ -250,7 +252,7 @@ class WelcomeCog(
         if config["attachment_url"]:
             view.container.add_item(
                 discord.ui.MediaGallery(
-                    discord.MediaGalleryItem(media=config["attachment_url"])
+                    discord.MediaGalleryItem(media=config["attachment_url"]),
                 ),
             )
 
@@ -261,7 +263,7 @@ class WelcomeCog(
                     label=config["b1_label"],
                     style=discord.ButtonStyle.link,
                     url=config["b1_url"],
-                )
+                ),
             )
         if config["b2_url"]:
             buttons.append(
@@ -269,7 +271,7 @@ class WelcomeCog(
                     label=config["b2_label"],
                     style=discord.ButtonStyle.link,
                     url=config["b2_url"],
-                )
+                ),
             )
 
         if buttons:

@@ -60,7 +60,7 @@ class DebugCog(
     @app_commands.command(name="error", description="send raw ErrorUI class")
     async def error(self, interaction: discord.Interaction) -> None:
         view = ErrorUI(
-            message=f"**something went wrong with that. please [join the support server]({INVITE_URL}) to report this issue.**"
+            message=f"**something went wrong with that. please [join the support server]({INVITE_URL}) to report this issue.**",
         )
         await interaction.response.send_message(view=view)
 

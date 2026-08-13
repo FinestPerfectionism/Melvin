@@ -77,7 +77,7 @@ class HelpView(discord.ui.LayoutView):
         initial_content = help_page(cogs[0]) if cogs else "No commands available."
         self.text_display = discord.ui.TextDisplay(content=initial_content)
         separator = discord.ui.Separator(
-            visible=True, spacing=discord.SeparatorSpacing.small
+            visible=True, spacing=discord.SeparatorSpacing.small,
         )
 
         self._update_button_states()

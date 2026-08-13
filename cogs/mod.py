@@ -112,17 +112,17 @@ class ModCog(
         # guard clause
         if member.bot:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to warn an app.**")
+                view=ErrorUI("**you tried to warn an app.**"),
             )
             return
         if member.id == interaction.user.id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to warn yourself.**")
+                view=ErrorUI("**you tried to warn yourself.**"),
             )
             return
         if member.id == interaction.guild.owner_id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to warn the guild owner.**")
+                view=ErrorUI("**you tried to warn the guild owner.**"),
             )
             return
 
@@ -181,17 +181,17 @@ class ModCog(
         # guard clause
         if member.bot:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to kick an app.**")
+                view=ErrorUI("**you tried to kick an app.**"),
             )
             return
         if member.id == interaction.user.id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to kick yourself.**")
+                view=ErrorUI("**you tried to kick yourself.**"),
             )
             return
         if member.id == interaction.guild.owner_id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to kick the guild owner.**")
+                view=ErrorUI("**you tried to kick the guild owner.**"),
             )
             return
         if (
@@ -199,12 +199,12 @@ class ModCog(
             and interaction.user.id != interaction.guild.owner_id
         ):
             await interaction.followup.send(
-                view=ErrorUI("**you tried to kick someone equal to / above you.**")
+                view=ErrorUI("**you tried to kick someone equal to / above you.**"),
             )
             return
         if member.top_role >= interaction.guild.me.top_role:
             await interaction.followup.send(
-                view=ErrorUI("**i tried to kick someone equal to / above me.**")
+                view=ErrorUI("**i tried to kick someone equal to / above me.**"),
             )
             return
 
@@ -231,7 +231,7 @@ class ModCog(
 
         # the actual kick part
         await member.kick(
-            reason=f"kicked by melvin using {interaction.user} with the reason {reason}"
+            reason=f"kicked by melvin using {interaction.user} with the reason {reason}",
         )
 
         # kick msg
@@ -258,17 +258,17 @@ class ModCog(
         # guard clause
         if member.bot:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to ban an app.**")
+                view=ErrorUI("**you tried to ban an app.**"),
             )
             return
         if member.id == interaction.user.id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to ban yourself.**")
+                view=ErrorUI("**you tried to ban yourself.**"),
             )
             return
         if member.id == interaction.guild.owner_id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to ban the guild owner.**")
+                view=ErrorUI("**you tried to ban the guild owner.**"),
             )
             return
         if (
@@ -276,12 +276,12 @@ class ModCog(
             and interaction.user.id != interaction.guild.owner_id
         ):
             await interaction.followup.send(
-                view=ErrorUI("**you tried to ban someone equal to / above you.**")
+                view=ErrorUI("**you tried to ban someone equal to / above you.**"),
             )
             return
         if member.top_role >= interaction.guild.me.top_role:
             await interaction.followup.send(
-                view=ErrorUI("**i tried to ban someone equal to / above me.**")
+                view=ErrorUI("**i tried to ban someone equal to / above me.**"),
             )
             return
 
@@ -338,12 +338,12 @@ class ModCog(
             await interaction.guild.fetch_ban(user)
         except discord.NotFound:
             await interaction.followup.send(
-                view=ErrorUI("**that user is not banned.**")
+                view=ErrorUI("**that user is not banned.**"),
             )
             return
         except discord.HTTPException as e:
             await interaction.followup.send(
-                view=ErrorUI(f"**failed to check ban status: {e!s}**")
+                view=ErrorUI(f"**failed to check ban status: {e!s}**"),
             )
             return
 
@@ -392,27 +392,27 @@ class ModCog(
         seconds = self.parseduration(duration)
         if not seconds:
             await interaction.followup.send(
-                view=ErrorUI("**not a valid duration format.**")
+                view=ErrorUI("**not a valid duration format.**"),
             )
             return
         if seconds > 28 * 86400:
             await interaction.followup.send(
-                view=ErrorUI("**duration cannot surpass 28 days.**")
+                view=ErrorUI("**duration cannot surpass 28 days.**"),
             )
             return
         if member.bot:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to mute an app.**")
+                view=ErrorUI("**you tried to mute an app.**"),
             )
             return
         if member.id == interaction.user.id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to mute yourself.**")
+                view=ErrorUI("**you tried to mute yourself.**"),
             )
             return
         if member.id == interaction.guild.owner_id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to mute the guild owner.**")
+                view=ErrorUI("**you tried to mute the guild owner.**"),
             )
             return
         if (
@@ -420,12 +420,12 @@ class ModCog(
             and interaction.user.id != interaction.guild.owner_id
         ):
             await interaction.followup.send(
-                view=ErrorUI("**you tried to mute someone equal to / above you.**")
+                view=ErrorUI("**you tried to mute someone equal to / above you.**"),
             )
             return
         if member.top_role >= interaction.guild.me.top_role:
             await interaction.followup.send(
-                view=ErrorUI("**i tried to mute someone equal to / above me.**")
+                view=ErrorUI("**i tried to mute someone equal to / above me.**"),
             )
             return
 
@@ -488,7 +488,7 @@ class ModCog(
             and interaction.user.id != interaction.guild.owner_id
         ):
             await interaction.followup.send(
-                view=ErrorUI("**you tried to unmute someone equal to / above you.**")
+                view=ErrorUI("**you tried to unmute someone equal to / above you.**"),
             )
             return
 
@@ -547,19 +547,19 @@ class ModCog(
 
         # guard clause
         if not isinstance(
-            target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)
+            target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread),
         ):
             await interaction.followup.send(
                 view=ErrorUI(
-                    "**this can only be used in a text channel, voice channel, or thread.**"
-                )
+                    "**this can only be used in a text channel, voice channel, or thread.**",
+                ),
             )
             return
 
         if isinstance(target_channel, discord.Thread):
             if target_channel.locked:
                 await interaction.followup.send(
-                    view=ErrorUI("**this thread is already locked.**")
+                    view=ErrorUI("**this thread is already locked.**"),
                 )
                 return
 
@@ -570,11 +570,11 @@ class ModCog(
             )
         else:
             current_overwrite = target_channel.overwrites_for(
-                interaction.guild.default_role
+                interaction.guild.default_role,
             )
             if current_overwrite.send_messages is False:
                 await interaction.followup.send(
-                    view=ErrorUI("**this channel is already locked.**")
+                    view=ErrorUI("**this channel is already locked.**"),
                 )
                 return
 
@@ -614,19 +614,19 @@ class ModCog(
 
         # guard clause
         if not isinstance(
-            target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)
+            target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread),
         ):
             await interaction.followup.send(
                 view=ErrorUI(
-                    "**this can only be used in either a text channel, voice channel, or thread.**"
-                )
+                    "**this can only be used in either a text channel, voice channel, or thread.**",
+                ),
             )
             return
 
         if isinstance(target_channel, discord.Thread):
             if not target_channel.locked:
                 await interaction.followup.send(
-                    view=ErrorUI("**this thread is not locked.**")
+                    view=ErrorUI("**this thread is not locked.**"),
                 )
                 return
 
@@ -637,14 +637,14 @@ class ModCog(
             )
         else:
             current_overwrite = target_channel.overwrites_for(
-                interaction.guild.default_role
+                interaction.guild.default_role,
             )
             if (
                 current_overwrite.send_messages is None
                 or current_overwrite.send_messages is True
             ):
                 await interaction.followup.send(
-                    view=ErrorUI("**this channel is not locked.**")
+                    view=ErrorUI("**this channel is not locked.**"),
                 )
                 return
 
@@ -682,12 +682,12 @@ class ModCog(
         # guard clause
         if member.bot:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to add a role to an app.**")
+                view=ErrorUI("**you tried to add a role to an app.**"),
             )
             return
         if role in member.roles:
             await interaction.followup.send(
-                view=ErrorUI("**that member already has this role.**")
+                view=ErrorUI("**that member already has this role.**"),
             )
             return
         if (
@@ -696,15 +696,15 @@ class ModCog(
         ):
             await interaction.followup.send(
                 view=ErrorUI(
-                    "**you tried to manage a role equal to / above your top role.**"
-                )
+                    "**you tried to manage a role equal to / above your top role.**",
+                ),
             )
             return
         if role.position >= interaction.guild.me.top_role.position:
             await interaction.followup.send(
                 view=ErrorUI(
-                    "**i tried to manage a role equal to / above my top role.**"
-                )
+                    "**i tried to manage a role equal to / above my top role.**",
+                ),
             )
             return
 
@@ -752,12 +752,12 @@ class ModCog(
         # guard clause
         if member.bot:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to remove a role from an app.**")
+                view=ErrorUI("**you tried to remove a role from an app.**"),
             )
             return
         if role not in member.roles:
             await interaction.followup.send(
-                view=ErrorUI("**that member does not have this role.**")
+                view=ErrorUI("**that member does not have this role.**"),
             )
             return
         if (
@@ -766,15 +766,15 @@ class ModCog(
         ):
             await interaction.followup.send(
                 view=ErrorUI(
-                    "**you tried to manage a role equal to / above your top role.**"
-                )
+                    "**you tried to manage a role equal to / above your top role.**",
+                ),
             )
             return
         if role.position >= interaction.guild.me.top_role.position:
             await interaction.followup.send(
                 view=ErrorUI(
-                    "**i tried to manage a role equal to / above my top role.**"
-                )
+                    "**i tried to manage a role equal to / above my top role.**",
+                ),
             )
             return
 

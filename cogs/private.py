@@ -32,11 +32,11 @@ class PrivateCog(
             f"Now in **{len(self.bot.guilds)}** guild(s)"
         )
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}"))
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")),
         )
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -49,11 +49,11 @@ class PrivateCog(
         view = ResponseUI()
         view.text_display.content = f"**Melvin was just removed from {guild.name}**\n. Now in **{len(self.bot.guilds)}** guild(s)"
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}"))
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")),
         )
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass

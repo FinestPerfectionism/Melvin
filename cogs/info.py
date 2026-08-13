@@ -37,7 +37,7 @@ class AvatarView(discord.ui.LayoutView):
                     label="web",
                     style=discord.ButtonStyle.link,
                     url=target.display_avatar.url,
-                )
+                ),
             ]
 
         action_row = discord.ui.ActionRow(*buttons)
@@ -52,7 +52,7 @@ class AvatarView(discord.ui.LayoutView):
 
 class BannerView(discord.ui.LayoutView):
     def __init__(
-        self, target: discord.User | discord.Member, fetched_user: discord.User
+        self, target: discord.User | discord.Member, fetched_user: discord.User,
     ) -> None:
         super().__init__()
         text_display = discord.ui.TextDisplay(
@@ -86,7 +86,7 @@ class BannerView(discord.ui.LayoutView):
                     style=discord.ButtonStyle.link,
                     disabled=True,
                     url="https://discord.com",
-                )
+                ),
             ]
 
         action_row = discord.ui.ActionRow(*buttons)
@@ -120,7 +120,7 @@ class InfoCog(
 
     @app_commands.command(name="avatar", description="view user avatar")
     async def avatar(
-        self, interaction: discord.Interaction, user: discord.User | None = None
+        self, interaction: discord.Interaction, user: discord.User | None = None,
     ) -> None:
         await interaction.response.defer()
         target = user or interaction.user
@@ -129,7 +129,7 @@ class InfoCog(
 
     @app_commands.command(name="banner", description="view user banner")
     async def banner(
-        self, interaction: discord.Interaction, user: discord.User | None = None
+        self, interaction: discord.Interaction, user: discord.User | None = None,
     ) -> None:
         await interaction.response.defer()
         target = user or interaction.user

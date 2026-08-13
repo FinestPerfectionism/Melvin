@@ -29,6 +29,9 @@ class AgentCog(
         self.api_key = os.getenv("GAPI")
         self.client = genai.Client(api_key=self.api_key)
 
+    def truncate(self, text: str, length: int = 500) -> str:
+        return (text)[: length - 3] + "..." if len(text) > length else text
+
     def _get_web_context(self, query: str, max_results: int = 5) -> str:
         try:
             ddgs = DDGS()
@@ -39,7 +42,7 @@ class AgentCog(
             formatted_results = []
             for i, r in enumerate(results, 1):
                 formatted_results.append(
-                    f"Source {i}:\nTitle: {r.get('title')}\nURL: {r.get('href')}\nSnippet: {r.get('body')}\n"
+                    f"Source {i}:\nTitle: {r.get('title')}\nURL: {r.get('href')}\nSnippet: {r.get('body')}\n",
                 )
             return "\n---\n".join(formatted_results)
         except Exception:
@@ -47,7 +50,9 @@ class AgentCog(
 
     # cogwide error logging
     async def cog_app_command_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.CommandOnCooldown):
             msg = "**you're being rate limited.**"
@@ -81,7 +86,7 @@ class AgentCog(
         )
 
         config = types.GenerateContentConfig(
-            system_instruction=system_instruction, temperature=0.7
+            system_instruction=system_instruction, temperature=0.7,
         )
         try:
             response = await self.client.aio.models.generate_content(
@@ -96,14 +101,15 @@ class AgentCog(
             raise RuntimeError(f"**Gemini API Error, {e!s}**")
 
     @app_commands.command(
-        name="ask", description="ask a free AI model some stupid shit"
+        name="ask",
+        description="ask a free AI model some stupid shit",
     )
     @app_commands.checks.cooldown(2, 60)
     async def ask(self, interaction: discord.Interaction, prompt: str) -> None:
         await interaction.response.defer()
         try:
             start = time.time()
-            ai_response = await self.query_gemini(prompt)
+            ai_response = self.truncate(await self.query_gemini(prompt))
             elapsed = time.time() - start
             model_button = discord.ui.Button(
                 label="model",
@@ -111,7 +117,7 @@ class AgentCog(
                 url="https://aistudio.google.com/",
             )
             prompt_section = discord.ui.Section(
-                f"# **prompt:** {prompt}", accessory=model_button
+                f"# **prompt:** {prompt}", accessory=model_button,
             )
             response_display = discord.ui.TextDisplay(
                 content=f"{ai_response}\n\n"

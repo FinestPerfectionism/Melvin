@@ -43,7 +43,7 @@ class LoggingCog(
 
     def clean_and_truncate(self, text: str, length: int = 500) -> str:
         return discord.utils.escape_markdown(
-            (text)[: length - 3] + "..." if len(text) > length else text
+            (text)[: length - 3] + "..." if len(text) > length else text,
         )
 
     def format_attachments(self, attachments: list[discord.Attachment]) -> str:
@@ -53,7 +53,7 @@ class LoggingCog(
         )
 
     def channel_display(
-        self, channel: discord.abc.Messageable | discord.abc.GuildChannel
+        self, channel: discord.abc.Messageable | discord.abc.GuildChannel,
     ) -> str:
         if isinstance(channel, discord.Thread):
             parent = channel.parent
@@ -107,7 +107,7 @@ class LoggingCog(
                 await conn.commit()
         except Exception:
             log.exception(
-                "failed to set log channel for guild %s", interaction.guild.id
+                "failed to set log channel for guild %s", interaction.guild.id,
             )
             view = ErrorUI(message="**something went wrong saving that**")
             await interaction.edit_original_response(view=view)
@@ -119,7 +119,7 @@ class LoggingCog(
 
     @channel.error
     async def channel_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             msg = "**you don't have permission to do this.**"
@@ -170,7 +170,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -193,14 +193,14 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_member_update(
-        self, before: discord.Member, after: discord.Member
+        self, before: discord.Member, after: discord.Member,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
         if log_channel is None:
@@ -220,17 +220,17 @@ class LoggingCog(
             removed = before_roles - after_roles
             if added:
                 changes.append(
-                    f"**Roles added:** {', '.join(r.mention for r in added)}"
+                    f"**Roles added:** {', '.join(r.mention for r in added)}",
                 )
             if removed:
                 changes.append(
-                    f"**Roles removed:** {', '.join(r.mention for r in removed)}"
+                    f"**Roles removed:** {', '.join(r.mention for r in removed)}",
                 )
 
         if before.timed_out_until != after.timed_out_until:
             if after.timed_out_until is not None:
                 changes.append(
-                    f"**Timed out until:** {discord.utils.format_dt(after.timed_out_until, style='f')}"
+                    f"**Timed out until:** {discord.utils.format_dt(after.timed_out_until, style='f')}",
                 )
             else:
                 changes.append("**Timeout removed**")
@@ -240,7 +240,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Member Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Member Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.Section(
                 f"**Member:** {after.mention} | {after.id}",
@@ -261,7 +261,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -288,7 +288,7 @@ class LoggingCog(
                 changes.append(f"**Username:** {before.name} | {after.name}")
             if before.global_name != after.global_name:
                 changes.append(
-                    f"**Display name:** {before.global_name or before.name} | {after.global_name or after.name}"
+                    f"**Display name:** {before.global_name or before.name} | {after.global_name or after.name}",
                 )
             if before.avatar != after.avatar:
                 changes.append("**Avatar changed**")
@@ -298,7 +298,7 @@ class LoggingCog(
 
             container = discord.ui.Container(
                 discord.ui.TextDisplay(
-                    f"# Profile Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                    f"# Profile Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
                 ),
                 discord.ui.Section(
                     f"**User:** {after.mention} | {after.id}",
@@ -319,14 +319,14 @@ class LoggingCog(
 
             try:
                 await log_channel.send(
-                    view=view, allowed_mentions=discord.AllowedMentions.none()
+                    view=view, allowed_mentions=discord.AllowedMentions.none(),
                 )
             except (discord.Forbidden, discord.HTTPException):
                 pass
 
     @commands.Cog.listener()
     async def on_message_edit(
-        self, before: discord.Message, after: discord.Message
+        self, before: discord.Message, after: discord.Message,
     ) -> None:
         if before.author.bot or before.content == after.content:
             return
@@ -340,7 +340,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Message Edited | {discord.utils.format_dt(after.edited_at or discord.utils.utcnow(), style='F')}"
+                f"# Message Edited | {discord.utils.format_dt(after.edited_at or discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.Section(
                 f"**Author:** {before.author.mention} | {before.author.id}\n"
@@ -380,7 +380,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -395,7 +395,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Message Deleted | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Message Deleted | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.TextDisplay(
                 f"**Author:** {msg.author.mention} | {msg.author.id}\n"
@@ -424,7 +424,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -443,7 +443,7 @@ class LoggingCog(
         if before.channel is None and after.channel is not None:
             container = discord.ui.Container(
                 discord.ui.TextDisplay(
-                    f"# Voice Channel Joined | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                    f"# Voice Channel Joined | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
                 ),
                 discord.ui.Section(
                     f"**Member:** {member.mention} | {member.id}\n**Channel:** {after.channel.mention}",
@@ -455,7 +455,7 @@ class LoggingCog(
             view.add_item(container)
             try:
                 await log_channel.send(
-                    view=view, allowed_mentions=discord.AllowedMentions.none()
+                    view=view, allowed_mentions=discord.AllowedMentions.none(),
                 )
             except (discord.Forbidden, discord.HTTPException):
                 pass
@@ -464,7 +464,7 @@ class LoggingCog(
         if before.channel is not None and after.channel is None:
             container = discord.ui.Container(
                 discord.ui.TextDisplay(
-                    f"# Voice Channel Left | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                    f"# Voice Channel Left | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
                 ),
                 discord.ui.Section(
                     f"**Member:** {member.mention} | {member.id}\n**Channel:** {before.channel.mention}",
@@ -476,7 +476,7 @@ class LoggingCog(
             view.add_item(container)
             try:
                 await log_channel.send(
-                    view=view, allowed_mentions=discord.AllowedMentions.none()
+                    view=view, allowed_mentions=discord.AllowedMentions.none(),
                 )
             except (discord.Forbidden, discord.HTTPException):
                 pass
@@ -489,7 +489,7 @@ class LoggingCog(
         ):
             container = discord.ui.Container(
                 discord.ui.TextDisplay(
-                    f"# Voice Channel Moved | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                    f"# Voice Channel Moved | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
                 ),
                 discord.ui.Section(
                     f"**Member:** {member.mention} | {member.id}\n**Moved:** {before.channel.mention} -> {after.channel.mention}",
@@ -501,7 +501,7 @@ class LoggingCog(
             view.add_item(container)
             try:
                 await log_channel.send(
-                    view=view, allowed_mentions=discord.AllowedMentions.none()
+                    view=view, allowed_mentions=discord.AllowedMentions.none(),
                 )
             except (discord.Forbidden, discord.HTTPException):
                 pass
@@ -514,10 +514,10 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Channel Created | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Channel Created | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.TextDisplay(
-                f"**Channel:** {channel.mention} | {channel.id}\n**Type:** {channel.type}"
+                f"**Channel:** {channel.mention} | {channel.id}\n**Type:** {channel.type}",
             ),
             accent_color=discord.Color.from_str(SECONDARY),
         )
@@ -526,7 +526,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -539,10 +539,10 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Channel Deleted | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Channel Deleted | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.TextDisplay(
-                f"**Name:** #{channel.name} | {channel.id}\n**Type:** {channel.type}"
+                f"**Name:** #{channel.name} | {channel.id}\n**Type:** {channel.type}",
             ),
             accent_color=discord.Color.from_str(TERTIARY),
         )
@@ -551,14 +551,14 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_guild_channel_update(
-        self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel
+        self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
         if log_channel is None:
@@ -575,7 +575,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Channel Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Channel Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.TextDisplay(f"**Channel:** {after.mention} | {after.id}"),
             accent_color=discord.Color.from_str(primary),
@@ -593,7 +593,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -606,7 +606,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Role Created | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Role Created | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.TextDisplay(f"**Role:** {role.mention} | {role.id}"),
             accent_color=discord.Color.from_str(SECONDARY),
@@ -616,7 +616,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -629,7 +629,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Role Deleted | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Role Deleted | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.TextDisplay(f"**Name:** {role.name} | {role.id}"),
             accent_color=discord.Color.from_str(TERTIARY),
@@ -639,14 +639,14 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_guild_role_update(
-        self, before: discord.Role, after: discord.Role
+        self, before: discord.Role, after: discord.Role,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
         if log_channel is None:
@@ -674,7 +674,7 @@ class LoggingCog(
             b_style = _describe_style(before)
             a_style = _describe_style(after)
             changes.append(
-                f"**Colours:** **{fmt(before)}** ({b_style}) | **{fmt(after)}** ({a_style})"
+                f"**Colours:** **{fmt(before)}** ({b_style}) | **{fmt(after)}** ({a_style})",
             )
 
         if before.permissions != after.permissions:
@@ -685,7 +685,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Role Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Role Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.TextDisplay(f"**Role:** {after.mention} | {after.id}"),
             accent_color=discord.Color.from_str(PRIMARY),
@@ -698,14 +698,14 @@ class LoggingCog(
         view.add_item(container)
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_member_ban(
-        self, guild: discord.Guild, user: discord.User | discord.Member
+        self, guild: discord.Guild, user: discord.User | discord.Member,
     ) -> None:
         log_channel = await self.get_log_channel(guild.id)
         if log_channel is None:
@@ -713,7 +713,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Member Banned | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Member Banned | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.Section(
                 f"**User:** {user} | {user.id}",
@@ -726,7 +726,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -739,7 +739,7 @@ class LoggingCog(
 
         container = discord.ui.Container(
             discord.ui.TextDisplay(
-                f"# Member Unbanned | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}"
+                f"# Member Unbanned | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.Section(
                 f"**User:** {user} | {user.id}",
@@ -752,7 +752,7 @@ class LoggingCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none()
+                view=view, allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
