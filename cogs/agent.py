@@ -29,7 +29,7 @@ class AgentCog(
         self.api_key = os.getenv("GAPI")
         self.client = genai.Client(api_key=self.api_key)
 
-    def truncate(self, text: str, length: int = 500) -> str:
+    def truncate(self, text: str, length: int = 1500) -> str:
         return (text)[: length - 3] + "..." if len(text) > length else text
 
     def _get_web_context(self, query: str, max_results: int = 5) -> str:
