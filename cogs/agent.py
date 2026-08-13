@@ -120,8 +120,9 @@ class AgentCog(
                 f"# **prompt:** {prompt}", accessory=model_button,
             )
             response_display = discord.ui.TextDisplay(
-                content=f"{ai_response}\n\n"
-                f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. {MELVIN_MISC_EMOJI} took {elapsed:.1f}s**\n-# **grounded using ddgs web search context**",
+                f"{ai_response}\n\n"
+                f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. {MELVIN_MISC_EMOJI} took {elapsed:.1f}s**\n"
+                "-# **grounded using ddgs web search context**",
             )
             view = ResponseUI()
             view.container.clear_items()
