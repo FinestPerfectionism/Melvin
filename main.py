@@ -24,10 +24,13 @@ class Melvin(commands.Bot):
             command_prefix="-",
             intents=intents,
             allowed_contexts=discord.app_commands.AppCommandContext(
-                guild=True, dm_channel=True, private_channel=True,
+                guild=True,
+                dm_channel=True,
+                private_channel=True,
             ),
             allowed_installs=discord.app_commands.AppInstallationType(
-                guild=True, user=True,
+                guild=True,
+                user=True,
             ),
         )
 
@@ -35,7 +38,6 @@ class Melvin(commands.Bot):
         loop = asyncio.get_running_loop()
         loop.set_debug(True)
         try:
-
             resolver = aiodns.DNSResolver(nameservers=["1.1.1.1", "8.8.8.8"])
             bot.http._HTTPClient__session._connector._resolver._resolver = resolver
             log.info("successful resolve")

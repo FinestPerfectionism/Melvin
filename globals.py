@@ -1,6 +1,6 @@
 PRIMARY = "#f8b95c"
-SECONDARY = "#6f9459"   # green
-TERTIARY = "#bd3b44"    # red
+SECONDARY = "#6f9459"  # green
+TERTIARY = "#bd3b44"  # red
 MELVIN_EMOJI = "<:MYLARGE:1535733782928298196>"
 LOG_CHANNEL = 1535283504105922620
 MELVIN_CROSS_EMOJI = "<:NegativeMelvin:1536787423164506142>"
@@ -9,4 +9,4 @@ MELVIN_MISC_EMOJI = "<:AlertMelvinAlt:1536787713942888609>"
 MELVIN_CHECK_EMOJI = "<:PositiveMelvin:1536787382534283350>"
 ERROR_CHANNEL = 1536683441616064532
 INVITE_URL = "https://discord.gg/PfyKM7dyx4"
-MELVIN_BANNER = "https://github.com/user-attachments/assets/a29dc670-3648-4f12-909a-669df49a4427"
+MELVIN_BANNER = ("https://github.com/user-attachments/assets/a29dc670-3648-4f12-909a-669df49a4427")

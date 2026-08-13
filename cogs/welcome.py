@@ -41,7 +41,9 @@ class WelcomeCog(
         await self._ensure_db()
 
     # cogwide error handling
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
+    async def cog_app_command_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             msg = "**you don't have permission to do this.**"
         elif isinstance(error, app_commands.NoPrivateMessage):
@@ -55,10 +57,14 @@ class WelcomeCog(
         else:
             await interaction.response.send_message(view=error_ui, ephemeral=False)
 
-    @app_commands.command(name="channel", description="set the channel for member join events.")
+    @app_commands.command(
+        name="channel", description="set the channel for member join events."
+    )
     @app_commands.describe(channel="the channel to send welcome messages to")
     @app_commands.checks.has_permissions(manage_guild=True)
-    async def channel(self, interaction: discord.Interaction, channel: discord.TextChannel) -> None:
+    async def channel(
+        self, interaction: discord.Interaction, channel: discord.TextChannel
+    ) -> None:
         if not interaction.guild:
             return
         view = ResponseUI()
@@ -76,17 +82,24 @@ class WelcomeCog(
                 await conn.commit()
         except Exception:
             log.exception("failed to set welcome channel", interaction.guild.id)
-            await interaction.edit_original_response(view=ErrorUI(f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**"))
+            await interaction.edit_original_response(
+                view=ErrorUI(
+                    f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**"
+                )
+            )
             return
         view.text_display.content = f"# {MELVIN_CHECK_EMOJI} welcome set \n**welcome channel set to {channel.mention}**"
         await interaction.edit_original_response(view=view)
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
         try:
-            async with aiosqlite.connect(self.db_path) as conn, conn.execute(
-                "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
-                (str(guild_id),),
-            ) as cursor:
+            async with (
+                aiosqlite.connect(self.db_path) as conn,
+                conn.execute(
+                    "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
+                    (str(guild_id),),
+                ) as cursor,
+            ):
                 row = await cursor.fetchone()
         except Exception:
             return None
@@ -96,7 +109,10 @@ class WelcomeCog(
 
         return self.bot.get_channel(int(row[0]))
 
-    @app_commands.command(name="config", description="set the welcome message and optional attachment/buttons")
+    @app_commands.command(
+        name="config",
+        description="set the welcome message and optional attachment/buttons",
+    )
     @app_commands.describe(
         text="the welcome message to send (use {member} to mention the new member)",
         attachment_url="optional image url to attach to the welcome message",
@@ -132,20 +148,29 @@ class WelcomeCog(
         try:
             # Make sure the table exists even if cog_load did not run.
             await self._ensure_db()
-            async with aiosqlite.connect(self.db_path) as conn, conn.execute(
-                "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
-                (str(interaction.guild.id),),
-            ) as cursor:
+            async with (
+                aiosqlite.connect(self.db_path) as conn,
+                conn.execute(
+                    "SELECT channel_id FROM welcome_channels WHERE guild_id = ?",
+                    (str(interaction.guild.id),),
+                ) as cursor,
+            ):
                 row = await cursor.fetchone()
             existing_channel_id = row[0] if row else None
         except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
+            await interaction.edit_original_response(
+                view=ErrorUI(
+                    f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"
+                )
+            )
             return
 
         # Config requires a channel, but the database may legitimately have no row yet.
         if existing_channel_id is None:
             await interaction.edit_original_response(
-                view=ErrorUI("**set a welcome channel first, using /welcome channel.**"),
+                view=ErrorUI(
+                    "**set a welcome channel first, using /welcome channel.**"
+                ),
             )
             return
 
@@ -158,25 +183,40 @@ class WelcomeCog(
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
-                        str(interaction.guild.id), existing_channel_id, text, attachment_url,
-                        b1_url, b1_label or "link", b2_url, b2_label or "link 2",
+                        str(interaction.guild.id),
+                        existing_channel_id,
+                        text,
+                        attachment_url,
+                        b1_url,
+                        b1_label or "link",
+                        b2_url,
+                        b2_label or "link 2",
                     ),
                 )
                 await conn.commit()
         except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"))
+            await interaction.edit_original_response(
+                view=ErrorUI(
+                    f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**"
+                )
+            )
             return
 
-        action_ui.text_display.content = f"**{MELVIN_CHECK_EMOJI} welcome message updated**"
+        action_ui.text_display.content = (
+            f"**{MELVIN_CHECK_EMOJI} welcome message updated**"
+        )
         await interaction.edit_original_response(view=action_ui)
 
     async def get_welcome_config(self, guild_id: int) -> dict | None:
         try:
-            async with aiosqlite.connect(self.db_path) as conn, conn.execute(
-                "SELECT channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label "
-                "FROM welcome_channels WHERE guild_id = ?",
-                (str(guild_id),),
-            ) as cursor:
+            async with (
+                aiosqlite.connect(self.db_path) as conn,
+                conn.execute(
+                    "SELECT channel_id, message, attachment_url, b1_url, b1_label, b2_url, b2_label "
+                    "FROM welcome_channels WHERE guild_id = ?",
+                    (str(guild_id),),
+                ) as cursor,
+            ):
                 row = await cursor.fetchone()
         except Exception:
             return None
@@ -209,16 +249,28 @@ class WelcomeCog(
 
         if config["attachment_url"]:
             view.container.add_item(
-                discord.ui.MediaGallery(discord.MediaGalleryItem(media=config["attachment_url"])),
+                discord.ui.MediaGallery(
+                    discord.MediaGalleryItem(media=config["attachment_url"])
+                ),
             )
 
         buttons = []
         if config["b1_url"]:
             buttons.append(
-                discord.ui.Button(label=config["b1_label"], style=discord.ButtonStyle.link, url=config["b1_url"]))
+                discord.ui.Button(
+                    label=config["b1_label"],
+                    style=discord.ButtonStyle.link,
+                    url=config["b1_url"],
+                )
+            )
         if config["b2_url"]:
             buttons.append(
-                discord.ui.Button(label=config["b2_label"], style=discord.ButtonStyle.link, url=config["b2_url"]))
+                discord.ui.Button(
+                    label=config["b2_label"],
+                    style=discord.ButtonStyle.link,
+                    url=config["b2_url"],
+                )
+            )
 
         if buttons:
             view.container.add_item(discord.ui.ActionRow(*buttons))

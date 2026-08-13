@@ -18,13 +18,27 @@ class AvatarView(discord.ui.LayoutView):
         )
 
         if target.avatar is not None:
-            formats = ("png", "jpg", "webp", "gif") if target.avatar.is_animated() else ("png", "jpg", "webp")
+            formats = (
+                ("png", "jpg", "webp", "gif")
+                if target.avatar.is_animated()
+                else ("png", "jpg", "webp")
+            )
             buttons = [
-                discord.ui.Button(label=fmt, style=discord.ButtonStyle.link, url=target.avatar.with_format(fmt).url)
+                discord.ui.Button(
+                    label=fmt,
+                    style=discord.ButtonStyle.link,
+                    url=target.avatar.with_format(fmt).url,
+                )
                 for fmt in formats
             ]
         else:
-            buttons = [discord.ui.Button(label="web", style=discord.ButtonStyle.link, url=target.display_avatar.url)]
+            buttons = [
+                discord.ui.Button(
+                    label="web",
+                    style=discord.ButtonStyle.link,
+                    url=target.display_avatar.url,
+                )
+            ]
 
         action_row = discord.ui.ActionRow(*buttons)
         container = discord.ui.Container(
@@ -37,7 +51,9 @@ class AvatarView(discord.ui.LayoutView):
 
 
 class BannerView(discord.ui.LayoutView):
-    def __init__(self, target: discord.User | discord.Member, fetched_user: discord.User) -> None:
+    def __init__(
+        self, target: discord.User | discord.Member, fetched_user: discord.User
+    ) -> None:
         super().__init__()
         text_display = discord.ui.TextDisplay(
             content=f"**{target.display_name}'s current banner**",
@@ -50,13 +66,28 @@ class BannerView(discord.ui.LayoutView):
         )
 
         if fetched_user.banner:
-            formats = ("png", "jpg", "webp", "gif") if fetched_user.banner.is_animated() else ("png", "jpg", "webp")
+            formats = (
+                ("png", "jpg", "webp", "gif")
+                if fetched_user.banner.is_animated()
+                else ("png", "jpg", "webp")
+            )
             buttons = [
-                discord.ui.Button(label=fmt, style=discord.ButtonStyle.link, url=fetched_user.banner.with_format(fmt).url)
+                discord.ui.Button(
+                    label=fmt,
+                    style=discord.ButtonStyle.link,
+                    url=fetched_user.banner.with_format(fmt).url,
+                )
                 for fmt in formats
             ]
         else:
-            buttons = [discord.ui.Button(label="No Banner", style=discord.ButtonStyle.link, disabled=True, url="https://discord.com")]
+            buttons = [
+                discord.ui.Button(
+                    label="No Banner",
+                    style=discord.ButtonStyle.link,
+                    disabled=True,
+                    url="https://discord.com",
+                )
+            ]
 
         action_row = discord.ui.ActionRow(*buttons)
         container = discord.ui.Container(
@@ -81,19 +112,25 @@ class InfoCog(
         await interaction.response.defer()
         latency = round(self.bot.latency * 1000)
         view = ResponseUI()
-        view.text_display.content = f"# {MELVIN_MISC_EMOJI} latency\n**bot's latency is {latency}ms**"
+        view.text_display.content = (
+            f"# {MELVIN_MISC_EMOJI} latency\n**bot's latency is {latency}ms**"
+        )
         view.container.accent_color = discord.Color.from_str(PRIMARY)
         await interaction.followup.send(view=view)
 
     @app_commands.command(name="avatar", description="view user avatar")
-    async def avatar(self, interaction: discord.Interaction, user: discord.User | None = None) -> None:
+    async def avatar(
+        self, interaction: discord.Interaction, user: discord.User | None = None
+    ) -> None:
         await interaction.response.defer()
         target = user or interaction.user
         view = AvatarView(target)
         await interaction.followup.send(view=view)
 
     @app_commands.command(name="banner", description="view user banner")
-    async def banner(self, interaction: discord.Interaction, user: discord.User | None = None) -> None:
+    async def banner(
+        self, interaction: discord.Interaction, user: discord.User | None = None
+    ) -> None:
         await interaction.response.defer()
         target = user or interaction.user
         fetched_user = await self.bot.fetch_user(target.id)

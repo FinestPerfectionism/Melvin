@@ -17,7 +17,9 @@ class ToolCog(
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="base64-decode", description="decode a base64 encoded string")
+    @app_commands.command(
+        name="base64-decode", description="decode a base64 encoded string"
+    )
     @app_commands.describe(text="the base64 string to decode")
     async def base64decode(self, interaction: discord.Interaction, text: str) -> None:
         await interaction.response.defer(ephemeral=False)
@@ -26,10 +28,14 @@ class ToolCog(
             decodedbyte = base64.b64decode(text, validate=True)
             decodedstr = decodedbyte.decode("utf-8")
         except binascii.Error as e:
-            await interaction.edit_original_response(view=ErrorUI(f"not valid b64, **{e}**"))
+            await interaction.edit_original_response(
+                view=ErrorUI(f"not valid b64, **{e}**")
+            )
             return
         except UnicodeDecodeError as e:
-            await interaction.edit_original_response(view=ErrorUI(f"decoded, but the result isn't valid text, **{e}**"))
+            await interaction.edit_original_response(
+                view=ErrorUI(f"decoded, but the result isn't valid text, **{e}**")
+            )
             return
 
         view = ResponseUI()
@@ -45,7 +51,9 @@ class ToolCog(
             encodedbyte = base64.b64encode(text.encode("utf-8"))
             encodedstr = encodedbyte.decode("utf-8")
         except Exception as e:
-            await interaction.edit_original_response(view=ErrorUI(f"something went wrong encoding this: **{e}**"))
+            await interaction.edit_original_response(
+                view=ErrorUI(f"something went wrong encoding this: **{e}**")
+            )
             return
 
         view = ResponseUI()
@@ -54,7 +62,12 @@ class ToolCog(
 
     @app_commands.command(name="speak", description="speak through melvin")
     @app_commands.checks.has_permissions(manage_messages=True)
-    async def speak(self, interaction: discord.Interaction, text: str, attachment: discord.Attachment | None = None) -> None:
+    async def speak(
+        self,
+        interaction: discord.Interaction,
+        text: str,
+        attachment: discord.Attachment | None = None,
+    ) -> None:
         await interaction.response.defer(ephemeral=False)
         view = ResponseUI()
         view.text_display.content = text
@@ -68,16 +81,21 @@ class ToolCog(
                     ),
                 ),
             )
-            await interaction.followup.send(view=view, file=file, allowed_mentions=discord.AllowedMentions.none())
+            await interaction.followup.send(
+                view=view, file=file, allowed_mentions=discord.AllowedMentions.none()
+            )
         else:
-            await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions.none())
+            await interaction.followup.send(
+                view=view, allowed_mentions=discord.AllowedMentions.none()
+            )
 
     @speak.error
     async def speak_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             view = ResponseUI()
-            view.text_display.content = (f"**{MELVIN_WARN_EMOJI} This command is gated, read our documentation in our [support server.]({INVITE_URL})**")
+            view.text_display.content = f"**{MELVIN_WARN_EMOJI} This command is gated, read our documentation in our [support server.]({INVITE_URL})**"
 
             if interaction.response.is_done():
                 await interaction.followup.send(view=view, ephemeral=True)

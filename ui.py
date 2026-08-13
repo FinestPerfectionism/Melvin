@@ -60,10 +60,14 @@ class HelpView(discord.ui.LayoutView):
 
         # 2. Add fixed custom_id parameters to both buttons
         self.prev_button = discord.ui.Button(
-            label="prev", style=discord.ButtonStyle.secondary, custom_id="help_view:prev"
+            label="prev",
+            style=discord.ButtonStyle.secondary,
+            custom_id="help_view:prev",
         )
         self.next_button = discord.ui.Button(
-            label="next", style=discord.ButtonStyle.secondary, custom_id="help_view:next"
+            label="next",
+            style=discord.ButtonStyle.secondary,
+            custom_id="help_view:next",
         )
         self.prev_button.callback = self.on_prev
         self.next_button.callback = self.on_next
@@ -72,7 +76,9 @@ class HelpView(discord.ui.LayoutView):
         cogs = self.get_cogs()
         initial_content = help_page(cogs[0]) if cogs else "No commands available."
         self.text_display = discord.ui.TextDisplay(content=initial_content)
-        separator = discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small)
+        separator = discord.ui.Separator(
+            visible=True, spacing=discord.SeparatorSpacing.small
+        )
 
         self._update_button_states()
 

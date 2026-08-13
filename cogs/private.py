@@ -32,9 +32,12 @@ class PrivateCog(
             f"Now in **{len(self.bot.guilds)}** guild(s)"
         )
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")))
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}"))
+        )
         try:
-            await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
+            await log_channel.send(
+                view=view, allowed_mentions=discord.AllowedMentions.none()
+            )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
@@ -44,11 +47,14 @@ class PrivateCog(
         if log_channel is None:
             return
         view = ResponseUI()
-        view.text_display.content = (f"**Melvin was just removed from {guild.name}**\n. Now in **{len(self.bot.guilds)}** guild(s)")
+        view.text_display.content = f"**Melvin was just removed from {guild.name}**\n. Now in **{len(self.bot.guilds)}** guild(s)"
         view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")))
+            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}"))
+        )
         try:
-            await log_channel.send(view=view, allowed_mentions=discord.AllowedMentions.none())
+            await log_channel.send(
+                view=view, allowed_mentions=discord.AllowedMentions.none()
+            )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
@@ -70,7 +76,9 @@ class PrivateCog(
             return
 
         view = ResponseUI()
-        view.text_display.content = f"**{MELVIN_CHECK_EMOJI} synced {len(synced)} command(s)**"
+        view.text_display.content = (
+            f"**{MELVIN_CHECK_EMOJI} synced {len(synced)} command(s)**"
+        )
         view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.followup.send(view=view)
         await interaction.followup.send(view=view, ephemeral=True)

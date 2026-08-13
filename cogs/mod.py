@@ -1,5 +1,5 @@
 import datetime
-import asyncio
+
 import aiosqlite
 import discord
 from discord import app_commands
@@ -67,7 +67,10 @@ class ModCog(
             view.text_display.content = f"**{MELVIN_MISC_EMOJI} you received a {action_type} in {guild_name} for {reason}. case {case_id}**"
             view.container.accent_color = discord.Color.from_str(PRIMARY)
         try:
-            await user.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+            await user.send(
+                view=view,
+                allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+            )
         except (discord.Forbidden, discord.HTTPException):
             pass
             # only failing silently here because idk where to put the EH for it
@@ -99,17 +102,28 @@ class ModCog(
     @app_commands.command(name="warn", description="warn someone")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
-    async def warn(self, interaction: discord.Interaction, member: discord.Member, reason: str = "No reason provided") -> None:
+    async def warn(
+        self,
+        interaction: discord.Interaction,
+        member: discord.Member,
+        reason: str = "No reason provided",
+    ) -> None:
         await interaction.response.defer()
         # guard clause
         if member.bot:
-            await interaction.followup.send(view=ErrorUI("**you tried to warn an app.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to warn an app.**")
+            )
             return
         if member.id == interaction.user.id:
-            await interaction.followup.send(view=ErrorUI("**you tried to warn yourself.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to warn yourself.**")
+            )
             return
         if member.id == interaction.guild.owner_id:
-            await interaction.followup.send(view=ErrorUI("**you tried to warn the guild owner.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to warn the guild owner.**")
+            )
             return
 
         # warn db call
@@ -124,11 +138,11 @@ class ModCog(
             case_id = cursor.lastrowid
 
             async with conn.execute(
-                    """
+                """
                     SELECT COUNT(*) FROM mod_cases
                     WHERE guild_id = ? AND user_id = ? AND action_type = 'warn'
                     """,
-                    (interaction.guild_id, member.id),
+                (interaction.guild_id, member.id),
             ) as count_cursor:
                 row = await count_cursor.fetchone()
 
@@ -146,31 +160,52 @@ class ModCog(
         # warn msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} warning\n **{member.mention}, you have been warned, case {case_id}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} warning\n **{member.mention}, you have been warned, case {case_id}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
     # kick cmd
     @app_commands.command(name="kick", description="kick a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(kick_members=True)
-    async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str = "No reason provided") -> None:
+    async def kick(
+        self,
+        interaction: discord.Interaction,
+        member: discord.Member,
+        reason: str = "No reason provided",
+    ) -> None:
         await interaction.response.defer()
         # guard clause
         if member.bot:
-            await interaction.followup.send(view=ErrorUI("**you tried to kick an app.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to kick an app.**")
+            )
             return
         if member.id == interaction.user.id:
-            await interaction.followup.send(view=ErrorUI("**you tried to kick yourself.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to kick yourself.**")
+            )
             return
         if member.id == interaction.guild.owner_id:
-            await interaction.followup.send(view=ErrorUI("**you tried to kick the guild owner.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to kick the guild owner.**")
+            )
             return
-        if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
-            await interaction.followup.send(view=ErrorUI("**you tried to kick someone equal to / above you.**"))
+        if (
+            member.top_role >= interaction.user.top_role
+            and interaction.user.id != interaction.guild.owner_id
+        ):
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to kick someone equal to / above you.**")
+            )
             return
         if member.top_role >= interaction.guild.me.top_role:
-            await interaction.followup.send(view=ErrorUI("**i tried to kick someone equal to / above me.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**i tried to kick someone equal to / above me.**")
+            )
             return
 
         # kick db call
@@ -195,36 +230,59 @@ class ModCog(
         )
 
         # the actual kick part
-        await member.kick(reason=f"kicked by melvin using {interaction.user} with the reason {reason}")
+        await member.kick(
+            reason=f"kicked by melvin using {interaction.user} with the reason {reason}"
+        )
 
         # kick msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} kicked\n **{member.mention} has been kicked, case {case_id}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} kicked\n **{member.mention} has been kicked, case {case_id}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
     # ban cmd
     @app_commands.command(name="ban", description="ban a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(ban_members=True)
-    async def ban(self, interaction: discord.Interaction, member: discord.Member, reason: str = "No reason provided") -> None:
+    async def ban(
+        self,
+        interaction: discord.Interaction,
+        member: discord.Member,
+        reason: str = "No reason provided",
+    ) -> None:
         await interaction.response.defer()
         # guard clause
         if member.bot:
-            await interaction.followup.send(view=ErrorUI("**you tried to ban an app.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to ban an app.**")
+            )
             return
         if member.id == interaction.user.id:
-            await interaction.followup.send(view=ErrorUI("**you tried to ban yourself.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to ban yourself.**")
+            )
             return
         if member.id == interaction.guild.owner_id:
-            await interaction.followup.send(view=ErrorUI("**you tried to ban the guild owner.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to ban the guild owner.**")
+            )
             return
-        if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
-            await interaction.followup.send(view=ErrorUI("**you tried to ban someone equal to / above you.**"))
+        if (
+            member.top_role >= interaction.user.top_role
+            and interaction.user.id != interaction.guild.owner_id
+        ):
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to ban someone equal to / above you.**")
+            )
             return
         if member.top_role >= interaction.guild.me.top_role:
-            await interaction.followup.send(view=ErrorUI("**i tried to ban someone equal to / above me.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**i tried to ban someone equal to / above me.**")
+            )
             return
 
         # ban db call
@@ -249,29 +307,44 @@ class ModCog(
         )
 
         # the actual ban part
-        await member.ban(reason=f"banned by melvin using {interaction.user} with the reason {reason}", delete_message_days=7)
+        await member.ban(
+            reason=f"banned by melvin using {interaction.user} with the reason {reason}",
+            delete_message_days=7,
+        )
 
         # ban msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} banned\n **{member.mention} has been banned, case {case_id}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} banned\n **{member.mention} has been banned, case {case_id}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
     @app_commands.command(name="unban", description="unban a user")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(ban_members=True)
-    async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str = "No reason provided") -> None:
+    async def unban(
+        self,
+        interaction: discord.Interaction,
+        user: discord.User,
+        reason: str = "No reason provided",
+    ) -> None:
         await interaction.response.defer()
 
         # guard clause
         try:
             await interaction.guild.fetch_ban(user)
         except discord.NotFound:
-            await interaction.followup.send(view=ErrorUI("**that user is not banned.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**that user is not banned.**")
+            )
             return
         except discord.HTTPException as e:
-            await interaction.followup.send(view=ErrorUI(f"**failed to check ban status: {e!s}**"))
+            await interaction.followup.send(
+                view=ErrorUI(f"**failed to check ban status: {e!s}**")
+            )
             return
 
         # unban db call
@@ -289,45 +362,71 @@ class ModCog(
         # the actual unban part
         await interaction.guild.unban(
             user,
-            reason=f"unbanned using melvin by {interaction.user} with the reason {reason}"
+            reason=f"unbanned using melvin by {interaction.user} with the reason {reason}",
         )
 
         # unban msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unbanned\n **{user.mention} has been unbanned, case {case_id}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} unbanned\n **{user.mention} has been unbanned, case {case_id}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
     # mute cmd
     @app_commands.command(name="mute", description="mute a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
-    async def mute(self, interaction: discord.Interaction, member: discord.Member, duration: str, reason: str = "No reason provided") -> None:
+    async def mute(
+        self,
+        interaction: discord.Interaction,
+        member: discord.Member,
+        duration: str,
+        reason: str = "No reason provided",
+    ) -> None:
         await interaction.response.defer()
 
         # guard clause
         seconds = self.parseduration(duration)
         if not seconds:
-            await interaction.followup.send(view=ErrorUI("**not a valid duration format.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**not a valid duration format.**")
+            )
             return
         if seconds > 28 * 86400:
-            await interaction.followup.send(view=ErrorUI("**duration cannot surpass 28 days.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**duration cannot surpass 28 days.**")
+            )
             return
         if member.bot:
-            await interaction.followup.send(view=ErrorUI("**you tried to mute an app.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to mute an app.**")
+            )
             return
         if member.id == interaction.user.id:
-            await interaction.followup.send(view=ErrorUI("**you tried to mute yourself.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to mute yourself.**")
+            )
             return
         if member.id == interaction.guild.owner_id:
-            await interaction.followup.send(view=ErrorUI("**you tried to mute the guild owner.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to mute the guild owner.**")
+            )
             return
-        if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
-            await interaction.followup.send(view=ErrorUI("**you tried to mute someone equal to / above you.**"))
+        if (
+            member.top_role >= interaction.user.top_role
+            and interaction.user.id != interaction.guild.owner_id
+        ):
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to mute someone equal to / above you.**")
+            )
             return
         if member.top_role >= interaction.guild.me.top_role:
-            await interaction.followup.send(view=ErrorUI("**i tried to mute someone equal to / above me.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**i tried to mute someone equal to / above me.**")
+            )
             return
 
         # mute db call
@@ -353,28 +452,44 @@ class ModCog(
 
         # the actual mute part
         until = discord.utils.utcnow() + datetime.timedelta(seconds=seconds)
-        await member.timeout(until, reason=f"muted by melvin using {interaction.user} with the reason {reason}")
+        await member.timeout(
+            until,
+            reason=f"muted by melvin using {interaction.user} with the reason {reason}",
+        )
 
         # mute msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} muted\n **{member.mention} has been muted, case {case_id}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} muted\n **{member.mention} has been muted, case {case_id}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
     # unmute cmd
     @app_commands.command(name="unmute", description="unmute a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
-    async def unmute(self, interaction: discord.Interaction, member: discord.Member, reason: str = "no reason given") -> None:
+    async def unmute(
+        self,
+        interaction: discord.Interaction,
+        member: discord.Member,
+        reason: str = "no reason given",
+    ) -> None:
         await interaction.response.defer()
 
         # guard clause
         if not member.is_timed_out():
             await interaction.followup.send(view=ErrorUI("**member is not timed out**"))
             return
-        if member.top_role >= interaction.user.top_role and interaction.user.id != interaction.guild.owner_id:
-            await interaction.followup.send(view=ErrorUI("**you tried to unmute someone equal to / above you.**"))
+        if (
+            member.top_role >= interaction.user.top_role
+            and interaction.user.id != interaction.guild.owner_id
+        ):
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to unmute someone equal to / above you.**")
+            )
             return
 
         # unmute db call
@@ -399,111 +514,198 @@ class ModCog(
         )
 
         # the actual unmute part
-        await member.timeout(None, reason=f"unmuted by melvin using {interaction.user} with the reason {reason}")
+        await member.timeout(
+            None,
+            reason=f"unmuted by melvin using {interaction.user} with the reason {reason}",
+        )
 
         # unmute msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unmuted\n **{member.mention} has been unmuted, case {case_id}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} unmuted\n **{member.mention} has been unmuted, case {case_id}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
     # lock cmd
     @app_commands.command(name="lock", description="lock a channel")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_channels=True)
-    async def lock(self, interaction: discord.Interaction, channel: discord.TextChannel | discord.VoiceChannel | discord.Thread | None = None, reason: str = "no reason given") -> None:
+    async def lock(
+        self,
+        interaction: discord.Interaction,
+        channel: discord.TextChannel
+        | discord.VoiceChannel
+        | discord.Thread
+        | None = None,
+        reason: str = "no reason given",
+    ) -> None:
         await interaction.response.defer()
         target_channel = channel or interaction.channel
 
         # guard clause
-        if not isinstance(target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)):
+        if not isinstance(
+            target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)
+        ):
             await interaction.followup.send(
-                view=ErrorUI("**this can only be used in a text channel, voice channel, or thread.**"))
+                view=ErrorUI(
+                    "**this can only be used in a text channel, voice channel, or thread.**"
+                )
+            )
             return
 
         if isinstance(target_channel, discord.Thread):
             if target_channel.locked:
-                await interaction.followup.send(view=ErrorUI("**this thread is already locked.**"))
+                await interaction.followup.send(
+                    view=ErrorUI("**this thread is already locked.**")
+                )
                 return
 
             # the actual thread locking
-            await target_channel.edit(locked=True, reason=f"locked using melvin by {interaction.user} for the reason {reason}")
+            await target_channel.edit(
+                locked=True,
+                reason=f"locked using melvin by {interaction.user} for the reason {reason}",
+            )
         else:
-            current_overwrite = target_channel.overwrites_for(interaction.guild.default_role)
+            current_overwrite = target_channel.overwrites_for(
+                interaction.guild.default_role
+            )
             if current_overwrite.send_messages is False:
-                await interaction.followup.send(view=ErrorUI("**this channel is already locked.**"))
+                await interaction.followup.send(
+                    view=ErrorUI("**this channel is already locked.**")
+                )
                 return
 
             # the actual channel locking
             current_overwrite.send_messages = False
-            await target_channel.set_permissions(interaction.guild.default_role, overwrite=current_overwrite, reason=f"locked using melvin by {interaction.user} for the reason {reason}")
+            await target_channel.set_permissions(
+                interaction.guild.default_role,
+                overwrite=current_overwrite,
+                reason=f"locked using melvin by {interaction.user} for the reason {reason}",
+            )
 
         # lock msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (
-                f"# {MELVIN_CHECK_EMOJI} locked\n **{target_channel.mention} has been locked**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} locked\n **{target_channel.mention} has been locked**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
     # unlock cmd
     @app_commands.command(name="unlock", description="unlock a channel")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_channels=True)
-    async def unlock(self, interaction: discord.Interaction, channel: discord.TextChannel | discord.VoiceChannel | discord.Thread | None = None, reason: str = "no reason given") -> None:
+    async def unlock(
+        self,
+        interaction: discord.Interaction,
+        channel: discord.TextChannel
+        | discord.VoiceChannel
+        | discord.Thread
+        | None = None,
+        reason: str = "no reason given",
+    ) -> None:
         await interaction.response.defer()
         target_channel = channel or interaction.channel
 
         # guard clause
-        if not isinstance(target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)):
-            await interaction.followup.send(view=ErrorUI("**this can only be used in either a text channel, voice channel, or thread.**"))
+        if not isinstance(
+            target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread)
+        ):
+            await interaction.followup.send(
+                view=ErrorUI(
+                    "**this can only be used in either a text channel, voice channel, or thread.**"
+                )
+            )
             return
 
         if isinstance(target_channel, discord.Thread):
             if not target_channel.locked:
-                await interaction.followup.send(view=ErrorUI("**this thread is not locked.**"))
+                await interaction.followup.send(
+                    view=ErrorUI("**this thread is not locked.**")
+                )
                 return
 
             # the actual thread unlocking
-            await target_channel.edit(locked=False, reason=f"unlocked using melvin by {interaction.user} with the reason {reason}")
+            await target_channel.edit(
+                locked=False,
+                reason=f"unlocked using melvin by {interaction.user} with the reason {reason}",
+            )
         else:
-            current_overwrite = target_channel.overwrites_for(interaction.guild.default_role)
-            if current_overwrite.send_messages is None or current_overwrite.send_messages is True:
-                await interaction.followup.send(view=ErrorUI("**this channel is not locked.**"))
+            current_overwrite = target_channel.overwrites_for(
+                interaction.guild.default_role
+            )
+            if (
+                current_overwrite.send_messages is None
+                or current_overwrite.send_messages is True
+            ):
+                await interaction.followup.send(
+                    view=ErrorUI("**this channel is not locked.**")
+                )
                 return
 
             # the actual channel unlocking (sets overwrite back to neutral/inherit)
             current_overwrite.send_messages = None
-            await target_channel.set_permissions(interaction.guild.default_role, overwrite=current_overwrite, reason=f"unlocked using melvin by {interaction.user} with the reason {reason}")
+            await target_channel.set_permissions(
+                interaction.guild.default_role,
+                overwrite=current_overwrite,
+                reason=f"unlocked using melvin by {interaction.user} with the reason {reason}",
+            )
 
         # unlock msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} unlocked\n **unlocked {target_channel.mention}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} unlocked\n **unlocked {target_channel.mention}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
-    #role add cmd
+    # role add cmd
     @app_commands.command(name="role-add", description="add a role to a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_roles=True)
-    async def role_add(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role, reason: str = "No reason provided") -> None:
+    async def role_add(
+        self,
+        interaction: discord.Interaction,
+        member: discord.Member,
+        role: discord.Role,
+        reason: str = "No reason provided",
+    ) -> None:
         await interaction.response.defer()
 
         # guard clause
         if member.bot:
-            await interaction.followup.send(view=ErrorUI("**you tried to add a role to an app.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to add a role to an app.**")
+            )
             return
         if role in member.roles:
-            await interaction.followup.send(view=ErrorUI("**that member already has this role.**"))
-            return
-        if role.position >= interaction.user.top_role.position and interaction.user.id != interaction.guild.owner_id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to manage a role equal to / above your top role.**"))
+                view=ErrorUI("**that member already has this role.**")
+            )
+            return
+        if (
+            role.position >= interaction.user.top_role.position
+            and interaction.user.id != interaction.guild.owner_id
+        ):
+            await interaction.followup.send(
+                view=ErrorUI(
+                    "**you tried to manage a role equal to / above your top role.**"
+                )
+            )
             return
         if role.position >= interaction.guild.me.top_role.position:
-            await interaction.followup.send(view=ErrorUI("**i tried to manage a role equal to / above my top role.**"))
+            await interaction.followup.send(
+                view=ErrorUI(
+                    "**i tried to manage a role equal to / above my top role.**"
+                )
+            )
             return
 
         # role db call
@@ -519,37 +721,61 @@ class ModCog(
             await conn.commit()
 
         # the actual role part
-        await member.add_roles(role, reason=f"role added by melvin using {interaction.user} with the reason {reason}")
+        await member.add_roles(
+            role,
+            reason=f"role added by melvin using {interaction.user} with the reason {reason}",
+        )
 
         # role add msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (
-                f"# {MELVIN_CHECK_EMOJI} role added\n **{role.mention} added to {member.mention}, case {case_id}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} role added\n **{role.mention} added to {member.mention}, case {case_id}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
-
-    #role remove cmd
+    # role remove cmd
     @app_commands.command(name="role-remove", description="remove a role from a member")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_roles=True)
-    async def role_remove(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role, reason: str = "No reason provided") -> None:
+    async def role_remove(
+        self,
+        interaction: discord.Interaction,
+        member: discord.Member,
+        role: discord.Role,
+        reason: str = "No reason provided",
+    ) -> None:
         await interaction.response.defer()
 
         # guard clause
         if member.bot:
-            await interaction.followup.send(view=ErrorUI("**you tried to remove a role from an app.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**you tried to remove a role from an app.**")
+            )
             return
         if role not in member.roles:
-            await interaction.followup.send(view=ErrorUI("**that member does not have this role.**"))
-            return
-        if role.position >= interaction.user.top_role.position and interaction.user.id != interaction.guild.owner_id:
             await interaction.followup.send(
-                view=ErrorUI("**you tried to manage a role equal to / above your top role.**"))
+                view=ErrorUI("**that member does not have this role.**")
+            )
+            return
+        if (
+            role.position >= interaction.user.top_role.position
+            and interaction.user.id != interaction.guild.owner_id
+        ):
+            await interaction.followup.send(
+                view=ErrorUI(
+                    "**you tried to manage a role equal to / above your top role.**"
+                )
+            )
             return
         if role.position >= interaction.guild.me.top_role.position:
-            await interaction.followup.send(view=ErrorUI("**i tried to manage a role equal to / above my top role.**"))
+            await interaction.followup.send(
+                view=ErrorUI(
+                    "**i tried to manage a role equal to / above my top role.**"
+                )
+            )
             return
 
         # role db call
@@ -565,14 +791,20 @@ class ModCog(
             await conn.commit()
 
         # the actual role part
-        await member.remove_roles(role, reason=f"role removed by melvin using {interaction.user} with the reason {reason}")
+        await member.remove_roles(
+            role,
+            reason=f"role removed by melvin using {interaction.user} with the reason {reason}",
+        )
 
         # role remove msg
         view = ResponseUI()
         if hasattr(view.text_display, "content"):
-            view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} role removed\n **{role.mention} removed from {member.mention}, case {case_id}**")
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} role removed\n **{role.mention} removed from {member.mention}, case {case_id}**"
             view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.followup.send(view=view, allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
 
 async def setup(bot: commands.Bot) -> None:
