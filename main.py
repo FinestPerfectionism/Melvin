@@ -71,7 +71,7 @@ async def main() -> None:
         await bot.load_extension("cogs.info")
         await bot.load_extension("cogs.agent")
         await bot.load_extension("cogs.mod")
-        await bot.load_extension("cogs.logging")
+        await bot.load_extension("cogs.audit")
         await bot.load_extension("cogs.tool")
         await bot.load_extension("cogs.debug")
         await bot.load_extension("cogs.welcome")

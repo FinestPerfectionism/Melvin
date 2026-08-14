@@ -32,10 +32,10 @@ def _describe_style(role: discord.Role) -> str:
 
 
 @app_commands.guild_only
-class LoggingCog(
+class AuditCog(
     commands.GroupCog,
-    name="log",
-    description="logging config",
+    name="audit",
+    description="an audit logging config config",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -759,4 +759,4 @@ class LoggingCog(
 
 
 async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(LoggingCog(bot))
+    await bot.add_cog(AuditCog(bot))
