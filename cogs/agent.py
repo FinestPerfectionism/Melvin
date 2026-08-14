@@ -22,7 +22,7 @@ primary = f"{PRIMARY}"
 class AgentCog(
     commands.GroupCog,
     name="ai",
-    description="self explanatory, ask a free AI model some stupid shit",
+    description="Self explanatory, ask a free AI model some stupid shit",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -37,7 +37,7 @@ class AgentCog(
             ddgs = DDGS()
             results = list(ddgs.text(query, max_results=max_results))
             if not results:
-                return "no search context available."
+                return "No search context available."
 
             formatted_results = []
             for i, r in enumerate(results, 1):
@@ -46,7 +46,7 @@ class AgentCog(
                 )
             return "\n---\n".join(formatted_results)
         except Exception:
-            return "couldnt to fetch search context."
+            return "Couldn't to fetch search context."
 
     # cogwide error logging
     async def cog_app_command_error(
@@ -55,35 +55,40 @@ class AgentCog(
         error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.CommandOnCooldown):
-            msg = "**you're being rate limited.**"
+            msg = "**You're being rate limited.**"
         else:
-            msg = f"**something went wrong: {error}**"
+            msg = f"**Something went wrong: {error}**"
         error_ui = ErrorUI(msg)
         if interaction.response.is_done():
             await interaction.followup.send(view=error_ui, ephemeral=True)
         else:
             await interaction.response.send_message(view=error_ui, ephemeral=True)
 
-    async def query_gemini(self, prompt: str) -> str:
+    async def query_gemini(self, prompt: str, use_search: bool = False) -> str:
         current_date_str = datetime.now().strftime("%B %d, %Y")
-        search_context = await asyncio.to_thread(self._get_web_context, prompt)
 
         system_instruction = (
             f"Today's date is {current_date_str}. "
             "Try to keep responses tidy, brief, and minimal to stay within Discord's 4000 character limit. "
             "Contain responses in short, yet informative paragraphs, rather than graphs or tables. "
             "Refrain from using emojis unless told to. "
-            "Use the provided search context to ground your answer relative to today's date. "
         )
 
-        # helpful
-        full_prompt = (
-            f"--- CURRENT DATE: {current_date_str} ---\n"
-            f"--- SEARCH CONTEXT ---\n"
-            f"{search_context}\n"
-            f"--- END CONTEXT ---\n\n"
-            f"User Question: {prompt}"
-        )
+        if use_search:
+            search_context = await asyncio.to_thread(self._get_web_context, prompt)
+            system_instruction += "Use the provided search context to ground your answer relative to today's date. "
+            full_prompt = (
+                f"--- CURRENT DATE: {current_date_str} ---\n"
+                f"--- SEARCH CONTEXT ---\n"
+                f"{search_context}\n"
+                f"--- END CONTEXT ---\n\n"
+                f"User Question: {prompt}"
+            )
+        else:
+            full_prompt = (
+                f"--- CURRENT DATE: {current_date_str} ---\n\n"
+                f"User Question: {prompt}"
+            )
 
         config = types.GenerateContentConfig(
             system_instruction=system_instruction, temperature=0.7,
@@ -102,14 +107,14 @@ class AgentCog(
 
     @app_commands.command(
         name="ask",
-        description="ask a free AI model some stupid shit",
+        description="Ask a free AI model some stupid shit",
     )
     @app_commands.checks.cooldown(2, 60)
-    async def ask(self, interaction: discord.Interaction, prompt: str) -> None:
+    async def ask(self, interaction: discord.Interaction, prompt: str, search: bool = False) -> None:
         await interaction.response.defer()
         try:
             start = time.time()
-            ai_response = self.truncate(await self.query_gemini(prompt))
+            ai_response = self.truncate(await self.query_gemini(prompt, use_search=search))
             elapsed = time.time() - start
             model_button = discord.ui.Button(
                 label="model",
@@ -119,10 +124,17 @@ class AgentCog(
             prompt_section = discord.ui.Section(
                 f"# **prompt:** {prompt}", accessory=model_button,
             )
+
+            grounding_text = (
+                "-# **grounded using ddgs web search context**"
+                if search
+                else "-# **generated without web search**"
+            )
+
             response_display = discord.ui.TextDisplay(
                 f"{ai_response}\n\n"
                 f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. {MELVIN_MISC_EMOJI} took {elapsed:.1f}s**\n"
-                "-# **grounded using ddgs web search context**",
+                f"{grounding_text}",
             )
             view = ResponseUI()
             view.container.clear_items()
