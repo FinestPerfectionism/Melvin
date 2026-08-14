@@ -1,7 +1,7 @@
 discord.py
 google-genai
-dotenv
 aiosqlite
 aiodns
 faust-cchardet
 ddgs
+python-dotenv
