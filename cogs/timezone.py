@@ -62,6 +62,15 @@ class TimezoneCog(
             """, (user_id, tz_string))
             await conn.commit()
 
+    async def _reset_user_timezone(self, user_id: int) -> bool:
+        async with aiosqlite.connect(self.db_path) as conn:
+            cursor = await conn.execute(
+                "DELETE FROM user_timezones WHERE user_id = ?",
+                (user_id,),
+            )
+            await conn.commit()
+            return cursor.rowcount > 0
+
     async def timezone_autocomplete(
         self,
         _interaction: discord.Interaction,
@@ -72,7 +81,7 @@ class TimezoneCog(
             tz for tz in all_tzs if current.lower() in tz.lower().replace("_", " ") or current.lower() in tz.lower()
         ]
         return [
-            app_commands.Choice(name=tz, value=tz)
+            app_commands.Choice(name=tz.replace("_", " "), value=tz)
             for tz in filtered[:25]
         ]
 
@@ -192,6 +201,19 @@ class TimezoneCog(
         except (zoneinfo.ZoneInfoNotFoundError, ValueError, KeyError):
             view = ErrorUI(f"{timezone} is not a valid timezone")
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
+
+    @app_commands.command(name="reset", description="reset your timezone")
+    async def reset(self, interaction: discord.Interaction) -> None:
+        deleted = await self._reset_user_timezone(interaction.user.id)
+        if not deleted:
+            view = ErrorUI("you don't have a timezone set")
+            await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
+            return
+
+        view = ResponseUI()
+        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} timezone reset\nreset your timezone"
+        view.container.accent_color = discord.Color.from_str(SECONDARY)
+        await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
 
 
 async def setup(bot: commands.Bot) -> None:
