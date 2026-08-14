@@ -91,7 +91,7 @@ class TimezoneCog(
         target_tz_str = await self._get_user_timezone(target_user.id)
 
         # easter eggs
-        if target_user.id == interaction.client:
+        if target_user.id == interaction.client.id:
             view = ResponseUI()
             view.text_display.content = random.choice(time_quotes)
             await interaction.response.send_message(view=view)
