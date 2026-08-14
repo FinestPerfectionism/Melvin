@@ -15,18 +15,32 @@ time_quotes = [
     '"Time brings all things to pass." -- Aeschylus',
     '"Time is a storm in which we are all lost." -- William Carlos Williams',
     '"The trouble is, you think you have time." -- Jack Kornfield',
-    "\"The only reason for time is so that everything doesn't happen at once.\" -- Albert Einstein",
+    '"The only reason for time is so that everything does not happen at once." -- Albert Einstein',
     '"Who controls the past, controls the future: who controls the present controls the past." -- George Orwell',
     '"They always say time changes things, but you actually have to change them yourself." -- Andy Warhol',
-    "\"There's never enough time to do all the nothing you want.\" -- Bill Watterson",
-    "\"It's not that we have little time, but more that we waste a good deal of it.\" -- Seneca",
+    '"There is never enough time to do all the nothing you want." -- Bill Watterson',
+    '"It is not that we have little time, but more that we waste a good deal of it." -- Seneca',
 ]
+
+
+def format_ordinal(day: int) -> str:
+    if 11 <= day <= 13:
+        return f"{day}th"
+    suffixes = {1: "st", 2: "nd", 3: "rd"}
+    return f"{day}{suffixes.get(day % 10, 'th')}"
+
+
+def format_date(dt: datetime.datetime) -> str:
+    month = dt.strftime("%B")
+    day_str = format_ordinal(dt.day)
+    year = dt.strftime("%Y")
+    return f"{month} {day_str}, {year}"
 
 
 class TimezoneCog(
     commands.GroupCog,
     name="timezone",
-    description="set or view timezones for users",
+    description="Set or view timezones for users.",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -85,26 +99,27 @@ class TimezoneCog(
             for tz in filtered[:25]
         ]
 
-    @app_commands.command(name="for", description="view a user's timezone, defaults to your timezone")
+    @app_commands.command(name="for", description="View a user's timezone, defaulting to your timezone.")
+    @app_commands.describe(user="The user whose timezone you want to view.")
     async def for_user(self, interaction: discord.Interaction, user: discord.User | None = None) -> None:
         target_user = user or interaction.user
         target_tz_str = await self._get_user_timezone(target_user.id)
 
         # easter eggs
-        if target_user.id == interaction.client.user.id:
+        if target_user == interaction.client.user:
             view = ResponseUI()
             view.text_display.content = random.choice(time_quotes)
             await interaction.response.send_message(view=view)
             return
 
         if target_user.bot:
-            view = ErrorUI("you tried to view a bot's timezone")
+            view = ErrorUI("You tried to view a bot's timezone.")
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
             return
 
         if not target_tz_str:
-            name = "you" if target_user == interaction.user else target_user.mention
-            suffix = " don't have a timezone set" if target_user == interaction.user else " doesn't have a timezone set"
+            name = "You" if target_user == interaction.user else target_user.mention
+            suffix = " do not have a timezone set." if target_user == interaction.user else " does not have a timezone set."
             view = ErrorUI(f"{name}{suffix}")
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
             return
@@ -115,9 +130,9 @@ class TimezoneCog(
 
         if target_user == interaction.user:
             time_str = target_time.strftime("%I:%M %p").lstrip("0")
-            date_str = target_time.strftime("%B %dth, %Y").replace(" 0", " ")
+            date_str = format_date(target_time)
             view = ResponseUI()
-            view.text_display.content = f"# {MELVIN_MISC_EMOJI} your timezone\nit's currently **{time_str}** for you. today is **{date_str}**"
+            view.text_display.content = f"# {MELVIN_MISC_EMOJI} Your Timezone\nIt is currently **{time_str}** for you. Today is **{date_str}**."
             view.container.accent_color = discord.Color.from_str(PRIMARY)
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
             return
@@ -126,7 +141,7 @@ class TimezoneCog(
         if not runner_tz_str:
             time_str = target_time.strftime("%I:%M %p").lstrip("0")
             view = ResponseUI()
-            view.text_display.content = f"# {MELVIN_MISC_EMOJI} timezone for {target_user.mention}\nit's currently **{time_str}** for {target_user.mention}. (set your own timezone to see time differences)"
+            view.text_display.content = f"# {MELVIN_MISC_EMOJI} Timezone for {target_user.mention}\nIt is currently **{time_str}** for {target_user.mention}. (Set your own timezone to see time differences.)"
             view.container.accent_color = discord.Color.from_str(PRIMARY)
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
             return
@@ -145,31 +160,32 @@ class TimezoneCog(
         runner_time_str = runner_time.strftime("%I:%M %p").lstrip("0")
 
         if target_time.date() == runner_time.date():
-            day_ctx = "you are both on the same day"
+            day_ctx = "You are both on the same day."
         else:
-            target_date_str = target_time.strftime("%B %dth, %Y").replace(" 0", " ")
-            runner_date_str = runner_time.strftime("%B %dth, %Y").replace(" 0", " ")
-            day_ctx = f"it's **{target_date_str}** for {target_user.mention}, while it is **{runner_date_str}** for you"
+            target_date_str = format_date(target_time)
+            runner_date_str = format_date(runner_time)
+            day_ctx = f"It is **{target_date_str}** for {target_user.mention}, while it is **{runner_date_str}** for you."
 
         if diff_hours == 0:
             view = ResponseUI()
-            view.text_display.content = f"# {MELVIN_MISC_EMOJI} timezone for {target_user.mention}\nit's currently **{target_time_str}** for {target_user.mention}. you are both in the same timezone"
+            view.text_display.content = f"# {MELVIN_MISC_EMOJI} Timezone for {target_user.mention}\nIt is currently **{target_time_str}** for {target_user.mention}. You are both in the same timezone."
             view.container.accent_color = discord.Color.from_str(PRIMARY)
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
         else:
             view = ResponseUI()
             view.text_display.content = (
-                f"# {MELVIN_MISC_EMOJI} timezone for {target_user.mention}\n"
+                f"# {MELVIN_MISC_EMOJI} Timezone for {target_user.mention}\n"
                 + (
-                    f"it's currently **{target_time_str}** for {target_user.mention}. you're **{diff_str}** hours behind, at **{runner_time_str}**. {day_ctx}"
+                    f"It is currently **{target_time_str}** for {target_user.mention}. You are **{diff_str}** hours behind, at **{runner_time_str}**. {day_ctx}"
                     if relation == "ahead" else
-                    f"it's currently **{target_time_str}** for {target_user.mention}. you're **{diff_str}** hours ahead, at **{runner_time_str}**. {day_ctx}"
+                    f"It is currently **{target_time_str}** for {target_user.mention}. You are **{diff_str}** hours ahead, at **{runner_time_str}**. {day_ctx}"
                 )
             )
             view.container.accent_color = discord.Color.from_str(PRIMARY)
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
 
-    @app_commands.command(name="at", description="view a timezone at a certain area")
+    @app_commands.command(name="at", description="View a timezone at a certain area.")
+    @app_commands.describe(timezone="The name or region of the timezone to view.")
     @app_commands.autocomplete(timezone=timezone_autocomplete)
     async def at(self, interaction: discord.Interaction, timezone: str) -> None:
         try:
@@ -178,40 +194,41 @@ class TimezoneCog(
             target_time = now_utc.astimezone(tz)
 
             time_str = target_time.strftime("%I:%M %p").lstrip("0")
-            date_str = target_time.strftime("%B %dth, %Y").replace(" 0", " ")
+            date_str = format_date(target_time)
 
             view = ResponseUI()
-            view.text_display.content = f"# {MELVIN_MISC_EMOJI} timezone for {timezone}\nit's currently **{time_str}** for those in **{timezone}**. it's **{date_str}** for them"
+            view.text_display.content = f"# {MELVIN_MISC_EMOJI} Timezone for {timezone.replace('_', ' ')}\nIt is currently **{time_str}** for those in **{timezone.replace('_', ' ')}**. It is **{date_str}** for them."
             view.container.accent_color = discord.Color.from_str(PRIMARY)
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
         except (zoneinfo.ZoneInfoNotFoundError, ValueError, KeyError):
-            view = ErrorUI(f"{timezone} is not a valid timezone")
+            view = ErrorUI(f"{timezone.replace('_', ' ')} is not a valid timezone.")
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
 
-    @app_commands.command(name="set", description="set your timezone")
+    @app_commands.command(name="set", description="Set your timezone.")
+    @app_commands.describe(timezone="The timezone to save for your account.")
     @app_commands.autocomplete(timezone=timezone_autocomplete)
     async def set(self, interaction: discord.Interaction, timezone: str) -> None:
         try:
             zoneinfo.ZoneInfo(timezone)
             await self._set_user_timezone(interaction.user.id, timezone)
             view = ResponseUI()
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} timezone set\nset your timezone to **{timezone}**"
+            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Timezone Set\nSet your timezone to **{timezone.replace('_', ' ')}**."
             view.container.accent_color = discord.Color.from_str(SECONDARY)
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
         except (zoneinfo.ZoneInfoNotFoundError, ValueError, KeyError):
-            view = ErrorUI(f"{timezone} is not a valid timezone")
+            view = ErrorUI(f"{timezone.replace('_', ' ')} is not a valid timezone.")
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
 
-    @app_commands.command(name="reset", description="reset your timezone")
+    @app_commands.command(name="reset", description="Reset your timezone.")
     async def reset(self, interaction: discord.Interaction) -> None:
         deleted = await self._reset_user_timezone(interaction.user.id)
         if not deleted:
-            view = ErrorUI("you don't have a timezone set")
+            view = ErrorUI("You do not have a timezone set.")
             await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
             return
 
         view = ResponseUI()
-        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} timezone reset\nreset your timezone"
+        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Timezone Reset\nReset your timezone."
         view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.response.send_message(view=view, allowed_mentions=AllowedMentions.none())
 

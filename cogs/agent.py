@@ -22,7 +22,7 @@ primary = f"{PRIMARY}"
 class AgentCog(
     commands.GroupCog,
     name="ai",
-    description="Self explanatory, ask a free AI model some stupid shit",
+    description="Self explanatory, ask a free AI model some stupid shit.",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -46,7 +46,7 @@ class AgentCog(
                 )
             return "\n---\n".join(formatted_results)
         except Exception:
-            return "Couldn't to fetch search context."
+            return "Could not fetch search context."
 
     # cogwide error logging
     async def cog_app_command_error(
@@ -55,9 +55,9 @@ class AgentCog(
         error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.CommandOnCooldown):
-            msg = "**You're being rate limited.**"
+            msg = "**You are being rate limited.**"
         else:
-            msg = f"**Something went wrong: {error}**"
+            msg = f"**Something went wrong: {error}.**"
         error_ui = ErrorUI(msg)
         if interaction.response.is_done():
             await interaction.followup.send(view=error_ui, ephemeral=True)
@@ -103,11 +103,15 @@ class AgentCog(
                 return response.text
             raise RuntimeError("**Gemini returned an empty response.**")
         except Exception as e:
-            raise RuntimeError(f"**Gemini API Error, {e!s}**")
+            raise RuntimeError(f"**Gemini API Error: {e!s}.**")
 
     @app_commands.command(
         name="ask",
-        description="Ask a free AI model some stupid shit",
+        description="Ask a free AI model some stupid shit.",
+    )
+    @app_commands.describe(
+        prompt="The question or prompt to ask the AI model.",
+        search="Whether to perform a web search for grounding context.",
     )
     @app_commands.checks.cooldown(2, 60)
     async def ask(self, interaction: discord.Interaction, prompt: str, search: bool = False) -> None:
@@ -126,14 +130,14 @@ class AgentCog(
             )
 
             grounding_text = (
-                "-# **grounded using ddgs web search context**"
+                "-# **Grounded using DDGS web search context.**"
                 if search
-                else "-# **generated without web search**"
+                else "-# **Generated without web search.**"
             )
 
             response_display = discord.ui.TextDisplay(
                 f"{ai_response}\n\n"
-                f"-# **{MELVIN_EMOJI} responses may be shortened due to discord UI limitations. {MELVIN_MISC_EMOJI} took {elapsed:.1f}s**\n"
+                f"-# **{MELVIN_EMOJI} Responses may be shortened due to Discord UI limitations. {MELVIN_MISC_EMOJI} Took {elapsed:.1f}s.**\n"
                 f"{grounding_text}",
             )
             view = ResponseUI()

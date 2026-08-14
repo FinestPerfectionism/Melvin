@@ -34,7 +34,7 @@ class AvatarView(discord.ui.LayoutView):
         else:
             buttons = [
                 discord.ui.Button(
-                    label="web",
+                    label="Web",
                     style=discord.ButtonStyle.link,
                     url=target.display_avatar.url,
                 ),
@@ -102,23 +102,24 @@ class BannerView(discord.ui.LayoutView):
 class InfoCog(
     commands.GroupCog,
     name="info",
-    description="some info stuff",
+    description="Commands for viewing user information and bot stats.",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="latency", description="bot latency")
+    @app_commands.command(name="latency", description="View the bot's latency.")
     async def latency(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
         latency = round(self.bot.latency * 1000)
         view = ResponseUI()
         view.text_display.content = (
-            f"# {MELVIN_MISC_EMOJI} latency\n**bot's latency is {latency}ms**"
+            f"# {MELVIN_MISC_EMOJI} Latency\n**The bot's latency is {latency}ms.**"
         )
         view.container.accent_color = discord.Color.from_str(PRIMARY)
         await interaction.followup.send(view=view)
 
-    @app_commands.command(name="avatar", description="view user avatar")
+    @app_commands.command(name="avatar", description="View a user's avatar.")
+    @app_commands.describe(user="The user whose avatar you want to view.")
     async def avatar(
         self, interaction: discord.Interaction, user: discord.User | None = None,
     ) -> None:
@@ -127,7 +128,8 @@ class InfoCog(
         view = AvatarView(target)
         await interaction.followup.send(view=view)
 
-    @app_commands.command(name="banner", description="view user banner")
+    @app_commands.command(name="banner", description="View a user's banner.")
+    @app_commands.describe(user="The user whose banner you want to view.")
     async def banner(
         self, interaction: discord.Interaction, user: discord.User | None = None,
     ) -> None:
@@ -136,7 +138,7 @@ class InfoCog(
         fetched_user = await self.bot.fetch_user(target.id)
         if fetched_user.banner is None:
             await interaction.followup.send(
-                f"{target.display_name}'s profile must not have a banner :/",
+                f"**{target.display_name}** does not have a profile banner.",
                 ephemeral=True,
             )
             return

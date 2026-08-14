@@ -12,24 +12,24 @@ class AdUI(discord.ui.LayoutView):
         super().__init__()
         self.bot = bot
         self.text_display = discord.ui.TextDisplay(
-            content=f"# {MELVIN_EMOJI} Melvin\nYAGPDB written in python under the discord.py framework, by someone still learning python. features user and guild install commands, welcoming configuration, cv2 messages over legacy embeds, and much more. Melvin is open source, and open to contributions, so if you want to contribute, feel free. **[github](https://github.com/saltgranule/Melvin)**\n\n**currently in {len(self.bot.guilds)} guilds.**",
+            content=f"# {MELVIN_EMOJI} Melvin\nYAGPDB written in Python under the discord.py framework, by someone still learning Python. Features user and guild install commands, welcoming configuration, CV2 messages over legacy embeds, and much more. Melvin is open source, and open to contributions, so if you want to contribute, feel free. **[GitHub](https://github.com/saltgranule/Melvin)**\n\n**Currently in {len(self.bot.guilds)} guilds.**",
         )
         media_gallery = discord.ui.MediaGallery(
             discord.MediaGalleryItem(media=f"{MELVIN_BANNER}"),
         )
         banner_container = discord.ui.Container(media_gallery)
         adbutton = discord.ui.Button(
-            label="support server",
+            label="Support Server",
             style=discord.ButtonStyle.link,
             url=f"{INVITE_URL}",
         )
         addbutton = discord.ui.Button(
-            label="add melvin",
+            label="Add Melvin",
             style=discord.ButtonStyle.link,
             url="https://discord.com/oauth2/authorize?client_id=1468362201197973756",
         )
         gitbutton = discord.ui.Button(
-            label="github",
+            label="GitHub",
             style=discord.ButtonStyle.link,
             url="https://github.com/saltgranule/Melvin",
         )
@@ -47,24 +47,24 @@ class AdUI(discord.ui.LayoutView):
 class DebugCog(
     commands.GroupCog,
     name="debug",
-    description="some debug stuff",
+    description="Commands for debugging purposes.",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="think", description="send raw ResponseUI class")
+    @app_commands.command(name="think", description="Send raw ResponseUI class.")
     async def think(self, interaction: discord.Interaction) -> None:
         view = ResponseUI()
         await interaction.response.send_message(view=view)
 
-    @app_commands.command(name="error", description="send raw ErrorUI class")
+    @app_commands.command(name="error", description="Send raw ErrorUI class.")
     async def error(self, interaction: discord.Interaction) -> None:
         view = ErrorUI(
-            message=f"**something went wrong with that. please [join the support server]({INVITE_URL}) to report this issue.**",
+            message=f"**Something went wrong with that. Please [join the support server]({INVITE_URL}) to report this issue.**",
         )
         await interaction.response.send_message(view=view)
 
-    @app_commands.command(name="ad", description="send advertisement")
+    @app_commands.command(name="ad", description="Send advertisement.")
     async def ad(self, interaction: discord.Interaction) -> None:
         view = AdUI(self.bot)
         await interaction.response.send_message(view=view)
