@@ -121,7 +121,7 @@ class AgentCog(
             ai_response = self.truncate(await self.query_gemini(prompt, use_search=search))
             elapsed = time.time() - start
             model_button = discord.ui.Button(
-                label="model",
+                label="Model",
                 style=discord.ButtonStyle.link,
                 url="https://aistudio.google.com/",
             )
