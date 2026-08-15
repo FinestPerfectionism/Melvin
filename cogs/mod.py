@@ -104,7 +104,7 @@ class ModCog(
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def cases(
-        self, interaction: discord.Interaction, target: discord.User | discord.Member
+        self, interaction: discord.Interaction, target: discord.User | discord.Member,
     ) -> None:
         await interaction.response.defer()
         #guard clause
@@ -128,7 +128,7 @@ class ModCog(
         description="Remove a mod action from a users account, takes the ID.",
     )
     @app_commands.describe(
-        case_id="takes the CaseID typically dmed to the user, find it by using /case [user]"
+        case_id="takes the CaseID typically dmed to the user, find it by using /case [user]",
     )
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
@@ -578,7 +578,7 @@ class ModCog(
         # guard clause
         if not member.is_timed_out():
             await interaction.followup.send(
-                view=ErrorUI("**Member is not timed out.**")
+                view=ErrorUI("**Member is not timed out.**"),
             )
             return
         if (
@@ -851,7 +851,7 @@ class ModCog(
 
     # role remove cmd
     @app_commands.command(
-        name="role-remove", description="Remove a role from a member."
+        name="role-remove", description="Remove a role from a member.",
     )
     @app_commands.describe(
         member="The member to remove the role from.",

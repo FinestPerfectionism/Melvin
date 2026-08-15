@@ -110,7 +110,7 @@ class HelpView(discord.ui.LayoutView):
             self.cog_select = CogSelect(cogs)
             select_row = discord.ui.ActionRow(self.cog_select)
             content_container = discord.ui.Container(
-                self.text_display, separator, select_row
+                self.text_display, separator, select_row,
             )
         else:
             content_container = discord.ui.Container(self.text_display, separator)
@@ -178,7 +178,7 @@ class CaseRemoveButton(discord.ui.Button):
 
 class CaseActionSelect(discord.ui.Select):
     def __init__(
-        self, target_user: discord.User | discord.Member, db_path: str
+        self, target_user: discord.User | discord.Member, db_path: str,
     ) -> None:
         self.target_user = target_user
         self.db_path = db_path
@@ -256,23 +256,23 @@ class CasesView(discord.ui.LayoutView):
         header_text = f"### {MELVIN_EMOJI} Cases for {self.target_user.mention}"
         self.container.add_item(discord.ui.TextDisplay(header_text))
         self.container.add_item(
-            discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small)
+            discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small),
         )
 
         async with aiosqlite.connect(self.db_path) as conn:
             if self.current_action == "all":
                 query = """
-                    SELECT case_id, action_type, reason, mod_id 
-                    FROM mod_cases 
-                    WHERE guild_id = ? AND user_id = ? 
+                    SELECT case_id, action_type, reason, mod_id
+                    FROM mod_cases
+                    WHERE guild_id = ? AND user_id = ?
                     ORDER BY case_id DESC LIMIT 5
                 """
                 params = (guild_id, self.target_user.id)
             else:
                 query = """
-                    SELECT case_id, action_type, reason, mod_id 
-                    FROM mod_cases 
-                    WHERE guild_id = ? AND user_id = ? AND action_type = ? 
+                    SELECT case_id, action_type, reason, mod_id
+                    FROM mod_cases
+                    WHERE guild_id = ? AND user_id = ? AND action_type = ?
                     ORDER BY case_id DESC LIMIT 5
                 """
                 params = (guild_id, self.target_user.id, self.current_action)
@@ -296,10 +296,10 @@ class CasesView(discord.ui.LayoutView):
                 self.container.add_item(section)
 
         self.container.add_item(
-            discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small)
+            discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small),
         )
         self.container.add_item(
-            discord.ui.ActionRow(CaseActionSelect(self.target_user, self.db_path))
+            discord.ui.ActionRow(CaseActionSelect(self.target_user, self.db_path)),
         )
 
     async def refresh(self, interaction: discord.Interaction) -> None:

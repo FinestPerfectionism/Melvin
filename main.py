@@ -59,6 +59,7 @@ async def help_command(interaction: discord.Interaction) -> None:
     view = HelpView(bot)
     await interaction.followup.send(view=view)
 
+
 async def main() -> None:
     load_dotenv()
     token = os.getenv("token")
