@@ -106,6 +106,7 @@ class ModCog(
     async def cases(
         self, interaction: discord.Interaction, target: discord.User | discord.Member
     ) -> None:
+        await interaction.response.defer()
         #guard clause
         if target.bot:
             await interaction.followup.send(
