@@ -107,7 +107,7 @@ class ModCog(
         self, interaction: discord.Interaction, target: discord.User | discord.Member,
     ) -> None:
         await interaction.response.defer()
-        #guard clause
+        # guard clause
         if target.bot:
             await interaction.followup.send(
                 view=ErrorUI("**You tried to view the cases of an app.**"),

@@ -7,6 +7,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from globals import DisplayNameEffect, DisplayNameFont
 from ui import HelpView
 
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +33,33 @@ class Melvin(commands.Bot):
                 guild=True,
                 user=True,
             ),
+        )
+
+    async def set_name_style(
+        self,
+        *,
+        guild: discord.Guild,
+        font_id: DisplayNameFont,
+        effect_id: DisplayNameEffect,
+        colors: list[str],
+    ) -> None:
+        color_integers = [int(hex_code, 16) for hex_code in colors]
+
+        await self.http.request(
+            route=discord.http.Route("PATCH", "/guilds/{guild_id}/members/@me", guild_id=guild.id),
+            json={
+              "display_name_font_id": font_id.value,
+              "display_name_effect_id": effect_id.value,
+              "display_name_colors": color_integers,
+            },
+        )
+
+    async def reset_name_style(self, *, guild: discord.Guild) -> None:
+        await self.set_name_style(
+            guild=guild,
+            font_id=DisplayNameFont.default,
+            effect_id=DisplayNameEffect.solid,
+            colors=["FFFFFF", "FFFFFF"],
         )
 
     async def setup_hook(self) -> None:

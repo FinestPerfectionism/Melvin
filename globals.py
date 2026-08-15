@@ -1,3 +1,5 @@
+import enum
+
 PRIMARY = "#f8b95c"
 SECONDARY = "#6f9459"  # green
 TERTIARY = "#bd3b44"  # red
@@ -12,3 +14,27 @@ INVITE_URL = "https://discord.gg/PfyKM7dyx4"
 MELVIN_BANNER = "https://cdn.discordapp.com/attachments/1537874702146469988/1538143639732228257/MYBANNER.png?ex=6a819b65&is=6a8049e5&hm=d7a1d6fb447d6e3702a9a51c920b5c8ce1c6e406598060868320a1f94ad028de&"
 MELVIN_HELP_BANNER = "https://cdn.discordapp.com/attachments/1537874702146469988/1538151792758493215/CMDBANNER.png?ex=6a81a2fc&is=6a80517c&hm=6f6cf55a64369c58e234a57388258f2adf486b7d3d10c4b530243ec6e22ebc40&"
 MELVIN_GITHUB_URL = "https://github.com/saltgranule/Melvin"
+
+
+class DisplayNameFont(enum.Enum):
+    bangers = 1  # Unimplemented
+    bio_rhyme = 2  # Unimplemented
+    cherry_bomb = 3
+    chicle = 4
+    compagnon = 5  # Unimplemented
+    museo_moderno = 6
+    neo_castel = 7
+    pixelify = 8
+    ribes = 9  # Unimplemented
+    sinistre = 10
+    default = 11
+    zilla_slab = 12
+
+
+class DisplayNameEffect(enum.Enum):
+    solid = 1
+    gradient = 2
+    neon = 3
+    toon = 4
+    pop = 5
+    glow = 6  # Unimplemented
