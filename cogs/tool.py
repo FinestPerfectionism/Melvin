@@ -36,7 +36,7 @@ class ToolCog(
         except UnicodeDecodeError as e:
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    f"Decoded successfully, but the result is not valid text: **{e}**."
+                    f"Decoded successfully, but the result is not valid text: **{e}**.",
                 ),
             )
             return
@@ -46,7 +46,7 @@ class ToolCog(
         await interaction.edit_original_response(view=view)
 
     @app_commands.command(
-        name="base64-encode", description="Encode a string as Base64."
+        name="base64-encode", description="Encode a string as Base64.",
     )
     @app_commands.describe(text="The string to encode.")
     async def base64encode(self, interaction: discord.Interaction, text: str) -> None:

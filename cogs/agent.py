@@ -115,13 +115,13 @@ class AgentCog(
     )
     @app_commands.checks.cooldown(2, 60)
     async def ask(
-        self, interaction: discord.Interaction, prompt: str, search: bool = False
+        self, interaction: discord.Interaction, prompt: str, search: bool = False,
     ) -> None:
         await interaction.response.defer()
         try:
             start = time.time()
             ai_response = self.truncate(
-                await self.query_gemini(prompt, use_search=search)
+                await self.query_gemini(prompt, use_search=search),
             )
             elapsed = time.time() - start
             model_button = discord.ui.Button(
@@ -130,7 +130,7 @@ class AgentCog(
                 url="https://aistudio.google.com/",
             )
             prompt_section = discord.ui.Section(
-                f"# **prompt:** {prompt}",
+                f"# **Prompt:** `{discord.utils.escape_markdown(prompt)}`",
                 accessory=model_button,
             )
 

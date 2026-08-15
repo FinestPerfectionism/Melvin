@@ -82,7 +82,7 @@ class AuditCog(
             await conn.commit()
 
     @app_commands.command(
-        name="channel", description="Set the channel for server logs."
+        name="channel", description="Set the channel for server logs.",
     )
     @app_commands.describe(channel="The channel to send logs to.")
     @app_commands.checks.has_permissions(manage_guild=True)
