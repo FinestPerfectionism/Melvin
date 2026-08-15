@@ -35,7 +35,7 @@ def _describe_style(role: discord.Role) -> str:
 class AuditCog(
     commands.GroupCog,
     name="audit",
-    description="an audit logging config config",
+    description="Audit logging configuration and handling.",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -80,8 +80,8 @@ class AuditCog(
             """)
             await conn.commit()
 
-    @app_commands.command(name="channel", description="set the channel for server logs")
-    @app_commands.describe(channel="the channel to send logs to")
+    @app_commands.command(name="channel", description="Set the channel for server logs.")
+    @app_commands.describe(channel="The channel to send logs to.")
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.guild_only()
     async def channel(
@@ -107,13 +107,13 @@ class AuditCog(
                 await conn.commit()
         except Exception:
             log.exception(
-                "failed to set log channel for guild %s", interaction.guild.id,
+                "Failed to set log channel for guild %s.", interaction.guild.id,
             )
-            view = ErrorUI(message="**something went wrong saving that**")
+            view = ErrorUI(message="**Something went wrong saving that.**")
             await interaction.edit_original_response(view=view)
             return
 
-        view.text_display.content = f"# {MELVIN_MISC_EMOJI} logging \n**logging channel set to {channel.mention}**"
+        view.text_display.content = f"# {MELVIN_MISC_EMOJI} Logging \n**Logging channel set to {channel.mention}.**"
         view.container.accent_color = discord.Color.from_str(PRIMARY)
         await interaction.edit_original_response(view=view)
 
@@ -122,11 +122,11 @@ class AuditCog(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
-            msg = "**you don't have permission to do this.**"
+            msg = "**You do not have permission to do this.**"
         elif isinstance(error, app_commands.NoPrivateMessage):
-            msg = "**this command can only be used in a server.**"
+            msg = "**This command can only be used in a server.**"
         else:
-            msg = f"something went wrong, **{error}. please [join the support server]({INVITE_URL}) to report this issue.**"
+            msg = f"Something went wrong, **{error}. Please [join the support server]({INVITE_URL}) to report this issue.**"
 
         error_ui = ErrorUI(msg)
         if interaction.response.is_done():
@@ -160,7 +160,7 @@ class AuditCog(
 
         container = discord.ui.Container(
             discord.ui.Section(
-                f"**{member} joined,**\n**member #{member.guild.member_count}**",
+                f"**{member} joined.**\n**Member #{member.guild.member_count}.**",
                 accessory=discord.ui.Thumbnail(media=member.display_avatar.url),
             ),
             accent_color=discord.Color.from_str(SECONDARY),
@@ -183,7 +183,7 @@ class AuditCog(
 
         container = discord.ui.Container(
             discord.ui.Section(
-                f"**{member} left,**\n**member #{member.guild.member_count}**",
+                f"**{member} left.**\n**Member #{member.guild.member_count}.**",
                 accessory=discord.ui.Thumbnail(media=member.display_avatar.url),
             ),
             accent_color=discord.Color.from_str(TERTIARY),
@@ -233,7 +233,7 @@ class AuditCog(
                     f"**Timed out until:** {discord.utils.format_dt(after.timed_out_until, style='f')}",
                 )
             else:
-                changes.append("**Timeout removed**")
+                changes.append("**Timeout removed.**")
 
         if not changes:
             return
@@ -291,7 +291,7 @@ class AuditCog(
                     f"**Display name:** {before.global_name or before.name} | {after.global_name or after.name}",
                 )
             if before.avatar != after.avatar:
-                changes.append("**Avatar changed**")
+                changes.append("**Avatar changed.**")
 
             if not changes:
                 continue
@@ -366,13 +366,13 @@ class AuditCog(
         container.add_item(
             discord.ui.TextDisplay(
                 "### Before\n"
-                f"{self.clean_and_truncate(before.content) or '[No content, likely an embed or attachment]'}",
+                f"{self.clean_and_truncate(before.content) or '[No content, likely an embed or attachment.]'}",
             ),
         )
         container.add_item(
             discord.ui.TextDisplay(
                 "### After\n"
-                f"{self.clean_and_truncate(after.content) or '[No content, likely an embed or attachment]'}",
+                f"{self.clean_and_truncate(after.content) or '[No content, likely an embed or attachment.]'}",
             ),
         )
         view = discord.ui.LayoutView()
@@ -416,7 +416,7 @@ class AuditCog(
         container.add_item(
             discord.ui.TextDisplay(
                 "### Content\n"
-                f"{self.clean_and_truncate((msg.content) or '[No content, likely an embed or attachment]')}",
+                f"{self.clean_and_truncate((msg.content) or '[No content, likely an embed or attachment.]')}",
             ),
         )
         view = discord.ui.LayoutView()
@@ -568,7 +568,7 @@ class AuditCog(
         if before.name != after.name:
             changes.append(f"**Name:** {before.name} | {after.name}")
         if getattr(before, "topic", None) != getattr(after, "topic", None):
-            changes.append("**Topic updated**")
+            changes.append("**Topic updated.**")
 
         if not changes:
             return
@@ -678,7 +678,7 @@ class AuditCog(
             )
 
         if before.permissions != after.permissions:
-            changes.append("**Permissions updated**")
+            changes.append("**Permissions updated.**")
 
         if not changes:
             return

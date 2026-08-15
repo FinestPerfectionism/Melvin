@@ -12,16 +12,16 @@ from ui import ErrorUI, ResponseUI
 class ToolCog(
     commands.GroupCog,
     name="tool",
-    description="some more tool stuff",
+    description="Utility tools and helper commands.",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @app_commands.command(
         name="base64-decode",
-        description="decode a base64 encoded string",
+        description="Decode a Base64-encoded string.",
     )
-    @app_commands.describe(text="the base64 string to decode")
+    @app_commands.describe(text="The Base64 string to decode.")
     async def base64decode(self, interaction: discord.Interaction, text: str) -> None:
         await interaction.response.defer(ephemeral=False)
 
@@ -30,21 +30,21 @@ class ToolCog(
             decodedstr = decodedbyte.decode("utf-8")
         except binascii.Error as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"not valid b64, **{e}**"),
+                view=ErrorUI(f"Not a valid Base64 string: **{e}**."),
             )
             return
         except UnicodeDecodeError as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"decoded, but the result isn't valid text, **{e}**"),
+                view=ErrorUI(f"Decoded successfully, but the result is not valid text: **{e}**."),
             )
             return
 
         view = ResponseUI()
-        view.text_display.content = f"**{decodedstr}** was the attempted decode."
+        view.text_display.content = f"**{decodedstr}** was the decoded result."
         await interaction.edit_original_response(view=view)
 
-    @app_commands.command(name="base64-encode", description="encode a string as base64")
-    @app_commands.describe(text="the string to encode")
+    @app_commands.command(name="base64-encode", description="Encode a string as Base64.")
+    @app_commands.describe(text="The string to encode.")
     async def base64encode(self, interaction: discord.Interaction, text: str) -> None:
         await interaction.response.defer(ephemeral=False)
 
@@ -53,15 +53,19 @@ class ToolCog(
             encodedstr = encodedbyte.decode("utf-8")
         except Exception as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"something went wrong encoding this: **{e}**"),
+                view=ErrorUI(f"Something went wrong while encoding this: **{e}**."),
             )
             return
 
         view = ResponseUI()
-        view.text_display.content = f"**{encodedstr}** was the attempted encode."
+        view.text_display.content = f"**{encodedstr}** was the encoded result."
         await interaction.edit_original_response(view=view)
 
-    @app_commands.command(name="speak", description="speak through melvin")
+    @app_commands.command(name="speak", description="Speak through Melvin.")
+    @app_commands.describe(
+        text="The message text to send.",
+        attachment="Optional attachment to include with the message.",
+    )
     @app_commands.checks.has_permissions(manage_messages=True)
     async def speak(
         self,
@@ -96,7 +100,7 @@ class ToolCog(
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             view = ResponseUI()
-            view.text_display.content = f"**{MELVIN_WARN_EMOJI} This command is gated, read our documentation in our [support server.]({INVITE_URL})**"
+            view.text_display.content = f"**{MELVIN_WARN_EMOJI} This command is gated. Please read our documentation in our [support server]({INVITE_URL}).**"
 
             if interaction.response.is_done():
                 await interaction.followup.send(view=view, ephemeral=True)

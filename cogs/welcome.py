@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class WelcomeCog(
     commands.GroupCog,
     name="welcome",
-    description="some welcome stuff",
+    description="Configure welcome messages and settings for new members.",
 ):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -47,11 +47,11 @@ class WelcomeCog(
         error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
-            msg = "**you don't have permission to do this.**"
+            msg = "**You do not have permission to do this.**"
         elif isinstance(error, app_commands.NoPrivateMessage):
-            msg = "**this command can only be used in a server.**"
+            msg = "**This command can only be used in a server.**"
         else:
-            msg = f"something went wrong, **{error}. please [join the support server]({INVITE_URL}) to report this issue.**"
+            msg = f"Something went wrong: **{error}. Please [join the support server]({INVITE_URL}) to report this issue.**"
 
         error_ui = ErrorUI(msg)
         if interaction.response.is_done():
@@ -60,9 +60,9 @@ class WelcomeCog(
             await interaction.response.send_message(view=error_ui, ephemeral=False)
 
     @app_commands.command(
-        name="channel", description="set the channel for member join events.",
+        name="channel", description="Set the channel for member join events.",
     )
-    @app_commands.describe(channel="the channel to send welcome messages to")
+    @app_commands.describe(channel="The channel to send welcome messages to.")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def channel(
         self, interaction: discord.Interaction, channel: discord.TextChannel,
@@ -86,11 +86,11 @@ class WelcomeCog(
             log.exception("failed to set welcome channel", interaction.guild.id)
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    f"**something went wrong saving that. please [join the support server]({INVITE_URL}) to report this issue.**",
+                    f"**Something went wrong saving that. Please [join the support server]({INVITE_URL}) to report this issue.**",
                 ),
             )
             return
-        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} welcome set \n**welcome channel set to {channel.mention}**"
+        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Welcome Channel Set\n**Welcome channel set to {channel.mention}.**"
         await interaction.edit_original_response(view=view)
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
@@ -113,15 +113,15 @@ class WelcomeCog(
 
     @app_commands.command(
         name="config",
-        description="set the welcome message and optional attachment/buttons",
+        description="Set the welcome message and optional attachments or buttons.",
     )
     @app_commands.describe(
-        text="the welcome message to send (use {member} to mention the new member)",
-        attachment_url="optional image url to attach to the welcome message",
-        b1_url="optional first button url",
-        b1_label="label for the first button (defaults to 'link')",
-        b2_url="optional second button url",
-        b2_label="label for the second button (defaults to 'link')",
+        text="The welcome message to send (use {member} to mention the new member).",
+        attachment_url="Optional image URL to attach to the welcome message.",
+        b1_url="Optional first button URL.",
+        b1_label="Label for the first button (defaults to 'Link').",
+        b2_url="Optional second button URL.",
+        b2_label="Label for the second button (defaults to 'Link 2').",
     )
     @app_commands.checks.has_permissions(manage_guild=True)
     async def config(
@@ -143,7 +143,7 @@ class WelcomeCog(
         for url in (attachment_url, b1_url, b2_url):
             if url and not url.startswith(("http://", "https://")):
                 await interaction.edit_original_response(
-                    view=ErrorUI("all URLs must be valid http(s) links."),
+                    view=ErrorUI("All URLs must be valid HTTP or HTTPS links."),
                 )
                 return
 
@@ -162,7 +162,7 @@ class WelcomeCog(
         except Exception as e:
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**",
+                    f"**Database error: {e}. Please [join the support server]({INVITE_URL}) to report this issue.**",
                 ),
             )
             return
@@ -171,7 +171,7 @@ class WelcomeCog(
         if existing_channel_id is None:
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    "**set a welcome channel first, using /welcome channel.**",
+                    "**Set a welcome channel first using `/welcome channel`.**",
                 ),
             )
             return
@@ -190,22 +190,22 @@ class WelcomeCog(
                         text,
                         attachment_url,
                         b1_url,
-                        b1_label or "link",
+                        b1_label or "Link",
                         b2_url,
-                        b2_label or "link 2",
+                        b2_label or "Link 2",
                     ),
                 )
                 await conn.commit()
         except Exception as e:
             await interaction.edit_original_response(
                 view=ErrorUI(
-                    f"**database error, {e}. please [join the support server]({INVITE_URL}) to report this issue.**",
+                    f"**Database error: {e}. Please [join the support server]({INVITE_URL}) to report this issue.**",
                 ),
             )
             return
 
         action_ui.text_display.content = (
-            f"**{MELVIN_CHECK_EMOJI} welcome message updated**"
+            f"**{MELVIN_CHECK_EMOJI} Welcome message updated.**"
         )
         await interaction.edit_original_response(view=action_ui)
 
@@ -243,7 +243,7 @@ class WelcomeCog(
         if config is None or config["channel"] is None:
             return
 
-        text = config["message"] or f"welcome, {member.mention}!"
+        text = config["message"] or f"Welcome, {member.mention}!"
         text = text.replace("{member}", member.mention)
 
         view = ResponseUI()

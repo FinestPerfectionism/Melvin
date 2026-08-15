@@ -13,10 +13,10 @@ from globals import (
 primary = f"{PRIMARY}"
 secondary = f"{SECONDARY}"  # green
 tertiary = f"{TERTIARY}"  # red
-message = f"**something went wrong with that. please [join the support server]({INVITE_URL}) to report this issue.**"
+message = f"**Something went wrong with that. Please [join the support server]({INVITE_URL}) to report this issue.**"
 
 
-# HelpView Funcs to grasp command group details
+# HelpView functions to grasp command group details
 def get_cog_commands(cog: commands.Cog) -> list:
     group = getattr(cog, "__cog_app_commands_group__", None)
     if group is not None:
@@ -34,7 +34,7 @@ def flatten_commands(cmd: object) -> list:
 
 
 def help_page(cog: commands.Cog) -> str:
-    lines = [f"# {MELVIN_EMOJI} {cog.__cog_group_name__} cmds"]
+    lines = [f"# {MELVIN_EMOJI} {cog.__cog_group_name__} Commands"]
     if (
         hasattr(cog, "__cog_group_description__")
         and cog.__cog_group_description__ != "…"
@@ -49,9 +49,9 @@ def help_page(cog: commands.Cog) -> str:
 
     return "\n".join(lines)
 
-#select menue
-class CogSelect(discord.ui.Select):
 
+# select menu
+class CogSelect(discord.ui.Select):
     def __init__(self, cogs: list[commands.Cog]) -> None:
         self.cogs_map = {cog.__cog_group_name__: cog for cog in cogs}
 
@@ -69,7 +69,13 @@ class CogSelect(discord.ui.Select):
             for cog in cogs
         ]
 
-        super().__init__(placeholder="Select a cog category", min_values=1, max_values=1, options=options, custom_id="help_view:cog_select")
+        super().__init__(
+            placeholder="Select a cog category.",
+            min_values=1,
+            max_values=1,
+            options=options,
+            custom_id="help_view:cog_select",
+        )
 
     async def callback(self, interaction: discord.Interaction) -> None:
         selected_cog_name = self.values[0]
@@ -81,13 +87,12 @@ class CogSelect(discord.ui.Select):
 
 
 class HelpView(discord.ui.LayoutView):
-
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__(timeout=None)
         self.bot = bot
 
         banner_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem(media="https://cdn.discordapp.com/attachments/1537874702146469988/1537874741925388372/3dwyry.webp?ex=6a80a0f6&is=6a7f4f76&hm=db86417eb589278eb4c9acebe893aaa50efb2a01508f5696df570fa0eeceb639&"),
+            discord.MediaGalleryItem("https://cdn.discordapp.com/attachments/1537874702146469988/1537874741925388372/3dwyry.webp?ex=6a80a0f6&is=6a7f4f76&hm=db86417eb589278eb4c9acebe893aaa50efb2a01508f5696df570fa0eeceb639&"),
         )
         banner_container = discord.ui.Container(banner_gallery)
 
@@ -156,7 +161,7 @@ class ErrorUI(discord.ui.LayoutView):
         super().__init__()
 
         text_display = discord.ui.TextDisplay(
-            content=f"# {MELVIN_CROSS_EMOJI} error\n\n{message}",
+            content=f"# {MELVIN_CROSS_EMOJI} Error\n\n{message}",
         )
 
         container = discord.ui.Container(

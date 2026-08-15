@@ -39,21 +39,21 @@ class Melvin(commands.Bot):
         loop.set_debug(True)
         try:
             resolver = aiodns.DNSResolver(nameservers=["1.1.1.1", "8.8.8.8"])
-            bot.http._HTTPClient__session._connector._resolver._resolver = resolver
-            log.info("successful resolve")
+            self.http._HTTPClient__session._connector._resolver._resolver = resolver
+            log.info("DNS resolver successfully configured.")
         except Exception as e:
-            log.info(f"could not resolve {e}")
-        log.info("logging started")
+            log.info(f"Could not configure DNS resolver: {e}.")
+        log.info("Logging started.")
 
     async def on_ready(self) -> None:
-        print(f"{bot.user}")
-        await bot.tree.sync()
+        log.info(f"Logged in as {self.user}.")
+        await self.tree.sync()
 
 
 bot = Melvin()
 
 
-@bot.tree.command(name="help", description="take a peek at melvins commands")
+@bot.tree.command(name="help", description="Take a peek at Melvin's commands.")
 async def help_command(interaction: discord.Interaction) -> None:
     await interaction.response.defer()
     view = HelpView(bot)
@@ -65,7 +65,7 @@ async def main() -> None:
     token = os.getenv("token")
 
     if not token:
-        raise RuntimeError("Token is not set")
+        raise RuntimeError("Token is not set.")
 
     async with bot:
         await bot.load_extension("cogs.info")
@@ -80,4 +80,5 @@ async def main() -> None:
         await bot.start(token)
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
