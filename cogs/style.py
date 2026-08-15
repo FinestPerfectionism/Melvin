@@ -4,7 +4,13 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import MELVIN_CHECK_EMOJI, SECONDARY, DisplayNameEffect, DisplayNameFont
+from globals import (
+    INVITE_URL,
+    MELVIN_CHECK_EMOJI,
+    SECONDARY,
+    DisplayNameEffect,
+    DisplayNameFont,
+)
 from main import Melvin
 from ui import ErrorUI, ResponseUI
 
@@ -20,7 +26,27 @@ class StyleCog(
     def __init__(self, bot: Melvin) -> None:
         self.bot = bot
 
+    # cogwide error handling
+    async def cog_app_command_error(
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
+    ) -> None:
+        if isinstance(error, app_commands.MissingPermissions):
+            msg = "**You do not have permission to do this.**"
+        elif isinstance(error, app_commands.NoPrivateMessage):
+            msg = "**This command can only be used in a server.**"
+        else:
+            msg = f"Something went wrong: **{error}. Please [join the support server]({INVITE_URL}) to report this issue.**"
+
+        error_ui = ErrorUI(msg)
+        if interaction.response.is_done():
+            await interaction.edit_original_response(view=error_ui)
+        else:
+            await interaction.response.send_message(view=error_ui, ephemeral=False)
+
     @app_commands.command(name="reset", description="Reset Melvin's name style for this guild.")
+    @app_commands.checks.has_permissions(manage_guild=True)
     async def reset(self, interaction: discord.Interaction) -> None:
         if interaction.guild is None:
             return
@@ -32,6 +58,7 @@ class StyleCog(
         await interaction.response.send_message(view=view)
 
     @app_commands.command(name="set", description="Set Melvin's name style for this guild.")
+    @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.describe(
         font="The display name's font.",
         effect="The display name's effect.",
