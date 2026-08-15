@@ -106,7 +106,12 @@ class ModCog(
     async def cases(
         self, interaction: discord.Interaction, target: discord.User | discord.Member
     ) -> None:
-        await interaction.response.defer()
+        #guard clause
+        if target.bot:
+            await interaction.followup.send(
+                view=ErrorUI("**You tried to view the cases of an app.**"),
+            )
+            return
 
         view = CasesView(target_user=target, db_path=self.db_path)
         await view.build_components(interaction.guild_id)
