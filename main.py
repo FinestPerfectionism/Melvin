@@ -105,6 +105,7 @@ async def main() -> None:
         await bot.load_extension("cogs.welcome")
         await bot.load_extension("cogs.private")
         await bot.load_extension("cogs.timezone")
+        await bot.load_extension("cogs.style")
         await bot.start(token)
 
 
