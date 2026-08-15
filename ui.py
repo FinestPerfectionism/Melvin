@@ -155,6 +155,13 @@ class CaseRemoveButton(discord.ui.Button):
         self.db_path = db_path
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        if (
+            isinstance(interaction.user, discord.Member)
+            and not interaction.user.guild_permissions.moderate_members
+        ):
+            await interaction.response.send_message("**You lack permissions to remove cases.**", ephemeral=True)
+            return
+
         await interaction.response.defer()
 
         # remove the case
