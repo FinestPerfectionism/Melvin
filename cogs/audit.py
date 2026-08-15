@@ -53,7 +53,8 @@ class AuditCog(
         )
 
     def channel_display(
-        self, channel: discord.abc.Messageable | discord.abc.GuildChannel,
+        self,
+        channel: discord.abc.Messageable | discord.abc.GuildChannel,
     ) -> str:
         if isinstance(channel, discord.Thread):
             parent = channel.parent
@@ -80,7 +81,9 @@ class AuditCog(
             """)
             await conn.commit()
 
-    @app_commands.command(name="channel", description="Set the channel for server logs.")
+    @app_commands.command(
+        name="channel", description="Set the channel for server logs."
+    )
     @app_commands.describe(channel="The channel to send logs to.")
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.guild_only()
@@ -107,7 +110,8 @@ class AuditCog(
                 await conn.commit()
         except Exception:
             log.exception(
-                "Failed to set log channel for guild %s.", interaction.guild.id,
+                "Failed to set log channel for guild %s.",
+                interaction.guild.id,
             )
             view = ErrorUI(message="**Something went wrong saving that.**")
             await interaction.edit_original_response(view=view)
@@ -119,7 +123,9 @@ class AuditCog(
 
     @channel.error
     async def channel_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError,
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             msg = "**You do not have permission to do this.**"
@@ -170,7 +176,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -193,14 +200,17 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_member_update(
-        self, before: discord.Member, after: discord.Member,
+        self,
+        before: discord.Member,
+        after: discord.Member,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
         if log_channel is None:
@@ -261,7 +271,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -319,14 +330,17 @@ class AuditCog(
 
             try:
                 await log_channel.send(
-                    view=view, allowed_mentions=discord.AllowedMentions.none(),
+                    view=view,
+                    allowed_mentions=discord.AllowedMentions.none(),
                 )
             except (discord.Forbidden, discord.HTTPException):
                 pass
 
     @commands.Cog.listener()
     async def on_message_edit(
-        self, before: discord.Message, after: discord.Message,
+        self,
+        before: discord.Message,
+        after: discord.Message,
     ) -> None:
         if before.author.bot or before.content == after.content:
             return
@@ -380,7 +394,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -424,7 +439,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -455,7 +471,8 @@ class AuditCog(
             view.add_item(container)
             try:
                 await log_channel.send(
-                    view=view, allowed_mentions=discord.AllowedMentions.none(),
+                    view=view,
+                    allowed_mentions=discord.AllowedMentions.none(),
                 )
             except (discord.Forbidden, discord.HTTPException):
                 pass
@@ -476,7 +493,8 @@ class AuditCog(
             view.add_item(container)
             try:
                 await log_channel.send(
-                    view=view, allowed_mentions=discord.AllowedMentions.none(),
+                    view=view,
+                    allowed_mentions=discord.AllowedMentions.none(),
                 )
             except (discord.Forbidden, discord.HTTPException):
                 pass
@@ -501,7 +519,8 @@ class AuditCog(
             view.add_item(container)
             try:
                 await log_channel.send(
-                    view=view, allowed_mentions=discord.AllowedMentions.none(),
+                    view=view,
+                    allowed_mentions=discord.AllowedMentions.none(),
                 )
             except (discord.Forbidden, discord.HTTPException):
                 pass
@@ -526,7 +545,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -551,14 +571,17 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_guild_channel_update(
-        self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel,
+        self,
+        before: discord.abc.GuildChannel,
+        after: discord.abc.GuildChannel,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
         if log_channel is None:
@@ -593,7 +616,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -616,7 +640,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -639,14 +664,17 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_guild_role_update(
-        self, before: discord.Role, after: discord.Role,
+        self,
+        before: discord.Role,
+        after: discord.Role,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
         if log_channel is None:
@@ -698,14 +726,17 @@ class AuditCog(
         view.add_item(container)
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     @commands.Cog.listener()
     async def on_member_ban(
-        self, guild: discord.Guild, user: discord.User | discord.Member,
+        self,
+        guild: discord.Guild,
+        user: discord.User | discord.Member,
     ) -> None:
         log_channel = await self.get_log_channel(guild.id)
         if log_channel is None:
@@ -726,7 +757,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -752,7 +784,8 @@ class AuditCog(
 
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass

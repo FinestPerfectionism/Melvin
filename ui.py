@@ -1,3 +1,4 @@
+import aiosqlite
 import discord
 from discord.ext import commands
 
@@ -5,10 +6,10 @@ from globals import (
     INVITE_URL,
     MELVIN_CROSS_EMOJI,
     MELVIN_EMOJI,
+    MELVIN_HELP_BANNER,
     PRIMARY,
     SECONDARY,
     TERTIARY,
-    MELVIN_HELP_BANNER,
 )
 
 primary = f"{PRIMARY}"
@@ -101,13 +102,16 @@ class HelpView(discord.ui.LayoutView):
         initial_content = help_page(cogs[0]) if cogs else "No commands available."
         self.text_display = discord.ui.TextDisplay(content=initial_content)
         separator = discord.ui.Separator(
-            visible=True, spacing=discord.SeparatorSpacing.small,
+            visible=True,
+            spacing=discord.SeparatorSpacing.small,
         )
 
         if cogs:
             self.cog_select = CogSelect(cogs)
             select_row = discord.ui.ActionRow(self.cog_select)
-            content_container = discord.ui.Container(self.text_display, separator, select_row)
+            content_container = discord.ui.Container(
+                self.text_display, separator, select_row
+            )
         else:
             content_container = discord.ui.Container(self.text_display, separator)
 
@@ -131,6 +135,169 @@ class HelpView(discord.ui.LayoutView):
             await interaction.response.edit_message(view=self)
         else:
             await interaction.response.defer()
+
+
+# case ui
+class CaseRemoveButton(discord.ui.Button):
+    def __init__(
+        self,
+        case_id: int,
+        target_user: discord.User | discord.Member,
+        db_path: str,
+    ) -> None:
+        super().__init__(
+            label="Remove",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"cases_view:remove:{case_id}",
+        )
+        self.case_id = case_id
+        self.target_user = target_user
+        self.db_path = db_path
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
+
+        # remove the case
+        async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute(
+                "DELETE FROM mod_cases WHERE guild_id = ? AND case_id = ?",
+                (interaction.guild_id, self.case_id),
+            )
+            await conn.commit()
+
+        if isinstance(self.view, CasesView):
+            await self.view.refresh(interaction)
+
+
+class CaseActionSelect(discord.ui.Select):
+    def __init__(
+        self, target_user: discord.User | discord.Member, db_path: str
+    ) -> None:
+        self.target_user = target_user
+        self.db_path = db_path
+
+        options = [
+            discord.SelectOption(
+                label="All Actions",
+                value="all",
+                description="View all moderation cases.",
+            ),
+            discord.SelectOption(
+                label="Warns",
+                value="warn",
+                description="View warning cases.",
+            ),
+            discord.SelectOption(
+                label="Mutes",
+                value="mute",
+                description="View mute cases.",
+            ),
+            discord.SelectOption(
+                label="Kicks",
+                value="kick",
+                description="View kick cases.",
+            ),
+            discord.SelectOption(
+                label="Bans",
+                value="ban",
+                description="View ban cases.",
+            ),
+            discord.SelectOption(
+                label="Role Add",
+                value="role_add",
+                description="View role addition cases.",
+            ),
+            discord.SelectOption(
+                label="Role Remove",
+                value="role_remove",
+                description="View role removal cases.",
+            ),
+        ]
+
+        super().__init__(
+            placeholder="Select an action type.",
+            min_values=1,
+            max_values=1,
+            options=options,
+            custom_id="cases_view:action_select",
+        )
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
+        if isinstance(self.view, CasesView):
+            self.view.current_action = self.values[0]
+            await self.view.refresh(interaction)
+
+
+class CasesView(discord.ui.LayoutView):
+    def __init__(
+        self,
+        target_user: discord.User | discord.Member,
+        db_path: str,
+        current_action: str = "all",
+    ) -> None:
+        super().__init__(timeout=None)
+        self.target_user = target_user
+        self.db_path = db_path
+        self.current_action = current_action
+        self.container = discord.ui.Container()
+        self.add_item(self.container)
+
+    async def build_components(self, guild_id: int) -> None:
+        self.container.clear_items()
+
+        header_text = f"### {MELVIN_EMOJI} Cases for {self.target_user.mention}"
+        self.container.add_item(discord.ui.TextDisplay(header_text))
+        self.container.add_item(
+            discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small)
+        )
+
+        async with aiosqlite.connect(self.db_path) as conn:
+            if self.current_action == "all":
+                query = """
+                    SELECT case_id, action_type, reason, mod_id 
+                    FROM mod_cases 
+                    WHERE guild_id = ? AND user_id = ? 
+                    ORDER BY case_id DESC LIMIT 5
+                """
+                params = (guild_id, self.target_user.id)
+            else:
+                query = """
+                    SELECT case_id, action_type, reason, mod_id 
+                    FROM mod_cases 
+                    WHERE guild_id = ? AND user_id = ? AND action_type = ? 
+                    ORDER BY case_id DESC LIMIT 5
+                """
+                params = (guild_id, self.target_user.id, self.current_action)
+
+            async with conn.execute(query, params) as cursor:
+                rows = await cursor.fetchall()
+
+        if not rows:
+            if self.current_action == "all":
+                msg = f"**No cases found for {self.target_user.mention}.**"
+            else:
+                msg = f"**No cases found for {self.target_user.mention} under filter {self.current_action}.**"
+            self.container.add_item(discord.ui.TextDisplay(msg))
+        else:
+            for case_id, action_type, reason, mod_id in rows:
+                content = (
+                    f"**#{case_id} {action_type} by <@{mod_id}>**\n-# **{reason}**"
+                )
+                btn = CaseRemoveButton(case_id, self.target_user, self.db_path)
+                section = discord.ui.Section(content, accessory=btn)
+                self.container.add_item(section)
+
+        self.container.add_item(
+            discord.ui.Separator(visible=True, spacing=discord.SeparatorSpacing.small)
+        )
+        self.container.add_item(
+            discord.ui.ActionRow(CaseActionSelect(self.target_user, self.db_path))
+        )
+
+    async def refresh(self, interaction: discord.Interaction) -> None:
+        await self.build_components(interaction.guild_id)
+        await interaction.edit_original_response(view=self)
 
 
 class ThinkingText(discord.ui.TextDisplay):

@@ -36,7 +36,8 @@ class PrivateCog(
         )
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -53,7 +54,8 @@ class PrivateCog(
         )
         try:
             await log_channel.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         except (discord.Forbidden, discord.HTTPException):
             pass
@@ -76,7 +78,9 @@ class PrivateCog(
             return
 
         view = ResponseUI()
-        view.text_display.content = f"**{MELVIN_CHECK_EMOJI} Synced {len(synced)} command(s).**"
+        view.text_display.content = (
+            f"**{MELVIN_CHECK_EMOJI} Synced {len(synced)} command(s).**"
+        )
         view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.followup.send(view=view, ephemeral=True)
 

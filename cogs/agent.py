@@ -86,12 +86,12 @@ class AgentCog(
             )
         else:
             full_prompt = (
-                f"--- CURRENT DATE: {current_date_str} ---\n\n"
-                f"User Question: {prompt}"
+                f"--- CURRENT DATE: {current_date_str} ---\n\nUser Question: {prompt}"
             )
 
         config = types.GenerateContentConfig(
-            system_instruction=system_instruction, temperature=0.7,
+            system_instruction=system_instruction,
+            temperature=0.7,
         )
         try:
             response = await self.client.aio.models.generate_content(
@@ -114,11 +114,15 @@ class AgentCog(
         search="Whether to perform a web search for grounding context.",
     )
     @app_commands.checks.cooldown(2, 60)
-    async def ask(self, interaction: discord.Interaction, prompt: str, search: bool = False) -> None:
+    async def ask(
+        self, interaction: discord.Interaction, prompt: str, search: bool = False
+    ) -> None:
         await interaction.response.defer()
         try:
             start = time.time()
-            ai_response = self.truncate(await self.query_gemini(prompt, use_search=search))
+            ai_response = self.truncate(
+                await self.query_gemini(prompt, use_search=search)
+            )
             elapsed = time.time() - start
             model_button = discord.ui.Button(
                 label="Model",
@@ -126,7 +130,8 @@ class AgentCog(
                 url="https://aistudio.google.com/",
             )
             prompt_section = discord.ui.Section(
-                f"# **prompt:** {prompt}", accessory=model_button,
+                f"# **prompt:** {prompt}",
+                accessory=model_button,
             )
 
             grounding_text = (

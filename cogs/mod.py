@@ -11,7 +11,7 @@ from globals import (
     PRIMARY,
     SECONDARY,
 )
-from ui import ErrorUI, ResponseUI
+from ui import CasesView, ErrorUI, ResponseUI
 
 
 class ModCog(
@@ -97,6 +97,71 @@ class ModCog(
             await interaction.followup.send(view=view, ephemeral=True)
         else:
             await interaction.response.send_message(view=view, ephemeral=True)
+
+    # cases cmd
+    @app_commands.command(name="cases", description="View moderation cases for a user.")
+    @app_commands.describe(target="The target user to view cases for.")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(moderate_members=True)
+    async def cases(
+        self, interaction: discord.Interaction, target: discord.User | discord.Member
+    ) -> None:
+        await interaction.response.defer()
+
+        view = CasesView(target_user=target, db_path=self.db_path)
+        await view.build_components(interaction.guild_id)
+
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
+
+    # case remove cmd
+    @app_commands.command(
+        name="case-remove",
+        description="Remove a mod action from a users account, takes the ID.",
+    )
+    @app_commands.describe(
+        case_id="takes the CaseID typically dmed to the user, find it by using /case [user]"
+    )
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(moderate_members=True)
+    async def case_remove(self, interaction: discord.Interaction, case_id: int) -> None:
+        await interaction.response.defer()
+
+        async with aiosqlite.connect(self.db_path) as conn:
+            async with conn.execute(
+                "SELECT user_id, action_type FROM mod_cases WHERE guild_id = ? AND case_id = ?",
+                (interaction.guild_id, case_id),
+            ) as cursor:
+                case = await cursor.fetchone()
+
+            if not case:
+                await interaction.followup.send(
+                    view=ErrorUI(f"**Case #{case_id} was not found in this server.**"),
+                )
+                return
+
+            user_id, action_type = case
+            await conn.execute(
+                "DELETE FROM mod_cases WHERE guild_id = ? AND case_id = ?",
+                (interaction.guild_id, case_id),
+            )
+            await conn.commit()
+
+        # case remove UI
+        view = ResponseUI()
+        if hasattr(view.text_display, "content"):
+            view.text_display.content = (
+                f"# {MELVIN_CHECK_EMOJI} Case Removed\n "
+                f"**Removed case #{case_id} ({action_type.upper()}) for <@{user_id}>.**"
+            )
+            view.container.accent_color = discord.Color.from_str(SECONDARY)
+
+        await interaction.followup.send(
+            view=view,
+            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+        )
 
     # warn cmd
     @app_commands.command(name="warn", description="Warn someone.")
@@ -506,7 +571,9 @@ class ModCog(
 
         # guard clause
         if not member.is_timed_out():
-            await interaction.followup.send(view=ErrorUI("**Member is not timed out.**"))
+            await interaction.followup.send(
+                view=ErrorUI("**Member is not timed out.**")
+            )
             return
         if (
             member.top_role >= interaction.user.top_role
@@ -576,7 +643,8 @@ class ModCog(
 
         # guard clause
         if not isinstance(
-            target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread),
+            target_channel,
+            (discord.TextChannel, discord.VoiceChannel, discord.Thread),
         ):
             await interaction.followup.send(
                 view=ErrorUI(
@@ -647,7 +715,8 @@ class ModCog(
 
         # guard clause
         if not isinstance(
-            target_channel, (discord.TextChannel, discord.VoiceChannel, discord.Thread),
+            target_channel,
+            (discord.TextChannel, discord.VoiceChannel, discord.Thread),
         ):
             await interaction.followup.send(
                 view=ErrorUI(
@@ -775,7 +844,9 @@ class ModCog(
         )
 
     # role remove cmd
-    @app_commands.command(name="role-remove", description="Remove a role from a member.")
+    @app_commands.command(
+        name="role-remove", description="Remove a role from a member."
+    )
     @app_commands.describe(
         member="The member to remove the role from.",
         role="The role to remove.",

@@ -35,7 +35,9 @@ class ToolCog(
             return
         except UnicodeDecodeError as e:
             await interaction.edit_original_response(
-                view=ErrorUI(f"Decoded successfully, but the result is not valid text: **{e}**."),
+                view=ErrorUI(
+                    f"Decoded successfully, but the result is not valid text: **{e}**."
+                ),
             )
             return
 
@@ -43,7 +45,9 @@ class ToolCog(
         view.text_display.content = f"**{decodedstr}** was the decoded result."
         await interaction.edit_original_response(view=view)
 
-    @app_commands.command(name="base64-encode", description="Encode a string as Base64.")
+    @app_commands.command(
+        name="base64-encode", description="Encode a string as Base64."
+    )
     @app_commands.describe(text="The string to encode.")
     async def base64encode(self, interaction: discord.Interaction, text: str) -> None:
         await interaction.response.defer(ephemeral=False)
@@ -87,16 +91,21 @@ class ToolCog(
                 ),
             )
             await interaction.followup.send(
-                view=view, file=file, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                file=file,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
         else:
             await interaction.followup.send(
-                view=view, allowed_mentions=discord.AllowedMentions.none(),
+                view=view,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
 
     @speak.error
     async def speak_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError,
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
             view = ResponseUI()

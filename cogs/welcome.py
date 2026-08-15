@@ -60,12 +60,15 @@ class WelcomeCog(
             await interaction.response.send_message(view=error_ui, ephemeral=False)
 
     @app_commands.command(
-        name="channel", description="Set the channel for member join events.",
+        name="channel",
+        description="Set the channel for member join events.",
     )
     @app_commands.describe(channel="The channel to send welcome messages to.")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def channel(
-        self, interaction: discord.Interaction, channel: discord.TextChannel,
+        self,
+        interaction: discord.Interaction,
+        channel: discord.TextChannel,
     ) -> None:
         if not interaction.guild:
             return
@@ -205,7 +208,9 @@ class WelcomeCog(
             )
             return
 
-        view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} Updated\n**Welcome message updated.**")
+        view.text_display.content = (
+            f"# {MELVIN_CHECK_EMOJI} Updated\n**Welcome message updated.**"
+        )
         view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.edit_original_response(view=view)
 
