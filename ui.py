@@ -8,6 +8,7 @@ from globals import (
     PRIMARY,
     SECONDARY,
     TERTIARY,
+    MELVIN_HELP_BANNER,
 )
 
 primary = f"{PRIMARY}"
@@ -92,7 +93,7 @@ class HelpView(discord.ui.LayoutView):
         self.bot = bot
 
         banner_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem("https://cdn.discordapp.com/attachments/1537874702146469988/1538139890775097384/CMDbanner.png?ex=6a8197e7&is=6a804667&hm=46517e9ddee5ee751704bf148b2cdae21fbb2cc1112082033b65e24476319b70&"),
+            discord.MediaGalleryItem(f"{MELVIN_HELP_BANNER}"),
         )
         banner_container = discord.ui.Container(banner_gallery)
 
