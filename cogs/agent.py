@@ -142,7 +142,7 @@ class AgentCog(
 
             response_display = discord.ui.TextDisplay(
                 f"{ai_response}\n\n"
-                f"-# **{MELVIN_EMOJI} Responses may be shortened due to Discord UI limitations. {MELVIN_MISC_EMOJI} Took {elapsed:.1f}s.**\n"
+                f"-# **{MELVIN_EMOJI} Responses may be shortened due to Discord UI limitations. Took {elapsed:.1f}s.**\n"
                 f"{grounding_text}",
             )
             view = ResponseUI()
