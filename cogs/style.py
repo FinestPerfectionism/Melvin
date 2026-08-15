@@ -53,7 +53,7 @@ class StyleCog(
 
         await self.bot.reset_name_style(guild=interaction.guild)
         view = ResponseUI()
-        view.text_display.content = f"{MELVIN_CHECK_EMOJI} Style Reset\nMelvin's display name style has been reset for this server."
+        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Style Reset\nMelvin's display name style has been reset for this server."
         view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.response.send_message(view=view)
 
@@ -121,7 +121,7 @@ class StyleCog(
             colors=color_list,
         )
         view = ResponseUI()
-        view.text_display.content = f"{MELVIN_CHECK_EMOJI} Style Set\nMelvin's display name style has been set for this server."
+        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Style Set\nMelvin's display name style has been set for this server."
         view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.response.send_message(view=view)
 
