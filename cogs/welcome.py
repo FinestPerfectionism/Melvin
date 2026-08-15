@@ -205,7 +205,7 @@ class WelcomeCog(
             )
             return
 
-        view.text_display.content = (f"**# {MELVIN_CHECK_EMOJI} Updated\n**Welcome message updated.**")
+        view.text_display.content = (f"# {MELVIN_CHECK_EMOJI} Updated\n**Welcome message updated.**")
         view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.edit_original_response(view=view)
 
