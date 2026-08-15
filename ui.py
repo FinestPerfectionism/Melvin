@@ -92,7 +92,7 @@ class HelpView(discord.ui.LayoutView):
         self.bot = bot
 
         banner_gallery = discord.ui.MediaGallery(
-            discord.MediaGalleryItem("https://cdn.discordapp.com/attachments/1537874702146469988/1537874741925388372/3dwyry.webp?ex=6a80a0f6&is=6a7f4f76&hm=db86417eb589278eb4c9acebe893aaa50efb2a01508f5696df570fa0eeceb639&"),
+            discord.MediaGalleryItem("https://cdn.discordapp.com/attachments/1537874702146469988/1538139890775097384/CMDbanner.png?ex=6a8197e7&is=6a804667&hm=46517e9ddee5ee751704bf148b2cdae21fbb2cc1112082033b65e24476319b70&"),
         )
         banner_container = discord.ui.Container(banner_gallery)
 
