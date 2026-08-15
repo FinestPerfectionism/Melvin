@@ -139,7 +139,7 @@ class WelcomeCog(
             return
 
         view = ResponseUI()
-        await interaction.response.send_message(view=action_ui, ephemeral=False)
+        await interaction.response.send_message(view=view, ephemeral=False)
 
         for url in (attachment_url, b1_url, b2_url):
             if url and not url.startswith(("http://", "https://")):
