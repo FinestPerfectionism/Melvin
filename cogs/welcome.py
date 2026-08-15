@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import INVITE_URL, MELVIN_CHECK_EMOJI
+from globals import INVITE_URL, MELVIN_CHECK_EMOJI, SECONDARY
 from ui import ErrorUI, ResponseUI
 
 log = logging.getLogger(__name__)
@@ -91,6 +91,7 @@ class WelcomeCog(
             )
             return
         view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Welcome Channel Set\n**Welcome channel set to {channel.mention}.**"
+        view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.edit_original_response(view=view)
 
     async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
@@ -137,7 +138,7 @@ class WelcomeCog(
         if not interaction.guild:
             return
 
-        action_ui = ResponseUI()
+        view = ResponseUI()
         await interaction.response.send_message(view=action_ui, ephemeral=False)
 
         for url in (attachment_url, b1_url, b2_url):
@@ -204,10 +205,9 @@ class WelcomeCog(
             )
             return
 
-        action_ui.text_display.content = (
-            f"**{MELVIN_CHECK_EMOJI} Welcome message updated.**"
-        )
-        await interaction.edit_original_response(view=action_ui)
+        view.text_display.content = (f"**# {MELVIN_CHECK_EMOJI} Updated\n**Welcome message updated.**")
+        view.container.accent_color = discord.Color.from_str(SECONDARY)
+        await interaction.edit_original_response(view=view)
 
     async def get_welcome_config(self, guild_id: int) -> dict | None:
         try:
