@@ -17,8 +17,10 @@ class ToolCog(
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(
-        name="base64-decode",
+    base64 = app_commands.Group(name="base64")
+
+    @base64.command(
+        name="decode",
         description="Decode a Base64-encoded string.",
     )
     @app_commands.describe(text="The Base64 string to decode.")
@@ -45,8 +47,9 @@ class ToolCog(
         view.text_display.content = f"**{decodedstr}** was the decoded result."
         await interaction.edit_original_response(view=view)
 
-    @app_commands.command(
-        name="base64-encode", description="Encode a string as Base64.",
+    @base64.command(
+        name="encode",
+        description="Encode a string as Base64.",
     )
     @app_commands.describe(text="The string to encode.")
     async def base64encode(self, interaction: discord.Interaction, text: str) -> None:

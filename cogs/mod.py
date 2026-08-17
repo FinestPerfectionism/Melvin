@@ -20,8 +20,12 @@ class ModCog(
     description="Guild moderation commands.",
 ):
     def __init__(self, bot: commands.Bot) -> None:
+        super().__init__()
         self.bot = bot
         self.db_path = "data/mod.db"
+
+    role = app_commands.Group(name="role")
+    cases = app_commands.Group(name="cases")
 
     # duration parsing
     def parseduration(self, durationstr: str) -> int | None:
@@ -98,13 +102,18 @@ class ModCog(
         else:
             await interaction.response.send_message(view=view, ephemeral=True)
 
-    # cases cmd
-    @app_commands.command(name="cases", description="View moderation cases for a user.")
+    # cases view cmd
+    @cases.command(
+        name="view",
+        description="View moderation cases for a user.",
+    )
     @app_commands.describe(target="The target user to view cases for.")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
-    async def cases(
-        self, interaction: discord.Interaction, target: discord.User | discord.Member,
+    async def cases_view(
+        self,
+        interaction: discord.Interaction,
+        target: discord.User | discord.Member,
     ) -> None:
         await interaction.response.defer()
         # guard clause
@@ -122,13 +131,13 @@ class ModCog(
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
         )
 
-    # case remove cmd
-    @app_commands.command(
-        name="case-remove",
+    # cases remove cmd
+    @cases.command(
+        name="remove",
         description="Remove a mod action from a users account, takes the ID.",
     )
     @app_commands.describe(
-        case_id="takes the CaseID typically dmed to the user, find it by using /case [user]",
+        case_id="Takes the CaseID typically DMed to the user, find it by using /mod case view [user]",
     )
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
@@ -775,7 +784,10 @@ class ModCog(
         )
 
     # role add cmd
-    @app_commands.command(name="role-add", description="Add a role to a member.")
+    @role.command(
+        name="add",
+        description="Add a role to a member.",
+    )
     @app_commands.describe(
         member="The member to give the role to.",
         role="The role to add.",
@@ -793,6 +805,11 @@ class ModCog(
         await interaction.response.defer()
 
         # guard clause
+        if role.is_default():
+            await interaction.followup.send(
+                view=ErrorUI("**You cannot modify the @everyone role.**"),
+            )
+            return
         if member.bot:
             await interaction.followup.send(
                 view=ErrorUI("**You tried to add a role to an app.**"),
@@ -850,8 +867,9 @@ class ModCog(
         )
 
     # role remove cmd
-    @app_commands.command(
-        name="role-remove", description="Remove a role from a member.",
+    @role.command(
+        name="remove",
+        description="Remove a role from a member.",
     )
     @app_commands.describe(
         member="The member to remove the role from.",
@@ -870,6 +888,11 @@ class ModCog(
         await interaction.response.defer()
 
         # guard clause
+        if role.is_default():
+            await interaction.followup.send(
+                view=ErrorUI("**You cannot modify the @everyone role.**"),
+            )
+            return
         if member.bot:
             await interaction.followup.send(
                 view=ErrorUI("**You tried to remove a role from an app.**"),

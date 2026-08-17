@@ -11,7 +11,7 @@ from discord.ext import commands
 from google import genai
 from google.genai import types
 
-from globals import MELVIN_EMOJI, MELVIN_MISC_EMOJI, PRIMARY
+from globals import MELVIN_EMOJI, PRIMARY
 from ui import ErrorUI, ResponseUI, SmallSeparator
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
