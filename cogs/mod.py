@@ -5,13 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import (
-    MELVIN_CHECK_EMOJI,
-    MELVIN_MISC_EMOJI,
-    PRIMARY,
-    SECONDARY,
-)
-from ui import CasesView, ErrorUI, ResponseUI
+from ui import CasesView, ErrorUI, InfoUI, PositiveUI
 
 
 @app_commands.guild_only()
@@ -67,10 +61,10 @@ class ModCog(
         guild_name: str,
         reason: str,
     ) -> None:
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"**{MELVIN_MISC_EMOJI} You received a {action_type} in {guild_name} for {reason}. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(PRIMARY)
+        view = InfoUI(
+            title=f"You received a {action_type} in {guild_name}.",
+            subtitle=f"Reason: {reason}. Case {case_id}",
+        )
         try:
             await user.send(
                 view=view,
@@ -168,17 +162,13 @@ class ModCog(
             await conn.commit()
 
         # case remove UI
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = (
-                f"# {MELVIN_CHECK_EMOJI} Case Removed\n "
-                f"**Removed case #{case_id} ({action_type.upper()}) for <@{user_id}>.**"
-            )
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
-
+        view = PositiveUI(
+            title="Case Removed",
+            subtitle=f"**Removed case #{case_id} ({action_type.upper()}) for <@{user_id}>.**",
+        )
         await interaction.followup.send(
             view=view,
-            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+            allowed_mentions=discord.AllowedMentions.none(),
         )
 
     # warn cmd
@@ -248,10 +238,10 @@ class ModCog(
         )
 
         # warn msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Warning\n **{member.mention}, you have been warned. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Warning",
+            subtitle=f"**{member.mention}, you have been warned. Case {case_id}.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
@@ -332,10 +322,10 @@ class ModCog(
         )
 
         # kick msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Kicked\n **{member.mention} has been kicked. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Kicked",
+            subtitle=f"**{member.mention} has been kicked. Case {case_id}.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
@@ -417,10 +407,10 @@ class ModCog(
         )
 
         # ban msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Banned\n **{member.mention} has been banned. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Banned",
+            subtitle=f"**{member.mention} has been banned. Case {case_id}.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
@@ -476,10 +466,10 @@ class ModCog(
         )
 
         # unban msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Unbanned\n **{user.mention} has been unbanned. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Unbanned",
+            subtitle=f"**{user.mention} has been unbanned. Case {case_id}.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
@@ -575,10 +565,10 @@ class ModCog(
         )
 
         # mute msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Muted\n **{member.mention} has been muted. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Muted",
+            subtitle=f"**{member.mention} has been muted. Case {case_id}.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
@@ -645,10 +635,10 @@ class ModCog(
         )
 
         # unmute msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Unmuted\n **{member.mention} has been unmuted. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Unmuted",
+            subtitle=f"**{member.mention} has been unmuted. Case {case_id}.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
@@ -720,10 +710,10 @@ class ModCog(
             )
 
         # lock msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Locked\n **{target_channel.mention} has been locked.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Locked",
+            subtitle=f"**{target_channel.mention} has been locked.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
@@ -798,13 +788,13 @@ class ModCog(
             )
 
         # unlock msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Unlocked\n **Unlocked {target_channel.mention}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Unlocked",
+            subtitle=f"**Unlocked {target_channel.mention}.**",
+        )
         await interaction.followup.send(
             view=view,
-            allowed_mentions=discord.AllowedMentions(users=False, roles=False),
+            allowed_mentions=discord.AllowedMentions.none(),
         )
 
     # role add cmd
@@ -883,10 +873,10 @@ class ModCog(
         )
 
         # role add msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Role Added\n **{role.mention} added to {member.mention}. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Role Added",
+            subtitle=f"**{role.mention} added to {member.mention}. Case {case_id}.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),
@@ -968,10 +958,10 @@ class ModCog(
         )
 
         # role remove msg
-        view = ResponseUI()
-        if hasattr(view.text_display, "content"):
-            view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Role Removed\n **{role.mention} removed from {member.mention}. Case {case_id}.**"
-            view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(
+            title="Role Removed",
+            subtitle=f"**{role.mention} removed from {member.mention}. Case {case_id}.**",
+        )
         await interaction.followup.send(
             view=view,
             allowed_mentions=discord.AllowedMentions(users=False, roles=False),

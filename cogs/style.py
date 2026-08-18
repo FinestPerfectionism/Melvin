@@ -6,13 +6,11 @@ from discord.ext import commands
 
 from globals import (
     INVITE_URL,
-    MELVIN_CHECK_EMOJI,
-    SECONDARY,
     DisplayNameEffect,
     DisplayNameFont,
 )
 from main import Melvin
-from ui import ErrorUI, ResponseUI
+from ui import ErrorUI, PositiveUI
 
 COLOR_PATTERN = re.compile(r"^[0-9a-fA-F]{6}(?:-[0-9a-fA-F]{6})?$")
 
@@ -52,9 +50,7 @@ class StyleCog(
             return
 
         await self.bot.reset_name_style(guild=interaction.guild)
-        view = ResponseUI()
-        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Style Reset\nMelvin's display name style has been reset for this server."
-        view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(title="Style Reset", subtitle="Melvin's display name style has been reset for this server.")
         await interaction.response.send_message(view=view)
 
     @app_commands.command(name="set", description="Set Melvin's name style for this guild.")
@@ -120,9 +116,7 @@ class StyleCog(
             effect_id=DisplayNameEffect[effect],
             colors=color_list,
         )
-        view = ResponseUI()
-        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Style Set\nMelvin's display name style has been set for this server."
-        view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(title="Style Set", subtitle="Melvin's display name style has been set for this server.")
         await interaction.response.send_message(view=view)
 
 

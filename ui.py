@@ -4,17 +4,16 @@ from discord.ext import commands
 
 from globals import (
     INVITE_URL,
+    MELVIN_CHECK_EMOJI,
     MELVIN_CROSS_EMOJI,
     MELVIN_EMOJI,
     MELVIN_HELP_BANNER,
+    MELVIN_MISC_EMOJI,
     PRIMARY,
     SECONDARY,
     TERTIARY,
 )
 
-primary = f"{PRIMARY}"
-secondary = f"{SECONDARY}"  # green
-tertiary = f"{TERTIARY}"  # red
 message = f"**Something went wrong with that. Please [join the support server]({INVITE_URL}) to report this issue.**"
 
 
@@ -303,7 +302,7 @@ class CasesView(discord.ui.LayoutView):
         )
 
     async def refresh(self, interaction: discord.Interaction) -> None:
-        await self.build_components(interaction.guild_id)
+        await self.build_components(interaction.guild.id)
         await interaction.edit_original_response(view=self)
 
 
@@ -330,6 +329,46 @@ class LargeSeparator(discord.ui.Separator):
         )
 
 
+# ResponseUI
+class ResponseUI(discord.ui.LayoutView):
+    def __init__(self, subtitle: str, /) -> None:
+        super().__init__()
+        self.text_display = discord.ui.TextDisplay(subtitle)
+
+        container = discord.ui.Container(
+            self.text_display,
+            SmallSeparator(),
+        )
+        self.container = container
+        self.add_item(container)
+
+
+# InfoUI
+class InfoUI(discord.ui.LayoutView):
+    def __init__(self, *, title: str, subtitle: str) -> None:
+        super().__init__()
+        container = discord.ui.Container(
+            discord.ui.TextDisplay(f"# {MELVIN_MISC_EMOJI} {title}\n{subtitle}"),
+            SmallSeparator(),
+            accent_color=discord.Color.from_str(PRIMARY),
+        )
+        self.container = container
+        self.add_item(container)
+
+
+# PositiveUI
+class PositiveUI(discord.ui.LayoutView):
+    def __init__(self, *, title: str, subtitle: str) -> None:
+        super().__init__()
+        container = discord.ui.Container(
+            discord.ui.TextDisplay(f"# {MELVIN_CHECK_EMOJI} {title}\n{subtitle}"),
+            SmallSeparator(),
+            accent_color=discord.Color.from_str(SECONDARY),
+        )
+        self.container = container
+        self.add_item(container)
+
+
 # ErrorUI
 class ErrorUI(discord.ui.LayoutView):
     def __init__(self, message: str) -> None:
@@ -342,23 +381,9 @@ class ErrorUI(discord.ui.LayoutView):
         container = discord.ui.Container(
             text_display,
             SmallSeparator(),
-            accent_color=discord.Color.from_str(tertiary),
+            accent_color=discord.Color.from_str(TERTIARY),
         )
 
-        self.container = container
-        self.add_item(container)
-
-
-# ResponseUI
-class ResponseUI(discord.ui.LayoutView):
-    def __init__(self) -> None:
-        super().__init__()
-        self.text_display = ThinkingText()
-
-        container = discord.ui.Container(
-            self.text_display,
-            SmallSeparator(),
-        )
         self.container = container
         self.add_item(container)
 
@@ -373,7 +398,7 @@ class ActionUI(discord.ui.LayoutView):
         container = discord.ui.Container(
             self.text_display,
             SmallSeparator(),
-            accent_color=discord.Color.from_str(primary),
+            accent_color=discord.Color.from_str(PRIMARY),
         )
 
         self.container = container
@@ -393,7 +418,7 @@ class MiscLoggingClass(discord.ui.LayoutView):
         container = discord.ui.Container(
             self.text_display,
             SmallSeparator(),
-            accent_color=discord.Color.from_str(primary),
+            accent_color=discord.Color.from_str(PRIMARY),
         )
 
         self.container = container
@@ -409,7 +434,7 @@ class NegativeLoggingClass(discord.ui.LayoutView):
         container = discord.ui.Container(
             self.text_display,
             SmallSeparator(),
-            accent_color=discord.Color.from_str(tertiary),
+            accent_color=discord.Color.from_str(TERTIARY),
         )
 
         self.container = container
@@ -425,7 +450,7 @@ class PositiveLoggingClass(discord.ui.LayoutView):
         container = discord.ui.Container(
             self.text_display,
             SmallSeparator(),
-            accent_color=discord.Color.from_str(secondary),
+            accent_color=discord.Color.from_str(SECONDARY),
         )
 
         self.container = container

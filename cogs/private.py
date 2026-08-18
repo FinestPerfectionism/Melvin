@@ -6,11 +6,9 @@ from globals import (
     INVITE_URL,
     LOG_CHANNEL,
     MELVIN_BANNER,
-    MELVIN_CHECK_EMOJI,
     MELVIN_WARN_EMOJI,
-    SECONDARY,
 )
-from ui import ErrorUI, ResponseUI
+from ui import ErrorUI, PositiveUI, ResponseUI
 
 
 class PrivateCog(
@@ -26,14 +24,17 @@ class PrivateCog(
         log_channel = self.bot.get_channel(LOG_CHANNEL)
         if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
-        view = ResponseUI()
-        view.text_display.content = (
-            f"**Melvin was just added to {guild.name}.**\n"
-            f"Now in **{len(self.bot.guilds)}** guild(s)."
+        view = discord.ui.LayoutView()
+        view.add_item(
+            discord.ui.Container(
+                discord.ui.TextDisplay(
+                    f"**Melvin was just added to {guild.name}.**\n"
+                    f"Now in **{len(self.bot.guilds)}** guild(s).",
+                ),
+                discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")),
+            ),
         )
-        view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")),
-        )
+
         try:
             await log_channel.send(
                 view=view,
@@ -47,11 +48,17 @@ class PrivateCog(
         log_channel = self.bot.get_channel(LOG_CHANNEL)
         if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
-        view = ResponseUI()
-        view.text_display.content = f"**Melvin was just removed from {guild.name}.**\n Now in **{len(self.bot.guilds)}** guild(s)."
-        view.container.add_item(
-            discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")),
+        view = discord.ui.LayoutView()
+        view.add_item(
+            discord.ui.Container(
+                discord.ui.TextDisplay(
+                    f"**Melvin was just removed from {guild.name}.**\n"
+                    f"Now in **{len(self.bot.guilds)}** guild(s).",
+                ),
+                discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"{MELVIN_BANNER}")),
+            ),
         )
+
         try:
             await log_channel.send(
                 view=view,
@@ -65,8 +72,7 @@ class PrivateCog(
         await interaction.response.defer(ephemeral=True)
 
         if not await self.bot.is_owner(interaction.user):
-            view = ResponseUI()
-            view.text_display.content = f"{MELVIN_WARN_EMOJI} **This command is gated. Please read our documentation in our [support server]({INVITE_URL}).**"
+            view = ResponseUI(f"{MELVIN_WARN_EMOJI} **This command is gated. Please read our documentation in our [support server]({INVITE_URL}).**")
             await interaction.followup.send(view=view, ephemeral=True)
             return
 
@@ -77,11 +83,7 @@ class PrivateCog(
             await interaction.followup.send(view=view, ephemeral=True)
             return
 
-        view = ResponseUI()
-        view.text_display.content = (
-            f"**{MELVIN_CHECK_EMOJI} Synced {len(synced)} command(s).**"
-        )
-        view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(title="Tree Sync Complete", subtitle=f"**Synced {len(synced)} command(s).**")
         await interaction.followup.send(view=view, ephemeral=True)
 
 

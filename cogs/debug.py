@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from globals import INVITE_URL, MELVIN_BANNER, MELVIN_EMOJI
-from ui import ErrorUI, ResponseUI, SmallSeparator
+from ui import ErrorUI, ResponseUI, SmallSeparator, ThinkingText
 
 
 # AdUI
@@ -54,7 +54,7 @@ class DebugCog(
 
     @app_commands.command(name="think", description="Send raw ResponseUI class.")
     async def think(self, interaction: discord.Interaction) -> None:
-        view = ResponseUI()
+        view = ResponseUI(ThinkingText().content)
         await interaction.response.send_message(view=view)
 
     @app_commands.command(name="error", description="Send raw ErrorUI class.")

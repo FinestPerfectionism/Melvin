@@ -69,12 +69,12 @@ class Melvin(commands.Bot):
             resolver = aiodns.DNSResolver(nameservers=["1.1.1.1", "8.8.8.8"])
             self.http._HTTPClient__session._connector._resolver._resolver = resolver
             log.info("DNS resolver successfully configured.")
-        except Exception as e:
-            log.info(f"Could not configure DNS resolver: {e}.")
+        except Exception:
+            log.exception("Could not configure DNS resolver")
         log.info("Logging started.")
 
     async def on_ready(self) -> None:
-        log.info(f"Logged in as {self.user}.")
+        log.info("Logged in as %s.", self.user)
         await self.tree.sync()
 
 

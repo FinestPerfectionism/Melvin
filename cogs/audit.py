@@ -5,11 +5,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import INVITE_URL, MELVIN_MISC_EMOJI, PRIMARY, SECONDARY, TERTIARY
+from globals import INVITE_URL, PRIMARY, SECONDARY, TERTIARY
 from ui import (
     ErrorUI,
+    InfoUI,
     LargeSeparator,
-    ResponseUI,
     primary,
     tertiary,
 )
@@ -95,8 +95,7 @@ class AuditCog(
         if not interaction.guild:
             return
 
-        view = ResponseUI()
-        await interaction.response.send_message(view=view, ephemeral=False)
+        await interaction.response.defer()
 
         try:
             async with aiosqlite.connect(self.db_path) as conn:
@@ -114,12 +113,11 @@ class AuditCog(
                 interaction.guild.id,
             )
             view = ErrorUI(message="**Something went wrong saving that.**")
-            await interaction.edit_original_response(view=view)
+            await interaction.followup.send(view=view)
             return
 
-        view.text_display.content = f"# {MELVIN_MISC_EMOJI} Logging \n**Logging channel set to {channel.mention}.**"
-        view.container.accent_color = discord.Color.from_str(PRIMARY)
-        await interaction.edit_original_response(view=view)
+        view = InfoUI(title="# Logging", subtitle=f"**Logging channel set to {channel.mention}.**")
+        await interaction.followup.send(view=view)
 
     @channel.error
     async def channel_error(

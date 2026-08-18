@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import time
 import warnings
@@ -11,12 +12,12 @@ from discord.ext import commands
 from google import genai
 from google.genai import types
 
-from globals import MELVIN_EMOJI, PRIMARY
-from ui import ErrorUI, ResponseUI, SmallSeparator
+from globals import MELVIN_EMOJI
+from ui import ErrorUI, SmallSeparator
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-primary = f"{PRIMARY}"
+log = logging.getLogger(__name__)
 
 
 class AgentCog(
@@ -64,7 +65,7 @@ class AgentCog(
         else:
             await interaction.response.send_message(view=error_ui, ephemeral=True)
 
-    async def query_gemini(self, prompt: str, use_search: bool = False) -> str:
+    async def query_gemini(self, prompt: str, *, use_search: bool = False) -> str:
         current_date_str = datetime.now().strftime("%B %d, %Y")
 
         system_instruction = (
@@ -115,7 +116,11 @@ class AgentCog(
     )
     @app_commands.checks.cooldown(2, 60)
     async def ask(
-        self, interaction: discord.Interaction, prompt: str, search: bool = False,
+        self,
+        interaction: discord.Interaction,
+        prompt: str,
+        *,
+        search: bool = False,
     ) -> None:
         await interaction.response.defer()
         try:
@@ -136,8 +141,8 @@ class AgentCog(
 
             grounding_text = (
                 "-# **Grounded using DDGS web search context.**"
-                if search
-                else "-# **Generated without web search.**"
+                if search else
+                "-# **Generated without web search.**"
             )
 
             response_display = discord.ui.TextDisplay(
@@ -145,14 +150,17 @@ class AgentCog(
                 f"-# **{MELVIN_EMOJI} Responses may be shortened due to Discord UI limitations. Took {elapsed:.1f}s.**\n"
                 f"{grounding_text}",
             )
-            view = ResponseUI()
-            view.container.clear_items()
-            view.container.add_item(prompt_section)
-            view.container.add_item(SmallSeparator())
-            view.container.add_item(response_display)
+            view = discord.ui.LayoutView()
+            view.add_item(
+                discord.ui.Container(
+                    prompt_section,
+                    SmallSeparator(),
+                    response_display,
+                ),
+            )
             await interaction.edit_original_response(view=view)
         except Exception as e:
-            print(e)
+            log.exception("Failure in agent command")
             await interaction.edit_original_response(view=ErrorUI(str(e)))
 
 

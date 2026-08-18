@@ -25,7 +25,7 @@ class ToolCog(
     )
     @app_commands.describe(text="The Base64 string to decode.")
     async def base64decode(self, interaction: discord.Interaction, text: str) -> None:
-        await interaction.response.defer(ephemeral=False)
+        await interaction.response.defer()
 
         try:
             decodedbyte = base64.b64decode(text, validate=True)
@@ -43,8 +43,7 @@ class ToolCog(
             )
             return
 
-        view = ResponseUI()
-        view.text_display.content = f"**{decodedstr}** was the decoded result."
+        view = ResponseUI(f"**{decodedstr}** was the decoded result.")
         await interaction.edit_original_response(view=view)
 
     @base64.command(
@@ -64,8 +63,7 @@ class ToolCog(
             )
             return
 
-        view = ResponseUI()
-        view.text_display.content = f"**{encodedstr}** was the encoded result."
+        view = ResponseUI(f"**{encodedstr}** was the encoded result.")
         await interaction.edit_original_response(view=view)
 
     @app_commands.command(name="speak", description="Speak through Melvin.")
@@ -81,8 +79,7 @@ class ToolCog(
         attachment: discord.Attachment | None = None,
     ) -> None:
         await interaction.response.defer(ephemeral=False)
-        view = ResponseUI()
-        view.text_display.content = text
+        view = ResponseUI(text)
 
         if attachment is not None:
             file = await attachment.to_file()
@@ -111,8 +108,7 @@ class ToolCog(
         error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.MissingPermissions):
-            view = ResponseUI()
-            view.text_display.content = f"**{MELVIN_WARN_EMOJI} This command is gated. Please read our documentation in our [support server]({INVITE_URL}).**"
+            view = ResponseUI(f"**{MELVIN_WARN_EMOJI} This command is gated. Please read our documentation in our [support server]({INVITE_URL}).**")
 
             if interaction.response.is_done():
                 await interaction.followup.send(view=view, ephemeral=True)

@@ -2,8 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import MELVIN_MISC_EMOJI, PRIMARY
-from ui import ResponseUI, SmallSeparator
+from ui import InfoUI, SmallSeparator
 
 
 # UI Classes
@@ -113,11 +112,7 @@ class InfoCog(
     async def latency(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
         latency = round(self.bot.latency * 1000)
-        view = ResponseUI()
-        view.text_display.content = (
-            f"# {MELVIN_MISC_EMOJI} Latency\n**The bot's latency is {latency}ms.**"
-        )
-        view.container.accent_color = discord.Color.from_str(PRIMARY)
+        view = InfoUI(title="Latency", subtitle=f"The bot's latency is **{latency}**ms.")
         await interaction.followup.send(view=view)
 
     @app_commands.command(name="avatar", description="View a user's avatar.")

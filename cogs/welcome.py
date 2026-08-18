@@ -5,8 +5,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from globals import INVITE_URL, MELVIN_CHECK_EMOJI, SECONDARY
-from ui import ErrorUI, ResponseUI
+from globals import INVITE_URL
+from ui import ErrorUI, PositiveUI, ResponseUI
 
 log = logging.getLogger(__name__)
 
@@ -72,8 +72,7 @@ class WelcomeCog(
     ) -> None:
         if not interaction.guild:
             return
-        view = ResponseUI()
-        await interaction.response.send_message(view=view, ephemeral=False)
+        await interaction.response.defer()
 
         try:
             async with aiosqlite.connect(self.db_path) as conn:
@@ -87,15 +86,14 @@ class WelcomeCog(
                 await conn.commit()
         except Exception:
             log.exception("failed to set welcome channel", interaction.guild.id)
-            await interaction.edit_original_response(
+            await interaction.followup.send(
                 view=ErrorUI(
                     f"**Something went wrong saving that. Please [join the support server]({INVITE_URL}) to report this issue.**",
                 ),
             )
             return
-        view.text_display.content = f"# {MELVIN_CHECK_EMOJI} Welcome Channel Set\n**Welcome channel set to {channel.mention}.**"
-        view.container.accent_color = discord.Color.from_str(SECONDARY)
-        await interaction.edit_original_response(view=view)
+        view = PositiveUI(title="Welcome Channel Set", subtitle=f"**Welcome channel set to {channel.mention}.**")
+        await interaction.followup.send(view=view)
 
     async def get_log_channel(self, guild_id: int) -> discord.abc.GuildChannel | discord.Thread | discord.abc.PrivateChannel | None:
         try:
@@ -141,8 +139,7 @@ class WelcomeCog(
         if not interaction.guild:
             return
 
-        view = ResponseUI()
-        await interaction.response.send_message(view=view, ephemeral=False)
+        await interaction.response.defer()
 
         for url in (attachment_url, b1_url, b2_url):
             if url and not url.startswith(("http://", "https://")):
@@ -201,17 +198,14 @@ class WelcomeCog(
                 )
                 await conn.commit()
         except Exception as e:
-            await interaction.edit_original_response(
+            await interaction.followup.send(
                 view=ErrorUI(
                     f"**Database error: {e}. Please [join the support server]({INVITE_URL}) to report this issue.**",
                 ),
             )
             return
 
-        view.text_display.content = (
-            f"# {MELVIN_CHECK_EMOJI} Updated\n**Welcome message updated.**"
-        )
-        view.container.accent_color = discord.Color.from_str(SECONDARY)
+        view = PositiveUI(title="Updated", subtitle="**Welcome message updated.**")
         await interaction.edit_original_response(view=view)
 
     async def get_welcome_config(self, guild_id: int) -> dict | None:
@@ -251,8 +245,7 @@ class WelcomeCog(
         text = config["message"] or f"Welcome, {member.mention}!"
         text = text.replace("{member}", member.mention)
 
-        view = ResponseUI()
-        view.text_display.content = text
+        view = ResponseUI(text)
 
         if config["attachment_url"]:
             view.container.add_item(
