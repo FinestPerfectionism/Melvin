@@ -17,7 +17,7 @@ class ToolCog(
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    base64 = app_commands.Group(name="base64")
+    base64 = app_commands.Group(name="base64", description="Utility encoding/decoding commands.")
 
     @base64.command(
         name="decode",

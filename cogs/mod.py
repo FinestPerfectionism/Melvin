@@ -19,8 +19,8 @@ class ModCog(
         self.bot = bot
         self.db_path = "data/mod.db"
 
-    role = app_commands.Group(name="role")
-    cases = app_commands.Group(name="cases")
+    role = app_commands.Group(name="role", description="Moderation role commands.")
+    cases = app_commands.Group(name="case", description="Moderation case commands.")
 
     # duration parsing
     def parse_duration(self, durationstr: str) -> int | None:
