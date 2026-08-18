@@ -14,6 +14,7 @@ from globals import (
 from ui import CasesView, ErrorUI, ResponseUI
 
 
+@app_commands.guild_only()
 class ModCog(
     commands.GroupCog,
     name="mod",
@@ -28,7 +29,7 @@ class ModCog(
     cases = app_commands.Group(name="cases")
 
     # duration parsing
-    def parseduration(self, durationstr: str) -> int | None:
+    def parse_duration(self, durationstr: str) -> int | None:
         unit = durationstr[-1].lower()
         if unit not in {"s", "m", "h", "d"}:
             return None
@@ -58,11 +59,11 @@ class ModCog(
             )
             await conn.commit()
 
-    async def dmhandling(
+    async def handle_dm(
         self,
         user: discord.User | discord.Member,
         action_type: str,
-        case_id: int,
+        case_id: int | None,
         guild_name: str,
         reason: str,
     ) -> None:
@@ -108,7 +109,6 @@ class ModCog(
         description="View moderation cases for a user.",
     )
     @app_commands.describe(target="The target user to view cases for.")
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def cases_view(
         self,
@@ -116,6 +116,10 @@ class ModCog(
         target: discord.User | discord.Member,
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild:
+            return
+
         # guard clause
         if target.bot:
             await interaction.followup.send(
@@ -124,7 +128,7 @@ class ModCog(
             return
 
         view = CasesView(target_user=target, db_path=self.db_path)
-        await view.build_components(interaction.guild_id)
+        await view.build_components(interaction.guild.id)
 
         await interaction.followup.send(
             view=view,
@@ -139,7 +143,6 @@ class ModCog(
     @app_commands.describe(
         case_id="Takes the CaseID typically DMed to the user, find it by using /mod case view [user]",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def case_remove(self, interaction: discord.Interaction, case_id: int) -> None:
         await interaction.response.defer()
@@ -184,7 +187,6 @@ class ModCog(
         member="The member to warn.",
         reason="The reason for the warning.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def warn(
         self,
@@ -193,6 +195,10 @@ class ModCog(
         reason: str = "No reason provided.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild:
+            return
+
         # guard clause
         if member.bot:
             await interaction.followup.send(
@@ -233,7 +239,7 @@ class ModCog(
             await conn.commit()
 
         # try dm
-        await self.dmhandling(
+        await self.handle_dm(
             user=member,
             action_type="warning",
             case_id=case_id,
@@ -257,7 +263,6 @@ class ModCog(
         member="The member to kick.",
         reason="The reason for the kick.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(kick_members=True)
     async def kick(
         self,
@@ -266,6 +271,10 @@ class ModCog(
         reason: str = "No reason provided.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         # guard clause
         if member.bot:
             await interaction.followup.send(
@@ -309,7 +318,7 @@ class ModCog(
             await conn.commit()
 
         # try dm
-        await self.dmhandling(
+        await self.handle_dm(
             user=member,
             action_type="kick",
             case_id=case_id,
@@ -338,7 +347,6 @@ class ModCog(
         member="The member to ban.",
         reason="The reason for the ban.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(ban_members=True)
     async def ban(
         self,
@@ -347,6 +355,10 @@ class ModCog(
         reason: str = "No reason provided.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         # guard clause
         if member.bot:
             await interaction.followup.send(
@@ -390,7 +402,7 @@ class ModCog(
             await conn.commit()
 
         # try dm
-        await self.dmhandling(
+        await self.handle_dm(
             user=member,
             action_type="ban",
             case_id=case_id,
@@ -419,7 +431,6 @@ class ModCog(
         user="The user to unban.",
         reason="The reason for the unban.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(ban_members=True)
     async def unban(
         self,
@@ -428,6 +439,9 @@ class ModCog(
         reason: str = "No reason provided.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
 
         # guard clause
         try:
@@ -478,7 +492,6 @@ class ModCog(
         duration="The duration of the mute (e.g., 10m, 2h, 1d).",
         reason="The reason for the mute.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def mute(
         self,
@@ -489,8 +502,11 @@ class ModCog(
     ) -> None:
         await interaction.response.defer()
 
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
+
         # guard clause
-        seconds = self.parseduration(duration)
+        seconds = self.parse_duration(duration)
         if not seconds:
             await interaction.followup.send(
                 view=ErrorUI("**Not a valid duration format.**"),
@@ -543,7 +559,7 @@ class ModCog(
             await conn.commit()
 
         # try dm
-        await self.dmhandling(
+        await self.handle_dm(
             user=member,
             action_type="mute",
             case_id=case_id,
@@ -574,7 +590,6 @@ class ModCog(
         member="The member to unmute.",
         reason="The reason for the unmute.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(moderate_members=True)
     async def unmute(
         self,
@@ -583,6 +598,9 @@ class ModCog(
         reason: str = "No reason given.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
 
         # guard clause
         if not member.is_timed_out():
@@ -612,7 +630,7 @@ class ModCog(
             await conn.commit()
 
         # try dm
-        await self.dmhandling(
+        await self.handle_dm(
             user=member,
             action_type="unmute",
             case_id=case_id,
@@ -642,7 +660,6 @@ class ModCog(
         channel="The channel or thread to lock.",
         reason="The reason for locking.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_channels=True)
     async def lock(
         self,
@@ -654,6 +671,10 @@ class ModCog(
         reason: str = "No reason given.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild:
+            return
+
         target_channel = channel or interaction.channel
 
         # guard clause
@@ -714,7 +735,6 @@ class ModCog(
         channel="The channel or thread to unlock.",
         reason="The reason for unlocking.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_channels=True)
     async def unlock(
         self,
@@ -726,6 +746,10 @@ class ModCog(
         reason: str = "No reason given.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild:
+            return
+
         target_channel = channel or interaction.channel
 
         # guard clause
@@ -793,7 +817,6 @@ class ModCog(
         role="The role to add.",
         reason="The reason for adding the role.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_roles=True)
     async def role_add(
         self,
@@ -803,6 +826,9 @@ class ModCog(
         reason: str = "No reason provided.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
 
         # guard clause
         if role.is_default():
@@ -876,7 +902,6 @@ class ModCog(
         role="The role to remove.",
         reason="The reason for removing the role.",
     )
-    @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_roles=True)
     async def role_remove(
         self,
@@ -886,6 +911,9 @@ class ModCog(
         reason: str = "No reason provided.",
     ) -> None:
         await interaction.response.defer()
+
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return
 
         # guard clause
         if role.is_default():

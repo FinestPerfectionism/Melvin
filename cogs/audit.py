@@ -140,7 +140,7 @@ class AuditCog(
         else:
             await interaction.response.send_message(view=error_ui, ephemeral=False)
 
-    async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
+    async def get_log_channel(self, guild_id: int) -> discord.abc.GuildChannel | discord.Thread | discord.abc.PrivateChannel | None:
         try:
             async with (
                 aiosqlite.connect(self.db_path) as conn,
@@ -161,7 +161,7 @@ class AuditCog(
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         log_channel = await self.get_log_channel(member.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -185,7 +185,7 @@ class AuditCog(
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member) -> None:
         log_channel = await self.get_log_channel(member.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -213,7 +213,7 @@ class AuditCog(
         after: discord.Member,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         changes = []
@@ -291,7 +291,7 @@ class AuditCog(
             if member is None:
                 continue
             log_channel = await self.get_log_channel(guild.id)
-            if log_channel is None:
+            if log_channel is None or not isinstance(log_channel, discord.TextChannel):
                 continue
 
             changes = []
@@ -349,7 +349,7 @@ class AuditCog(
             return
 
         log_channel = await self.get_log_channel(before.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -405,7 +405,7 @@ class AuditCog(
         if msg.author.bot or not msg.guild:
             return
         log_channel = await self.get_log_channel(msg.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -453,7 +453,7 @@ class AuditCog(
         after: discord.VoiceState,
     ) -> None:
         log_channel = await self.get_log_channel(member.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         if before.channel is None and after.channel is not None:
@@ -528,7 +528,7 @@ class AuditCog(
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel) -> None:
         log_channel = await self.get_log_channel(channel.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -554,7 +554,7 @@ class AuditCog(
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel) -> None:
         log_channel = await self.get_log_channel(channel.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -584,7 +584,7 @@ class AuditCog(
         after: discord.abc.GuildChannel,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         changes = []
@@ -625,7 +625,7 @@ class AuditCog(
     @commands.Cog.listener()
     async def on_guild_role_create(self, role: discord.Role) -> None:
         log_channel = await self.get_log_channel(role.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -649,7 +649,7 @@ class AuditCog(
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role) -> None:
         log_channel = await self.get_log_channel(role.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -677,7 +677,7 @@ class AuditCog(
         after: discord.Role,
     ) -> None:
         log_channel = await self.get_log_channel(before.guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         changes = []
@@ -739,7 +739,7 @@ class AuditCog(
         user: discord.User | discord.Member,
     ) -> None:
         log_channel = await self.get_log_channel(guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(
@@ -766,7 +766,7 @@ class AuditCog(
     @commands.Cog.listener()
     async def on_member_unban(self, guild: discord.Guild, user: discord.User) -> None:
         log_channel = await self.get_log_channel(guild.id)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
 
         container = discord.ui.Container(

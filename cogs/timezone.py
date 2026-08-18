@@ -174,8 +174,12 @@ class TimezoneCog(
         runner_tz = zoneinfo.ZoneInfo(runner_tz_str)
         runner_time = now_utc.astimezone(runner_tz)
 
-        target_offset = target_time.utcoffset().total_seconds() / 3600
-        runner_offset = runner_time.utcoffset().total_seconds() / 3600
+        target_utcoffset = target_time.utcoffset()
+        runner_utcoffset = runner_time.utcoffset()
+
+        target_offset = target_utcoffset.total_seconds() / 3600 if target_utcoffset else 0.0
+        runner_offset = runner_utcoffset.total_seconds() / 3600 if runner_utcoffset else 0.0
+
         diff_hours = abs(runner_offset - target_offset)
 
         diff_str = f"{int(diff_hours)}" if diff_hours.is_integer() else f"{diff_hours}"

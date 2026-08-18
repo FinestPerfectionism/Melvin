@@ -24,7 +24,7 @@ class PrivateCog(
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild) -> None:
         log_channel = self.bot.get_channel(LOG_CHANNEL)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
         view = ResponseUI()
         view.text_display.content = (
@@ -45,7 +45,7 @@ class PrivateCog(
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         log_channel = self.bot.get_channel(LOG_CHANNEL)
-        if log_channel is None:
+        if log_channel is None or not isinstance(log_channel, discord.TextChannel):
             return
         view = ResponseUI()
         view.text_display.content = f"**Melvin was just removed from {guild.name}.**\n Now in **{len(self.bot.guilds)}** guild(s)."

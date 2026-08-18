@@ -97,7 +97,7 @@ class WelcomeCog(
         view.container.accent_color = discord.Color.from_str(SECONDARY)
         await interaction.edit_original_response(view=view)
 
-    async def get_log_channel(self, guild_id: int) -> discord.TextChannel | None:
+    async def get_log_channel(self, guild_id: int) -> discord.abc.GuildChannel | discord.Thread | discord.abc.PrivateChannel | None:
         try:
             async with (
                 aiosqlite.connect(self.db_path) as conn,
