@@ -10,8 +10,6 @@ from ui import (
     ErrorUI,
     InfoUI,
     LargeSeparator,
-    primary,
-    tertiary,
 )
 
 log = logging.getLogger(__name__)
@@ -254,7 +252,7 @@ class AuditCog(
                 f"**Member:** {after.mention} | {after.id}",
                 accessory=discord.ui.Thumbnail(media=after.display_avatar.url),
             ),
-            accent_color=discord.Color.from_str(primary),
+            accent_color=discord.Color.from_str(PRIMARY),
         )
 
         changes_text = "\n".join(changes)
@@ -313,7 +311,7 @@ class AuditCog(
                     f"**User:** {after.mention} | {after.id}",
                     accessory=discord.ui.Thumbnail(media=after.display_avatar.url),
                 ),
-                accent_color=discord.Color.from_str(primary),
+                accent_color=discord.Color.from_str(PRIMARY),
             )
 
             changes_text = "\n".join(changes)
@@ -363,7 +361,7 @@ class AuditCog(
                     url=after.jump_url,
                 ),
             ),
-            accent_color=discord.Color.from_str(primary),
+            accent_color=discord.Color.from_str(PRIMARY),
         )
 
         if after.attachments:
@@ -414,7 +412,7 @@ class AuditCog(
                 f"**Author:** {msg.author.mention} | {msg.author.id}\n"
                 f"**Channel:** {self.channel_display(msg.channel)}",
             ),
-            accent_color=discord.Color.from_str(tertiary),
+            accent_color=discord.Color.from_str(TERTIARY),
         )
 
         if msg.attachments:
@@ -511,7 +509,7 @@ class AuditCog(
                     f"**Member:** {member.mention} | {member.id}\n**Moved:** {before.channel.mention} -> {after.channel.mention}",
                     accessory=discord.ui.Thumbnail(media=member.display_avatar.url),
                 ),
-                accent_color=discord.Color.from_str(primary),
+                accent_color=discord.Color.from_str(PRIMARY),
             )
             view = discord.ui.LayoutView()
             view.add_item(container)
@@ -599,7 +597,7 @@ class AuditCog(
                 f"# Channel Updated | {discord.utils.format_dt(discord.utils.utcnow(), style='F')}",
             ),
             discord.ui.TextDisplay(f"**Channel:** {after.mention} | {after.id}"),
-            accent_color=discord.Color.from_str(primary),
+            accent_color=discord.Color.from_str(PRIMARY),
         )
 
         changes_text = "\n".join(changes)
